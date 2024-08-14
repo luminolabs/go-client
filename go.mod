@@ -1,3 +1,3 @@
-module example.com/lumino-node-client
+module github.com/lum-go-client
 
-go 1.22.5
+go 1.22.4
