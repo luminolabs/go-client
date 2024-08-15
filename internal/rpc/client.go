@@ -1,4 +1,4 @@
-package rpc
+package rpcclient
 
 import (
 	"context"
@@ -10,21 +10,25 @@ import (
 var log = logrus.New()
 
 type Client struct {
-	rpc *rpc.Client
+	rpcClient *rpc.Client
 }
 
 func NewClient(url string) (*Client, error) {
-	rpc, err := rpc.Dial(url)
+	rpcClient, err := rpc.Dial(url)
 	if err != nil {
 		return nil, err
 	}
-	return &Client{rpc: rpc}, nil
+	return &Client{rpcClient: rpcClient}, nil
 }
 
 func (c *Client) Call(ctx context.Context, result interface{}, method string, args ...interface{}) error {
-	return c.rpc.CallContext(ctx, result, method, args...)
+	return c.rpcClient.CallContext(ctx, result, method, args...)
+}
+
+func (c *Client) Subscribe(ctx context.Context, namespace string, channel interface{}, args ...interface{}) (*rpc.ClientSubscription, error) {
+	return c.rpcClient.Subscribe(ctx, namespace, channel, args...)
 }
 
 func (c *Client) Close() {
-	c.rpc.Close()
+	c.rpcClient.Close()
 }
