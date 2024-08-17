@@ -3,7 +3,7 @@ package cmd
 
 import (
 	"fmt"
-	"luminoclient/core/types"
+	"lumino/core/types"
 	"math/big"
 
 	"github.com/ethereum/go-ethereum/ethclient"
