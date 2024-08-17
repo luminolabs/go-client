@@ -4,7 +4,6 @@ package cmd
 import (
 	"fmt"
 	"lumino/core/types"
-	"math/big"
 
 	"github.com/ethereum/go-ethereum/ethclient"
 	"github.com/spf13/pflag"
@@ -37,7 +36,7 @@ type UtilsCmdInterface interface {
 	SetConfig(flagSet *pflag.FlagSet) error
 	GetProvider() (string, error)
 	GetLogLevel() (string, error)
-	GetConfigData() (types.Configurations, error)
+	// GetConfigData() (types.Configurations, error)
 	ExecuteStake(flagSet *pflag.FlagSet)
 	ExecuteUnstake(flagSet *pflag.FlagSet)
 	ExecuteCreateJob(flagSet *pflag.FlagSet)
@@ -48,20 +47,20 @@ type UtilsCmdInterface interface {
 }
 
 type StakeManagerInterface interface {
-	Stake(client *ethclient.Client, stakerId uint32, amount *big.Int, epoch uint32) (*types.Transaction, error)
-	Unstake(client *ethclient.Client, stakerId uint32, amount *big.Int) (*types.Transaction, error)
-	GetStakeInfo(client *ethclient.Client, stakerId uint32) (*types.StakeInfo, error)
+	// Stake(client *ethclient.Client, stakerId uint32, amount *big.Int, epoch uint32) (*types.Transaction, error)
+	// Unstake(client *ethclient.Client, stakerId uint32, amount *big.Int) (*types.Transaction, error)
+	// GetStakeInfo(client *ethclient.Client, stakerId uint32) (*types.StakeInfo, error)
 }
 
 type JobManagerInterface interface {
-	CreateJob(client *ethclient.Client, jobDetails string) (*types.Transaction, error)
+	// CreateJob(client *ethclient.Client, jobDetails string) (*types.Transaction, error)
 	GetJobDetails(client *ethclient.Client, jobId uint16) (*types.Job, error)
 	ListJobs(client *ethclient.Client) ([]types.Job, error)
 }
 
 type BlockManagerInterface interface {
-	ProposeBlock(client *ethclient.Client, epoch uint32, jobIds []uint16) (*types.Transaction, error)
-	ConfirmBlock(client *ethclient.Client, blockId string) (*types.Transaction, error)
+	// ProposeBlock(client *ethclient.Client, epoch uint32, jobIds []uint16) (*types.Transaction, error)
+	// ConfirmBlock(client *ethclient.Client, blockId string) (*types.Transaction, error)
 	GetBlockDetails(client *ethclient.Client, blockId string) (*types.Block, error)
 }
 
