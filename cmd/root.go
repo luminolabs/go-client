@@ -5,9 +5,12 @@ import (
 	"os"
 
 	"lumino/core"
+	"lumino/logger"
 
 	"github.com/spf13/cobra"
 )
+
+var log = logger.NewLogger()
 
 var rootCmd = &cobra.Command{
 	Use:     "luminocli",
