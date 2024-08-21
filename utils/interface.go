@@ -20,29 +20,30 @@ var RetryInterface RetryUtils
 var BlockManagerInterface BlockManagerUtils
 var FlagSetInterface FlagSetUtils
 
-// Interface definition
+// Utils interface defines utility functions used throughout the application
 type Utils interface {
-	GetUint32(flagSet *pflag.FlagSet, name string) (uint32, error)
-	GetDelayedState(client *ethclient.Client, buffer int32) (int64, error)
-	GetLatestBlockWithRetry(client *ethclient.Client) (*Types.Header, error)
-	GetStateBuffer(client *ethclient.Client) (uint64, error)
-	GetEpoch(client *ethclient.Client) (uint32, error)
-	GetStateName(stateNumber int64) string
+	GetUint32(flagSet *pflag.FlagSet, name string) (uint32, error)           // Retrieves a uint32 flag value
+	GetDelayedState(client *ethclient.Client, buffer int32) (int64, error)   // Calculates the current network state
+	GetLatestBlockWithRetry(client *ethclient.Client) (*Types.Header, error) // Fetches the latest block header
+	GetStateBuffer(client *ethclient.Client) (uint64, error)                 // Retrieves the state buffer value
+	GetEpoch(client *ethclient.Client) (uint32, error)                       // Calculates the current epoch
+	GetStateName(stateNumber int64) string                                   // Converts state number to string representation
 }
 
+// EthClientUtils interface defines Ethereum client utility functions
 type EthClientUtils interface {
-	Dial(rawurl string) (*ethclient.Client, error)
+	Dial(rawurl string) (*ethclient.Client, error) // Establishes connection to an Ethereum node
 }
 
+// ClientUtils interface defines utility functions for interacting with the Ethereum client
 type ClientUtils interface {
-	BalanceAt(client *ethclient.Client, ctx context.Context, account common.Address, blockNumber *big.Int) (*big.Int, error)
-	HeaderByNumber(client *ethclient.Client, ctx context.Context, number *big.Int) (*Types.Header, error)
-	NonceAt(client *ethclient.Client, ctx context.Context, account common.Address) (uint64, error)
-	SuggestGasPrice(client *ethclient.Client, ctx context.Context) (*big.Int, error)
-	EstimateGas(client *ethclient.Client, ctx context.Context, msg ethereum.CallMsg) (uint64, error)
-	FilterLogs(client *ethclient.Client, ctx context.Context, q ethereum.FilterQuery) ([]Types.Log, error)
+	BalanceAt(client *ethclient.Client, ctx context.Context, account common.Address, blockNumber *big.Int) (*big.Int, error) // Retrieves account balance
+	HeaderByNumber(client *ethclient.Client, ctx context.Context, number *big.Int) (*Types.Header, error)                    // Fetches block header
+	NonceAt(client *ethclient.Client, ctx context.Context, account common.Address) (uint64, error)                           // Retrieves account nonce
+	SuggestGasPrice(client *ethclient.Client, ctx context.Context) (*big.Int, error)                                         // Suggests gas price
+	EstimateGas(client *ethclient.Client, ctx context.Context, msg ethereum.CallMsg) (uint64, error)                         // Estimates gas for a transaction
+	FilterLogs(client *ethclient.Client, ctx context.Context, q ethereum.FilterQuery) ([]Types.Log, error)                   // Filters logs based on query
 }
-
 type BlockManagerUtils interface {
 	StateBuffer(client *ethclient.Client) (uint8, error)
 }
@@ -56,6 +57,7 @@ type FlagSetUtils interface {
 }
 
 // Struct Definition
+// Each struct implements the corresponding interface
 type UtilsStruct struct{}
 type BlockManagerStruct struct{}
 type FLagSetStruct struct{}
