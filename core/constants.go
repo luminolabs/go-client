@@ -1,19 +1,19 @@
 package core
 
-const (
-	// Network related constants
-	DefaultRPCURL  = "http://localhost:8545"
-	DefaultChainID = 1 // Mainnet Ethereum
+var ChainID = 1 // Mainnet Ethereum
 
-	// Time related constants
-	EpochLength = 1200 // in seconds, 20 minutes
+// Network related constants
+var DefaultRPCProvider = "http://localhost:8545"
+var DefaultBufferPercent = 20
 
-	// Staking related constants
-	MinimumStake = 1e18 // 1 LUMINO token (assuming 18 decimals)
+// Time related constants
+var EpochLength = 1200 // in seconds, 20 minutes
 
-	// Job related constants
-	MaxJobsPerStaker = 5
+// Staking related constants
+var MinimumStake = 1e18 // 1 LUMINO token (assuming 18 decimals)
 
-	// Block related constants
-	MaxBlocksPerEpoch = 1
-)
+// Job related constants
+var MaxJobsPerStaker = 5
+
+// Block related constants
+var MaxBlocksPerEpoch = 1
