@@ -5,7 +5,8 @@ import (
 	pathPackage "path"
 )
 
-// This function returns the log file path
+// GetLogFilePath returns the path for the log file
+// It creates the necessary directories if they don't exist
 func (PathUtils) GetLogFilePath(fileName string) (string, error) {
 	razorPath, err := PathUtilsInterface.GetDefaultPath()
 	if err != nil {
