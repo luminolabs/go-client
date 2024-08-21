@@ -60,7 +60,7 @@ func InitializeLogger(fileName string) {
 			Filename:   logFilePath,
 			MaxSize:    200, // Maximum Size of a log file
 			MaxBackups: 52,  // Maximum number of log files
-			MaxAge:     365, // Maximum number of days to retain olf files
+			MaxAge:     365, // Maximum number of days to retain old files
 		}
 
 		out := os.Stderr

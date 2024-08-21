@@ -27,6 +27,7 @@ type Utils interface {
 	GetLatestBlockWithRetry(client *ethclient.Client) (*Types.Header, error)
 	GetStateBuffer(client *ethclient.Client) (uint64, error)
 	GetEpoch(client *ethclient.Client) (uint32, error)
+	GetStateName(stateNumber int64) string
 }
 
 type EthClientUtils interface {

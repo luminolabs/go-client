@@ -9,7 +9,7 @@ import (
 	"github.com/ethereum/go-ethereum/ethclient"
 )
 
-func GetStateName(stateNumber int64) string {
+func (*UtilsStruct) GetStateName(stateNumber int64) string {
 	var stateName string
 	switch stateNumber {
 	case 0:
