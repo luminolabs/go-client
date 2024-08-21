@@ -15,23 +15,26 @@ import (
 	"gopkg.in/natefinch/lumberjack.v2"
 )
 
-var log = logrus.New()
-
+// StandardLogger wraps the logrus Logger
 type StandardLogger struct {
 	*logrus.Logger
 }
 
 var standardLogger = &StandardLogger{logrus.New()}
 
-var Address string
-var Epoch uint32
-var BlockNumber *big.Int
-var FileName string
-var Client *ethclient.Client
+// Global variables for logging context
+var (
+	Address     string
+	Epoch       uint32
+	BlockNumber *big.Int
+	FileName    string
+	Client      *ethclient.Client
+)
 
+// init initializes the logger
 func init() {
-	log.SetOutput(os.Stdout)
-	log.SetLevel(logrus.InfoLevel)
+	standardLogger.SetOutput(os.Stdout)
+	standardLogger.SetLevel(logrus.InfoLevel)
 
 	InitializeLogger(FileName)
 
@@ -49,6 +52,7 @@ func init() {
 	}).Info()
 }
 
+// InitializeLogger sets up the logger with file rotation if a filename is provided
 func InitializeLogger(fileName string) {
 	if fileName != "" {
 		logFilePath, err := path.PathUtilsInterface.GetLogFilePath(fileName)
@@ -73,41 +77,48 @@ func InitializeLogger(fileName string) {
 	}
 }
 
+// NewLogger returns a new instance of StandardLogger
 func NewLogger() *StandardLogger {
 	return standardLogger
 }
 
+// SetLogLevel sets the log level based on the provided string
 func SetLogLevel(level string) {
 	switch level {
 	case "debug":
-		log.SetLevel(logrus.DebugLevel)
+		standardLogger.SetLevel(logrus.DebugLevel)
 	case "info":
-		log.SetLevel(logrus.InfoLevel)
+		standardLogger.SetLevel(logrus.InfoLevel)
 	case "warn":
-		log.SetLevel(logrus.WarnLevel)
+		standardLogger.SetLevel(logrus.WarnLevel)
 	case "error":
-		log.SetLevel(logrus.ErrorLevel)
+		standardLogger.SetLevel(logrus.ErrorLevel)
 	default:
-		log.SetLevel(logrus.InfoLevel)
+		standardLogger.SetLevel(logrus.InfoLevel)
 	}
 }
 
+// Debug logs a debug message
 func Debug(args ...interface{}) {
-	log.Debug(args...)
+	standardLogger.Debug(args...)
 }
 
+// Info logs an info message
 func Info(args ...interface{}) {
-	log.Info(args...)
+	standardLogger.Info(args...)
 }
 
+// Warn logs a warning message
 func Warn(args ...interface{}) {
-	log.Warn(args...)
+	standardLogger.Warn(args...)
 }
 
+// Error logs an error message
 func Error(args ...interface{}) {
-	log.Error(args...)
+	standardLogger.Error(args...)
 }
 
+// Fatal logs a fatal message and exits
 func Fatal(args ...interface{}) {
-	log.Fatal(args...)
+	standardLogger.Fatal(args...)
 }
