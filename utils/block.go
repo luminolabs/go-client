@@ -7,6 +7,8 @@ import (
 	"github.com/ethereum/go-ethereum/ethclient"
 )
 
+// GetStateBuffer retrieves the state buffer from the BlockManager contract.
+// It uses retry logic to handle potential network issues.
 func (*UtilsStruct) GetStateBuffer(client *ethclient.Client) (uint64, error) {
 	var (
 		stateBuffer uint64

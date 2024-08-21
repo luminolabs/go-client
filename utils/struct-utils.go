@@ -9,22 +9,27 @@ import (
 	"github.com/spf13/pflag"
 )
 
+// RPCTimeout is the timeout duration for RPC calls
 var RPCTimeout int64
 
-func IntiliaseLuminoUtils(optionsPackageStruct OptionsPackageStruct) Utils {
+// IntialiseLuminoUtils initializes the utility interfaces with the provided options.
+func IntialiseLuminoUtils(optionsPackageStruct OptionsPackageStruct) Utils {
 	UtilsInterface = optionsPackageStruct.UtilsInterface
 	FlagSetInterface = optionsPackageStruct.FlagSetInterface
 	return &UtilsStruct{}
 }
 
+// GetUint32 retrieves a uint32 flag value from the provided flag set.
 func (u UtilsStruct) GetUint32(flagSet *pflag.FlagSet, name string) (uint32, error) {
 	return flagSet.GetUint32(name)
 }
 
+// GetLogFileName retrieves the log file name from the provided flag set.
 func (f FLagSetStruct) GetLogFileName(flagSet *pflag.FlagSet) (string, error) {
 	return flagSet.GetString("logFile")
 }
 
+// InvokeFunctionWithTimeout invokes a function with a timeout.
 func InvokeFunctionWithTimeout(interfaceName interface{}, methodName string, args ...interface{}) []reflect.Value {
 	var functionCall []reflect.Value
 	var gotFunction = make(chan bool)
@@ -53,6 +58,7 @@ func InvokeFunctionWithTimeout(interfaceName interface{}, methodName string, arg
 	}
 }
 
+// CheckIfAnyError checks if any of the returned values is an error.
 func CheckIfAnyError(result []reflect.Value) error {
 	if result == nil {
 		return errors.New("RPC timeout error")

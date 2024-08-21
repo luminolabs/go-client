@@ -12,6 +12,7 @@ import (
 	"github.com/ethereum/go-ethereum/ethclient"
 )
 
+// GetNonceAtWithRetry retrieves the nonce for an account with retry logic.
 func (*UtilsStruct) GetNonceAtWithRetry(client *ethclient.Client, accountAddress common.Address) (uint64, error) {
 	var (
 		nonce uint64
@@ -32,6 +33,7 @@ func (*UtilsStruct) GetNonceAtWithRetry(client *ethclient.Client, accountAddress
 	return nonce, nil
 }
 
+// GetLatestBlockWithRetry fetches the latest block header with retry logic.
 func (*UtilsStruct) GetLatestBlockWithRetry(client *ethclient.Client) (*types.Header, error) {
 	var (
 		latestHeader *types.Header
@@ -52,6 +54,7 @@ func (*UtilsStruct) GetLatestBlockWithRetry(client *ethclient.Client) (*types.He
 	return latestHeader, nil
 }
 
+// SuggestGasPriceWithRetry retrieves the suggested gas price with retry logic.
 func (o *UtilsStruct) SuggestGasPriceWithRetry(client *ethclient.Client) (*big.Int, error) {
 	var (
 		gasPrice *big.Int
@@ -72,6 +75,7 @@ func (o *UtilsStruct) SuggestGasPriceWithRetry(client *ethclient.Client) (*big.I
 	return gasPrice, nil
 }
 
+// EstimateGasWithRetry estimates the gas required for a transaction with retry logic.
 func (*UtilsStruct) EstimateGasWithRetry(client *ethclient.Client, message ethereum.CallMsg) (uint64, error) {
 	var (
 		gasLimit uint64
@@ -92,6 +96,7 @@ func (*UtilsStruct) EstimateGasWithRetry(client *ethclient.Client, message ether
 	return gasLimit, nil
 }
 
+// FilterLogsWithRetry retrieves logs based on the given query with retry logic.
 func (*UtilsStruct) FilterLogsWithRetry(client *ethclient.Client, query ethereum.FilterQuery) ([]types.Log, error) {
 	var (
 		logs []types.Log
@@ -112,6 +117,7 @@ func (*UtilsStruct) FilterLogsWithRetry(client *ethclient.Client, query ethereum
 	return logs, nil
 }
 
+// BalanceAtWithRetry retrieves the balance of an account with retry logic.
 func (*UtilsStruct) BalanceAtWithRetry(client *ethclient.Client, account common.Address) (*big.Int, error) {
 	var (
 		balance *big.Int
