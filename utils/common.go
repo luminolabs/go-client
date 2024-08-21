@@ -4,20 +4,17 @@ import (
 	"math/big"
 
 	"github.com/ethereum/go-ethereum/common"
+	"github.com/ethereum/go-ethereum/ethclient"
 )
 
 func GetStateName(stateNumber int64) string {
 	var stateName string
 	switch stateNumber {
 	case 0:
-		stateName = "Commit"
+		stateName = "Assign"
 	case 1:
-		stateName = "Reveal"
+		stateName = "Accept"
 	case 2:
-		stateName = "Propose"
-	case 3:
-		stateName = "Dispute"
-	case 4:
 		stateName = "Confirm"
 	default:
 		stateName = "Buffer"
@@ -37,4 +34,13 @@ func FromWei(wei *big.Int) *big.Float {
 
 func IsValidAddress(address string) bool {
 	return common.IsHexAddress(address)
+}
+
+func (*UtilsStruct) ConnectToClient(provider string) *ethclient.Client {
+	client, err := EthClient.Dial(provider)
+	if err != nil {
+		log.Fatal("Error in connecting...", err)
+	}
+	log.Info("Connected to: ", provider)
+	return client
 }
