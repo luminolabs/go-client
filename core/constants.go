@@ -8,7 +8,9 @@ var DefaultRPCProvider = "http://localhost:8545"
 var DefaultBufferPercent = 20
 
 // Time related constants
-var EpochLength = 1200 // in seconds, 20 minutes
+var EpochLength int64 = 1200 // in seconds, 20 minutes
+var NumberOfStates int64 = 3
+var StateLength = uint64(EpochLength / NumberOfStates)
 
 // Staking related constants
 var MinimumStake = 1e18 // 1 LUMINO token (assuming 18 decimals)
