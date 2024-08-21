@@ -1,22 +1,31 @@
 package core
 
-var ChainID = 1 // Mainnet Ethereum
+// ChainID represents the Ethereum chain ID (1 for Mainnet)
+var ChainID = 1
+
+// MaxRetries defines the maximum number of retry attempts for operations
 var MaxRetries uint = 8
 
-// Network related constants
+// DefaultRPCProvider is the default RPC provider URL
 var DefaultRPCProvider = "http://localhost:8545"
+
+// DefaultBufferPercent is the default buffer percentage for state transitions
 var DefaultBufferPercent = 20
 
-// Time related constants
-var EpochLength int64 = 1200 // in seconds, 20 minutes
+// EpochLength defines the duration of an epoch in seconds (20 minutes)
+var EpochLength int64 = 1200
+
+// NumberOfStates defines the number of states in an epoch
 var NumberOfStates int64 = 3
+
+// StateLength calculates the duration of each state within an epoch
 var StateLength = uint64(EpochLength / NumberOfStates)
 
-// Staking related constants
+// MinimumStake defines the minimum amount of LUMINO tokens required for staking
 var MinimumStake = 1e18 // 1 LUMINO token (assuming 18 decimals)
 
-// Job related constants
+// MaxJobsPerStaker defines the maximum number of jobs a staker can take on
 var MaxJobsPerStaker = 5
 
-// Block related constants
+// MaxBlocksPerEpoch defines the maximum number of blocks that can be proposed in an epoch
 var MaxBlocksPerEpoch = 1
