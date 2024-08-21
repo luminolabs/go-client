@@ -17,6 +17,7 @@ var UtilsInterface Utils
 var EthClient EthClientUtils
 var ClientInterface ClientUtils
 var RetryInterface RetryUtils
+var BlockManagerInterface BlockManagerUtils
 var FlagSetInterface FlagSetUtils
 
 // Interface definition
@@ -24,6 +25,8 @@ type Utils interface {
 	GetUint32(flagSet *pflag.FlagSet, name string) (uint32, error)
 	GetDelayedState(client *ethclient.Client, buffer int32) (int64, error)
 	GetLatestBlockWithRetry(client *ethclient.Client) (*Types.Header, error)
+	GetStateBuffer(client *ethclient.Client) (uint64, error)
+	GetEpoch(client *ethclient.Client) (uint32, error)
 }
 
 type EthClientUtils interface {
@@ -39,6 +42,10 @@ type ClientUtils interface {
 	FilterLogs(client *ethclient.Client, ctx context.Context, q ethereum.FilterQuery) ([]Types.Log, error)
 }
 
+type BlockManagerUtils interface {
+	StateBuffer(client *ethclient.Client) (uint8, error)
+}
+
 type RetryUtils interface {
 	RetryAttempts(numberOfAttempts uint) retry.Option
 }
@@ -49,7 +56,7 @@ type FlagSetUtils interface {
 
 // Struct Definition
 type UtilsStruct struct{}
-
+type BlockManagerStruct struct{}
 type FLagSetStruct struct{}
 
 // OptionPackageStruct
