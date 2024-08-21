@@ -6,6 +6,8 @@ import (
 	"github.com/spf13/viper"
 )
 
+// GetBufferPercent retrieves the buffer percent value from flags or config.
+// It returns the buffer percent as an int32 and an error if retrieval fails.
 func (*UtilsStruct) GetBufferPercent() (int32, error) {
 	bufferPercent, err := flagSetUtils.GetRootInt32Buffer()
 	if err != nil {

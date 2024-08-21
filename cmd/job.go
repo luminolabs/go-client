@@ -4,11 +4,13 @@ import (
 	"github.com/spf13/cobra"
 )
 
+// jobCmd represents the job command
 var jobCmd = &cobra.Command{
 	Use:   "job",
 	Short: "Manage job operations",
 }
 
+// jobCreateCmd represents the command to create a new job
 var jobCreateCmd = &cobra.Command{
 	Use:   "create",
 	Short: "Create a new job",
@@ -17,6 +19,7 @@ var jobCreateCmd = &cobra.Command{
 	},
 }
 
+// jobListCmd represents the command to list available or assigned jobs
 var jobListCmd = &cobra.Command{
 	Use:   "list",
 	Short: "List available or assigned jobs",
@@ -25,6 +28,7 @@ var jobListCmd = &cobra.Command{
 	},
 }
 
+// jobExecuteCmd represents the command to execute an assigned job
 var jobExecuteCmd = &cobra.Command{
 	Use:   "execute <job-id>",
 	Short: "Execute an assigned job",
@@ -34,6 +38,7 @@ var jobExecuteCmd = &cobra.Command{
 	},
 }
 
+// init initializes the job command and its subcommands
 func init() {
 	jobCmd.AddCommand(jobCreateCmd, jobListCmd, jobExecuteCmd)
 	rootCmd.AddCommand(jobCmd)

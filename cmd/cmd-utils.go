@@ -13,7 +13,8 @@ import (
 	"github.com/spf13/cobra"
 )
 
-// confirmAction asks for user confirmation before proceeding
+// confirmAction asks for user confirmation before proceeding with an action.
+// It returns true if the user confirms, false otherwise.
 func confirmAction(prompt string) bool {
 	fmt.Printf("%s (y/n): ", prompt)
 	var response string
@@ -36,7 +37,8 @@ func addCommonFlags(cmd *cobra.Command) {
 	cmd.Flags().StringP("private-key", "k", "", "Private key for transaction signing")
 }
 
-// This function takes client as a parameter and returns the epoch and state
+// GetEpochAndState retrieves the current epoch and state from the Ethereum client.
+// It returns the epoch as uint32, state as int64, and an error if retrieval fails.
 func (*UtilsStruct) GetEpochAndState(client *ethclient.Client) (uint32, int64, error) {
 	epoch, err := protoUtils.GetEpoch(client)
 	if err != nil {
@@ -55,7 +57,8 @@ func (*UtilsStruct) GetEpochAndState(client *ethclient.Client) (uint32, int64, e
 	return epoch, state, nil
 }
 
-// This function returns the states which are allowed
+// GetStatesAllowed returns a string representation of allowed states.
+// It takes a slice of int representing allowed states and returns a formatted string.
 func GetStatesAllowed(states []int) string {
 	var statesAllowed string
 	for i := 0; i < len(states); i++ {

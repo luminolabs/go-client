@@ -16,7 +16,8 @@ func InitializeUtils() {
 	utils.FlagSetInterface = &utils.FLagSetStruct{}
 }
 
-// This function returns the buffer of root in Int32
+// GetRootInt32Buffer retrieves the buffer value from root command flags.
+// It returns the buffer as an int32 and an error if retrieval fails.
 func (flagSetUtils FLagSetUtils) GetRootInt32Buffer() (int32, error) {
 	return rootCmd.PersistentFlags().GetInt32("buffer")
 }
@@ -85,7 +86,8 @@ func (flagSetUtils FLagSetUtils) GetFloat32GasLimit(flagSet *pflag.FlagSet) (flo
 	return flagSet.GetFloat32("gasLimit")
 }
 
-// This function returns the delayed state
+// GetDelayedState calculates the delayed state based on the current block and buffer.
+// It returns the delayed state as an int64 and an error if calculation fails.
 func (u Utils) GetDelayedState(client *ethclient.Client, buffer int32) (int64, error) {
 	return utilsInterface.GetDelayedState(client, buffer)
 }
