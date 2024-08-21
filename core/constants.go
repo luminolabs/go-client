@@ -1,6 +1,7 @@
 package core
 
 var ChainID = 1 // Mainnet Ethereum
+var MaxRetries uint = 8
 
 // Network related constants
 var DefaultRPCProvider = "http://localhost:8545"

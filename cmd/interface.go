@@ -56,6 +56,7 @@ type UtilsCmdInterface interface {
 }
 
 type Utils struct{}
+
 type FLagSetUtils struct{}
 type UtilsStruct struct{}
 

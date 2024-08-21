@@ -2,6 +2,7 @@ package cmd
 
 import (
 	"lumino/utils"
+	"math/big"
 
 	"github.com/ethereum/go-ethereum/ethclient"
 )
@@ -47,4 +48,24 @@ func (flagSetUtils FLagSetUtils) GetRootInt64RPCTimeout() (int64, error) {
 // This function returns the delayed state
 func (u Utils) GetDelayedState(client *ethclient.Client, buffer int32) (int64, error) {
 	return utilsInterface.GetDelayedState(client, buffer)
+}
+
+// This function returns the amount in wei
+func (u Utils) GetAmountInWei(amount *big.Int) *big.Int {
+	return utils.GetAmountInWei(amount)
+}
+
+// This function returns the epoch
+func (u Utils) GetEpoch(client *ethclient.Client) (uint32, error) {
+	return utilsInterface.GetEpoch(client)
+}
+
+// This function connects to the client
+func (u Utils) ConnectToClient(provider string) *ethclient.Client {
+	returnedValues := utils.InvokeFunctionWithTimeout(utilsInterface, "ConnectToClient", provider)
+	returnedError := utils.CheckIfAnyError(returnedValues)
+	if returnedError != nil {
+		return nil
+	}
+	return returnedValues[0].Interface().(*ethclient.Client)
 }
