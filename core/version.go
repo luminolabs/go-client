@@ -2,6 +2,7 @@ package core
 
 import "fmt"
 
+// Version components
 const (
 	VersionMajor = 0       // Major version component of the current release
 	VersionMinor = 1       // Minor version component of the current release
@@ -31,10 +32,11 @@ var VersionWithName = func() string {
 	return fmt.Sprintf("%s/%s", ClientName, VersionWithMeta)
 }()
 
-var (
-	GitCommit string // This will be set during build time
-	BuildDate string // This will be set during build time
-)
+// GitCommit holds the Git commit hash, set during build time
+var GitCommit string
+
+// BuildDate holds the build date, set during build time
+var BuildDate string
 
 // VersionInfo returns a string with detailed version information
 func VersionInfo() string {
