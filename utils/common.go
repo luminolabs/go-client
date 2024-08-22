@@ -46,9 +46,9 @@ func IsValidAddress(address string) bool {
 	return common.IsHexAddress(address)
 }
 
-// ConnectToClient establishes a connection to an Ethereum client using the provided provider URL.
+// ConnectToEthClient establishes a connection to an Ethereum client using the provided provider URL.
 // It returns an ethclient.Client instance or logs a fatal error if connection fails.
-func (*UtilsStruct) ConnectToClient(provider string) *ethclient.Client {
+func (*UtilsStruct) ConnectToEthClient(provider string) *ethclient.Client {
 	client, err := EthClient.Dial(provider)
 	if err != nil {
 		log.Fatal("Error in connecting...", err)

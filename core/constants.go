@@ -25,6 +25,7 @@ var StateLength = uint64(EpochLength / NumberOfStates)
 var MinimumStake = 1e18 // 1 LUMINO token (assuming 18 decimals)
 
 // MaxJobsPerStaker defines the maximum number of jobs a staker can take on
+// Note: This is tentative
 var MaxJobsPerStaker = 5
 
 // MaxBlocksPerEpoch defines the maximum number of blocks that can be proposed in an epoch

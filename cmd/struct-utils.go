@@ -104,7 +104,7 @@ func (u Utils) GetEpoch(client *ethclient.Client) (uint32, error) {
 
 // This function connects to the client
 func (u Utils) ConnectToEthClient(provider string) *ethclient.Client {
-	returnedValues := utils.InvokeFunctionWithTimeout(utilsInterface, "ConnectToClient", provider)
+	returnedValues := utils.InvokeFunctionWithTimeout(utilsInterface, "ConnectToEthClient", provider)
 	returnedError := utils.CheckIfAnyError(returnedValues)
 	if returnedError != nil {
 		return nil

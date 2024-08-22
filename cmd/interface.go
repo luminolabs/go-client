@@ -20,7 +20,7 @@ var cmdUtils UtilsCmdInterface
 
 type UtilsInterface interface {
 	GetEpoch(client *ethclient.Client) (uint32, error)
-	ConnectToClient(provider string) *ethclient.Client
+	ConnectToEthClient(provider string) *ethclient.Client
 	GetAmountInWei(amount *big.Int) *big.Int
 	GetDelayedState(client *ethclient.Client, buffer int32) (int64, error)
 }
