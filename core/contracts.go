@@ -1,8 +1,7 @@
 package core
 
-var (
-	StakeManagerAddress = ""
-	JobManagerAddress   = ""
-	BlockManagerAddress = ""
-	LuminoTokenAddress  = ""
-)
+var StateManagerAddress = ""
+var StakeManagerAddress = ""
+var JobManagerAddress = ""
+var VoteManagerAddress = ""
+var BlockManagerAddress = ""
