@@ -42,7 +42,7 @@ type UtilsCmdInterface interface {
 }
 
 type Utils struct{}
-type FLagSetUtils struct{}
+type FlagSetUtils struct{}
 type UtilsStruct struct{}
 
 func InitializeInterfaces() {
