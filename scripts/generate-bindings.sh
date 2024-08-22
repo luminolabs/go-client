@@ -21,4 +21,4 @@ do
     generate_binding "$c"
 done
 
-bash copy-contracts-address.sh
+bash ./scripts/copy-contracts-address.sh
