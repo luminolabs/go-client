@@ -30,3 +30,6 @@ var MaxJobsPerStaker = 5
 
 // MaxBlocksPerEpoch defines the maximum number of blocks that can be proposed in an epoch
 var MaxBlocksPerEpoch = 1
+
+// BlockNumberInterval is the interval in seconds after which blockNumber needs to be calculated again
+var BlockNumberInterval = 5
