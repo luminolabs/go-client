@@ -34,10 +34,14 @@ func (*UtilsStruct) ExecuteNetworkInfo(flagSet *pflag.FlagSet) {
 	client := protoUtils.ConnectToEthClient(config.Provider)
 	logger.SetLoggerParameters(client, "")
 
+	log.Debug("ExecuteStakerinfo: Calling GetNetworkInfo()")
+	err = cmdUtils.GetNetworkInfo(client)
+	utils.CheckError("Error in getting staker info: ", err)
+
 }
 
 // This function provides the staker details like age, stake, maturity etc.
-func (*UtilsStruct) GetStakerInfo(client *ethclient.Client, stakerId uint32) error {
+func (*UtilsStruct) GetNetworkInfo(client *ethclient.Client, stakerId uint32) error {
 	callOpts := protoUtils.GetOptions()
 	stakerInfo, err := stakeManagerUtils.StakerInfo(client, &callOpts, stakerId)
 	if err != nil {

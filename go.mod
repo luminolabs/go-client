@@ -12,6 +12,8 @@ require (
 	gopkg.in/natefinch/lumberjack.v2 v2.2.1
 )
 
+require github.com/google/uuid v1.4.0 // indirect
+
 require (
 	github.com/google/uuid v1.4.0 // indirect
 	github.com/mattn/go-runewidth v0.0.13 // indirect
