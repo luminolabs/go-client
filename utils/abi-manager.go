@@ -9,7 +9,7 @@ import (
 )
 
 func (*UtilsStruct) GetStateManager(client *ethclient.Client) *bindings.StateManager {
-	stateManagerContract, err := BindingsInterface.NewStakeManager(common.HexToAddress(core.StateManagerAddress), client)
+	stateManagerContract, err := BindingsInterface.NewStateManager(common.HexToAddress(core.StateManagerAddress), client)
 	if err != nil {
 		log.Fatal(err)
 	}
