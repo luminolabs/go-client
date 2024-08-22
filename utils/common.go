@@ -46,6 +46,14 @@ func IsValidAddress(address string) bool {
 	return common.IsHexAddress(address)
 }
 
+// CheckError returns a fatal log message which is passed as a parameter
+// if the error passed is not nil
+func CheckError(msg string, err error) {
+	if err != nil {
+		log.Fatal(msg + err.Error())
+	}
+}
+
 // ConnectToEthClient establishes a connection to an Ethereum client using the provided provider URL.
 // It returns an ethclient.Client instance or logs a fatal error if connection fails.
 func (*UtilsStruct) ConnectToEthClient(provider string) *ethclient.Client {

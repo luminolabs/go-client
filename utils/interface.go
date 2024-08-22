@@ -6,6 +6,7 @@ import (
 
 	"github.com/avast/retry-go"
 	"github.com/ethereum/go-ethereum"
+	"github.com/ethereum/go-ethereum/accounts/abi/bind"
 	"github.com/ethereum/go-ethereum/common"
 	Types "github.com/ethereum/go-ethereum/core/types"
 	"github.com/ethereum/go-ethereum/ethclient"
@@ -28,6 +29,7 @@ type Utils interface {
 	GetStateBuffer(client *ethclient.Client) (uint64, error)                 // Retrieves the state buffer value
 	GetEpoch(client *ethclient.Client) (uint32, error)                       // Calculates the current epoch
 	GetStateName(stateNumber int64) string                                   // Converts state number to string representation
+	GetOptions() bind.CallOpts                                               //
 }
 
 // EthClientUtils interface defines Ethereum client utility functions
