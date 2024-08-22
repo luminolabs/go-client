@@ -8,12 +8,6 @@ import (
 	"github.com/spf13/pflag"
 )
 
-//go:generate mockery --name FlagSetInterface --output ./mocks/ --case=underscore
-//go:generate mockery --name UtilsCmdInterface --output ./mocks/ --case=underscore
-//go:generate mockery --name StakeManagerInterface --output ./mocks/ --case=underscore
-//go:generate mockery --name JobManagerInterface --output ./mocks/ --case=underscore
-//go:generate mockery --name BlockManagerInterface --output ./mocks/ --case=underscore
-
 var flagSetUtils FlagSetInterface
 var protoUtils UtilsInterface
 var cmdUtils UtilsCmdInterface
