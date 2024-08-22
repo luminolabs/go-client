@@ -47,7 +47,7 @@ type UtilsStruct struct{}
 
 func InitializeInterfaces() {
 	protoUtils = Utils{}
-	flagSetUtils = FLagSetUtils{}
+	flagSetUtils = FlagSetUtils{}
 	cmdUtils = &UtilsStruct{}
 
 	InitializeUtils()
