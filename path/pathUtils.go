@@ -6,9 +6,6 @@ import (
 	"os"
 )
 
-//go:generate mockery --name PathInterface --output ./mocks/ --case=underscore
-//go:generate mockery --name OSInterface --output ./mocks/ --case=underscore
-
 var PathUtilsInterface PathInterface
 var OSUtilsInterface OSInterface
 
