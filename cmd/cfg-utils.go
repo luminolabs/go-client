@@ -2,6 +2,8 @@ package cmd
 
 import (
 	"lumino/core"
+	"lumino/core/types"
+	"strings"
 
 	"github.com/spf13/viper"
 )
@@ -22,4 +24,44 @@ func (*UtilsStruct) GetBufferPercent() (int32, error) {
 		}
 	}
 	return bufferPercent, nil
+}
+
+func (*UtilsStruct) GetConfigData() (types.Configurations, error) {
+	config := types.Configurations{
+		Provider:      "",
+		BufferPercent: 0,
+	}
+
+	provider, err := cmdUtils.GetRPCProvider()
+	if err != nil {
+		return config, err
+	}
+	bufferPercent, err := cmdUtils.GetBufferPercent()
+	if err != nil {
+		return config, err
+	}
+	config.Provider = provider
+	config.BufferPercent = bufferPercent
+
+	return config, nil
+}
+
+// This function returns the provider
+func (*UtilsStruct) GetRPCProvider() (string, error) {
+	provider, err := flagSetUtils.GetRootStringProvider()
+	if err != nil {
+		return core.DefaultRPCProvider, err
+	}
+	if provider == "" {
+		if viper.IsSet("provider") {
+			provider = viper.GetString("provider")
+		} else {
+			provider = core.DefaultRPCProvider
+			log.Debug("Provider is not set, taking its default value ", provider)
+		}
+	}
+	if !strings.HasPrefix(provider, "https") {
+		log.Warn("You are not using a secure RPC URL. Switch to an https URL instead to be safe.")
+	}
+	return provider, nil
 }

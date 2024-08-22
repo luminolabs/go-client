@@ -4,6 +4,7 @@ import (
 	"lumino/utils"
 	"math/big"
 
+	"github.com/ethereum/go-ethereum/accounts/abi/bind"
 	"github.com/ethereum/go-ethereum/ethclient"
 	"github.com/spf13/pflag"
 )
@@ -86,6 +87,11 @@ func (FlagSetUtils FlagSetUtils) GetFloat32GasLimit(flagSet *pflag.FlagSet) (flo
 	return flagSet.GetFloat32("gasLimit")
 }
 
+// This function returns the provider of root in string
+func (flagSetUtils FlagSetUtils) GetRootStringProvider() (string, error) {
+	return rootCmd.PersistentFlags().GetString("provider")
+}
+
 // GetDelayedState calculates the delayed state based on the current block and buffer.
 // It returns the delayed state as an int64 and an error if calculation fails.
 func (u Utils) GetDelayedState(client *ethclient.Client, buffer int32) (int64, error) {
@@ -100,6 +106,11 @@ func (u Utils) GetAmountInWei(amount *big.Int) *big.Int {
 // This function returns the epoch
 func (u Utils) GetEpoch(client *ethclient.Client) (uint32, error) {
 	return utilsInterface.GetEpoch(client)
+}
+
+// This function returns the options
+func (u Utils) GetOptions() bind.CallOpts {
+	return utilsInterface.GetOptions()
 }
 
 // This function connects to the client
