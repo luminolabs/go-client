@@ -12,8 +12,8 @@ import (
 	"github.com/spf13/pflag"
 )
 
-var stakerInfoCmd = &cobra.Command{
-	Use:   "stakerInfo",
+var networkInfoCmd = &cobra.Command{
+	Use:   "networkInfo",
 	Short: "Network Info details",
 	Long: `Provides the Network details like state, epoch etc.
 
@@ -29,12 +29,12 @@ func initialiseNetworkInfo(cmd *cobra.Command, args []string) {
 func (*UtilsStruct) ExecuteNetworkInfo(flagSet *pflag.FlagSet) {
 	config, err := cmdUtils.GetConfigData()
 	utils.CheckError("Error in getting config: ", err)
-	log.Debugf("ExecuteStakerinfo: Config: %+v", config)
+	log.Debugf("ExecutenetworkInfo: Config: %+v", config)
 
 	client := protoUtils.ConnectToEthClient(config.Provider)
 	logger.SetLoggerParameters(client, "")
 
-	log.Debug("ExecuteStakerinfo: Calling GetNetworkInfo()")
+	log.Debug("ExecutenetworkInfo: Calling GetNetworkInfo()")
 	err = cmdUtils.GetNetworkInfo(client)
 	utils.CheckError("Error in getting staker info: ", err)
 
@@ -43,11 +43,11 @@ func (*UtilsStruct) ExecuteNetworkInfo(flagSet *pflag.FlagSet) {
 // This function provides the staker details like age, stake, maturity etc.
 func (*UtilsStruct) GetNetworkInfo(client *ethclient.Client, stakerId uint32) error {
 	callOpts := protoUtils.GetOptions()
-	stakerInfo, err := stakeManagerUtils.StakerInfo(client, &callOpts, stakerId)
+	networkInfo, err := stakeManagerUtils.NetworkInfo(client, &callOpts, stakerId)
 	if err != nil {
 		return err
 	}
-	maturity, err := stakeManagerUtils.GetMaturity(client, &callOpts, stakerInfo.Age)
+	maturity, err := stakeManagerUtils.GetMaturity(client, &callOpts, networkInfo.Age)
 	if err != nil {
 		return err
 	}
@@ -62,10 +62,10 @@ func (*UtilsStruct) GetNetworkInfo(client *ethclient.Client, stakerId uint32) er
 	table := tablewriter.NewWriter(os.Stdout)
 	table.SetHeader([]string{"Staker Id", "Staker Address", "Stake", "Age", "Maturity", "Influence"})
 	table.Append([]string{
-		strconv.Itoa(int(stakerInfo.Id)),
-		stakerInfo.Address.String(),
-		stakerInfo.Stake.String(),
-		strconv.Itoa(int(stakerInfo.Age)),
+		strconv.Itoa(int(networkInfo.Id)),
+		networkInfo.Address.String(),
+		networkInfo.Stake.String(),
+		strconv.Itoa(int(networkInfo.Age)),
 		strconv.Itoa(int(maturity)),
 		influence.String(),
 	})
@@ -74,11 +74,11 @@ func (*UtilsStruct) GetNetworkInfo(client *ethclient.Client, stakerId uint32) er
 }
 
 func init() {
-	rootCmd.AddCommand(stakerInfoCmd)
+	rootCmd.AddCommand(networkInfoCmd)
 
 	var (
 		StakerId uint32
 	)
 
-	stakerInfoCmd.Flags().Uint32VarP(&StakerId, "stakerId", "", 0, "staker id")
+	networkInfoCmd.Flags().Uint32VarP(&StakerId, "stakerId", "", 0, "staker id")
 }
