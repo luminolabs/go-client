@@ -28,8 +28,14 @@ func (*UtilsStruct) GetBufferPercent() (int32, error) {
 
 func (*UtilsStruct) GetConfigData() (types.Configurations, error) {
 	config := types.Configurations{
-		Provider:      "",
-		BufferPercent: 0,
+		Provider:           "",
+		BufferPercent:      0,
+		WaitTime:           0,
+		GasPrice:           0,
+		RPCTimeout:         0,
+		LogLevel:           "",
+		GasMultiplier:      0.0,
+		GasLimitMultiplier: 0.0,
 	}
 
 	provider, err := cmdUtils.GetRPCProvider()
