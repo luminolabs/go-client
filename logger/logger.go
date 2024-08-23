@@ -43,12 +43,12 @@ func init() {
 		standardLogger.Fatal("Error in fetching OS Info: ", err)
 	}
 	standardLogger.WithFields(logrus.Fields{
-		"Operating System": osInfo.OS,
-		"Core":             osInfo.Core,
-		"Platform":         osInfo.Platform,
-		"CPUs":             osInfo.CPUs,
-		"razor-go version": core.VersionWithMeta,
-		"go version":       runtime.Version(),
+		"Operating System":  osInfo.OS,
+		"Core":              osInfo.Core,
+		"Platform":          osInfo.Platform,
+		"CPUs":              osInfo.CPUs,
+		"lumino-go version": core.VersionWithMeta,
+		"go version":        runtime.Version(),
 	}).Info()
 }
 

@@ -2,6 +2,7 @@ package utils
 
 import (
 	"context"
+	"lumino/pkg/bindings"
 	"math/big"
 
 	"github.com/avast/retry-go"
@@ -17,6 +18,7 @@ var UtilsInterface Utils
 var EthClient EthClientUtils
 var ClientInterface ClientUtils
 var RetryInterface RetryUtils
+var BindingsInterface BindingsUtils
 var BlockManagerInterface BlockManagerUtils
 var FlagSetInterface FlagSetUtils
 
@@ -46,6 +48,10 @@ type ClientUtils interface {
 }
 type BlockManagerUtils interface {
 	StateBuffer(client *ethclient.Client) (uint8, error)
+}
+
+type BindingsUtils interface {
+	NewStateManager(address common.Address, client *ethclient.Client) (*bindings.StateManager, error)
 }
 
 type RetryUtils interface {

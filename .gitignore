@@ -17,6 +17,14 @@
 # Go workspace file
 go.work
 
+# Generated Bindings and abi files
+abis/*
+pkg/*
+
+build
+
+.history
+lumino
 # IDE-specific files
 .idea/
 .vscode/
@@ -24,3 +32,5 @@ go.work
 # OS-specific files
 .DS_Store
 Thumbs.db
+
+repopack-output.txt
