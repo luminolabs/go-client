@@ -34,10 +34,10 @@ func initializeStake(cmd *cobra.Command, args []string) {
 	ctx := context.Background()
 
 	// Connect to the Ethereum client
-	client, err := utils.ConnectToClient(core.DefaultRPCURL)
-	if err != nil {
-		logger.Fatal("Failed to connect to Ethereum client:", err)
-	}
+	client := protoUtils.ConnectToEthClient(core.DefaultRPCProvider)
+
+	// Get the stake amount from the command flags
+	stakeAmount, _ := cmd.Flags().GetString("amount")
 
 	// Parse the stake amount from string to big.Int
 	amount, err := utils.ParseBigInt(stakeAmount)
@@ -45,11 +45,17 @@ func initializeStake(cmd *cobra.Command, args []string) {
 		logger.Fatal("Invalid stake amount:", err)
 	}
 
+	// Get the stake address from the command flags
+	stakeAddress, _ := cmd.Flags().GetString("address")
+
 	// Convert the address string to Ethereum address type
 	address := common.HexToAddress(stakeAddress)
 
+	// Get the password from the command flags
+	password, _ := cmd.Flags().GetString("password")
+
 	// Prepare the arguments for staking
-	stakeArgs := types.StakeArgs{
+	stakeArgs := types.StakeArgs{ //check inside core - > staker.go and define there
 		Client:   client,
 		Address:  address,
 		Amount:   amount,
@@ -66,12 +72,12 @@ func initializeStake(cmd *cobra.Command, args []string) {
 // It checks balances, approves token transfer, and executes the stake
 func executeStake(ctx context.Context, args types.StakeArgs) error {
 	// Validate the provided password
-	if err := utils.ValidatePassword(args.Address, args.Password); err != nil {
+	if err := core.ValidatePassword(args.Address, args.Password); err != nil {
 		return fmt.Errorf("invalid password: %w", err)
 	}
 
 	// Check the LUMINO balance of the staker
-	balance, err := utils.GetLuminoBalance(ctx, args.Client, args.Address)
+	balance, err := core.GetLuminoBalance(ctx, args.Client, args.Address)
 	if err != nil {
 		return fmt.Errorf("failed to get LUMINO balance: %w", err)
 	}
@@ -82,7 +88,7 @@ func executeStake(ctx context.Context, args types.StakeArgs) error {
 	}
 
 	// Check the minimum required stake amount
-	minStake, err := utils.GetMinimumStake(ctx, args.Client)
+	minStake, err := core.GetMinimumStake(ctx, args.Client)
 	if err != nil {
 		return fmt.Errorf("failed to get minimum stake amount: %w", err)
 	}
