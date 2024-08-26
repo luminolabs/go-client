@@ -1,6 +1,7 @@
 package cmd
 
 import (
+	"lumino/core/types"
 	"lumino/utils"
 	"math/big"
 
@@ -121,4 +122,18 @@ func (u Utils) ConnectToEthClient(provider string) *ethclient.Client {
 		return nil
 	}
 	return returnedValues[0].Interface().(*ethclient.Client)
+}
+
+// This function returns the staker Info
+func (stateManagerUtils StateManagerUtils) NetworkInfo(client *ethclient.Client, opts *bind.CallOpts, provider string) (types.NetworkInfo, error) {
+	stateManager := utilsInterface.GetStateManager(client)
+	epoch := utils.InvokeFunctionWithTimeout(stateManager, "GetEpoch", opts)
+	epochError := utils.CheckIfAnyError(epoch)
+	if epochError != nil {
+		return types.NetworkInfo{}, epochError
+	}
+	epochVal := epoch[0].Interface().(uint32)
+
+	return types.NetworkInfo{
+		EpochNumber: epochVal, State: 3}, nil
 }

@@ -13,6 +13,7 @@ import (
 var flagSetUtils FlagSetInterface
 var protoUtils UtilsInterface
 var cmdUtils UtilsCmdInterface
+var stateManagerUtils StateManagerInterface
 
 type UtilsInterface interface {
 	GetEpoch(client *ethclient.Client) (uint32, error)
@@ -34,22 +35,29 @@ type FlagSetInterface interface {
 	GetRootInt64RPCTimeout() (int64, error)
 }
 
+type StateManagerInterface interface {
+	NetworkInfo(client *ethclient.Client, opts *bind.CallOpts, provider string) (types.NetworkInfo, error)
+}
+
 type UtilsCmdInterface interface {
 	GetBufferPercent() (int32, error)
 	GetEpochAndState(client *ethclient.Client) (uint32, int64, error)
 	GetConfigData() (types.Configurations, error)
 	GetRPCProvider() (string, error)
 	ExecuteNetworkInfo(flagSet *pflag.FlagSet)
+	GetNetworkInfo(client *ethclient.Client, provider string) error
 }
 
 type Utils struct{}
 type FlagSetUtils struct{}
 type UtilsStruct struct{}
+type StateManagerUtils struct{}
 
 func InitializeInterfaces() {
 	protoUtils = Utils{}
 	flagSetUtils = FlagSetUtils{}
 	cmdUtils = &UtilsStruct{}
+	stateManagerUtils = &StateManagerUtils{}
 
 	InitializeUtils()
 }

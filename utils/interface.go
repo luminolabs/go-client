@@ -32,6 +32,7 @@ type Utils interface {
 	GetEpoch(client *ethclient.Client) (uint32, error)                       // Calculates the current epoch
 	GetStateName(stateNumber int64) string                                   // Converts state number to string representation
 	GetOptions() bind.CallOpts                                               //
+	GetStateManager(client *ethclient.Client) *bindings.StateManager
 }
 
 // EthClientUtils interface defines Ethereum client utility functions
