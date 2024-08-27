@@ -15,3 +15,11 @@ func (*UtilsStruct) GetStateManager(client *ethclient.Client) *bindings.StateMan
 	}
 	return stateManagerContract
 }
+
+func (*UtilsStruct) GetStakeManager(client *ethclient.Client) *bindings.StakeManager {
+	stakeManagerContract, err := BindingsInterface.NewStakeManager(common.HexToAddress(core.StakeManagerAddress), client)
+	if err != nil {
+		log.Fatal(err)
+	}
+	return stakeManagerContract
+}

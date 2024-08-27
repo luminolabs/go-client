@@ -14,6 +14,7 @@ generate_binding() {
 contracts=(
   # TODO: Add files as we test
   "StateManager stateManager.go"
+  "StakeManager stakeManager.go"
 )
 
 for c in "${contracts[@]}"

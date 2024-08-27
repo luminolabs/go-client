@@ -2,6 +2,7 @@ package utils
 
 import (
 	"context"
+	"github.com/ethereum/go-ethereum/accounts/abi/bind"
 	"lumino/pkg/bindings"
 	"math/big"
 
@@ -30,6 +31,9 @@ type Utils interface {
 	GetStateBuffer(client *ethclient.Client) (uint64, error)                 // Retrieves the state buffer value
 	GetEpoch(client *ethclient.Client) (uint32, error)                       // Calculates the current epoch
 	GetStateName(stateNumber int64) string                                   // Converts state number to string representation
+	GetOptions() bind.CallOpts                                               // Retrieves the call options
+	//GetStateManager(client *ethclient.Client) *bindings.StateManager       //	Initializes the state manager
+	GetStakeManager(client *ethclient.Client) *bindings.StakeManager // Initializes the stake manager
 }
 
 // EthClientUtils interface defines Ethereum client utility functions
@@ -52,6 +56,7 @@ type BlockManagerUtils interface {
 
 type BindingsUtils interface {
 	NewStateManager(address common.Address, client *ethclient.Client) (*bindings.StateManager, error)
+	NewStakeManager(address common.Address, client *ethclient.Client) (*bindings.StakeManager, error)
 }
 
 type RetryUtils interface {

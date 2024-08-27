@@ -2,6 +2,7 @@
 package cmd
 
 import (
+	"lumino/pkg/bindings"
 	"math/big"
 
 	"github.com/ethereum/go-ethereum/ethclient"
@@ -11,6 +12,7 @@ import (
 var flagSetUtils FlagSetInterface
 var protoUtils UtilsInterface
 var cmdUtils UtilsCmdInterface
+var stakeManagerUtils StakeManagerInterface
 
 type UtilsInterface interface {
 	GetEpoch(client *ethclient.Client) (uint32, error)
@@ -33,6 +35,10 @@ type FlagSetInterface interface {
 type UtilsCmdInterface interface {
 	GetBufferPercent() (int32, error)
 	GetEpochAndState(client *ethclient.Client) (uint32, int64, error)
+}
+
+type StakeManagerInterface interface {
+	GetStakeManagerContract(client *ethclient.Client) (*bindings.StakeManager, error)
 }
 
 type Utils struct{}
