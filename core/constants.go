@@ -12,6 +12,13 @@ var DefaultRPCProvider = "https://optimism.drpc.org"
 // DefaultBufferPercent is the default buffer percentage for state transitions
 var DefaultBufferPercent = 20
 
+var DefaultGasMultiplier = 1.0
+var DefaultGasPrice = 1
+var DefaultWaitTime = 1
+var DefaultGasLimit = 2
+var DefaultRPCTimeout = 10
+var DefaultLogLevel = ""
+
 // EpochLength defines the duration of an epoch in seconds (20 minutes)
 var EpochLength int64 = 1200
 
