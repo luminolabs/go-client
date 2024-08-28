@@ -101,12 +101,6 @@ func validateStakeArgs(ctx context.Context, args types.StakeArgs) error {
 		return fmt.Errorf("insufficient LUMINO balance. Have %s, need %s", balance.String(), args.Amount.String())
 	}
 
-	// Check the minimum required stake amount
-	//minStake, err := core.GetMinimumStake(ctx, args.Client)
-	//if err != nil {
-	//	return fmt.Errorf("failed to get minimum stake amount: %w", err)
-	//}
-
 	minStakeBigInt := big.NewInt(int64(core.MinimumStake))
 
 	// Ensure the stake amount meets the minimum requirement
@@ -130,14 +124,8 @@ func stakeTokens(ctx context.Context, args types.StakeArgs) error {
 	// Step 2: Get the StakeManager Contract Instance
 	stakeManager := utilsInterface.GetStakeManager(args.Client)
 
-	//stakeManager, err := core.GetStakeManagerContract(args.Client)
-	//if err != nil {
-	//	return fmt.Errorf("failed to get stake manager contract: %w", err)
-	//}
-
 	// Step 3: Stake the Tokens using the Contract Instance
 	logger.Info("Staking LUMINO tokens...")
-	//arrayOfValues := utils.InvokeFunctionWithTimeout(stakeManager, "Stake", transactOpts, args.Amount)
 
 	epoch, err := protoUtils.GetEpoch(args.Client)
 
