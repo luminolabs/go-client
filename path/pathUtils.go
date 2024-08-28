@@ -14,10 +14,6 @@ type PathInterface interface {
 	GetDefaultPath() (string, error)
 	GetLogFilePath(fileName string) (string, error)
 	GetConfigFilePath() (string, error)
-	GetJobFilePath() (string, error)
-	GetCommitDataFileName(address string) (string, error)
-	GetProposeDataFileName(address string) (string, error)
-	GetDisputeDataFileName(address string) (string, error)
 }
 
 // OSInterface defines the interface for OS-related operations
