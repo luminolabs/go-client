@@ -2,8 +2,12 @@ package utils
 
 import (
 	"context"
+	"crypto/ecdsa"
+	"io/fs"
 	"lumino/pkg/bindings"
 	"math/big"
+	"os"
+	"time"
 
 	"github.com/avast/retry-go"
 	"github.com/ethereum/go-ethereum"
@@ -18,6 +22,10 @@ import (
 var UtilsInterface Utils
 var EthClient EthClientUtils
 var ClientInterface ClientUtils
+var OS OSUtils
+var PathInterface PathUtils
+var BindInterface BindUtils
+var Time TimeUtils
 var RetryInterface RetryUtils
 var BindingsInterface BindingsUtils
 var BlockManagerInterface BlockManagerUtils
@@ -33,6 +41,8 @@ type Utils interface {
 	GetStateName(stateNumber int64) string                                   // Converts state number to string representation
 	GetOptions() bind.CallOpts                                               //
 	GetStateManager(client *ethclient.Client) *bindings.StateManager
+	AssignLogFile(flagSet *pflag.FlagSet)
+	IsFlagPassed(name string) bool
 }
 
 // EthClientUtils interface defines Ethereum client utility functions
@@ -57,6 +67,26 @@ type BindingsUtils interface {
 	NewStateManager(address common.Address, client *ethclient.Client) (*bindings.StateManager, error)
 }
 
+type TimeUtils interface {
+	Sleep(duration time.Duration)
+}
+
+type PathUtils interface {
+	GetDefaultPath() (string, error)
+	GetJobFilePath() (string, error)
+}
+
+type BindUtils interface {
+	NewKeyedTransactorWithChainID(key *ecdsa.PrivateKey, chainID *big.Int) (*bind.TransactOpts, error)
+}
+
+type OSUtils interface {
+	OpenFile(name string, flag int, perm fs.FileMode) (*os.File, error)
+	Open(name string) (*os.File, error)
+	WriteFile(name string, data []byte, perm fs.FileMode) error
+	ReadFile(filename string) ([]byte, error)
+}
+
 type RetryUtils interface {
 	RetryAttempts(numberOfAttempts uint) retry.Option
 }
@@ -68,11 +98,28 @@ type FlagSetUtils interface {
 // Struct Definition
 // Each struct implements the corresponding interface
 type UtilsStruct struct{}
+type EthClientStruct struct{}
+type ClientStruct struct{}
+type TimeStruct struct{}
+type OSStruct struct{}
+type PathStruct struct{}
+type BindStruct struct{}
 type BlockManagerStruct struct{}
+type BindingsStruct struct{}
+type RetryStruct struct{}
 type FLagSetStruct struct{}
 
 // OptionPackageStruct
 type OptionsPackageStruct struct {
-	UtilsInterface   Utils
-	FlagSetInterface FlagSetUtils
+	UtilsInterface        Utils
+	EthClient             EthClientUtils
+	ClientInterface       ClientUtils
+	Time                  TimeUtils
+	OS                    OSUtils
+	PathInterface         PathUtils
+	BindInterface         BindUtils
+	BlockManagerInterface BlockManagerUtils
+	BindingsInterface     BindingsUtils
+	RetryInterface        RetryUtils
+	FlagSetInterface      FlagSetUtils
 }
