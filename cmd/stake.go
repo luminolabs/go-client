@@ -34,8 +34,11 @@ func initializeStake(cmd *cobra.Command, args []string) {
 	// Create a background context
 	ctx := context.Background()
 
-	// Connect to the Ethereum client
-	client := protoUtils.ConnectToEthClient(core.DefaultRPCProvider)
+	// Attempt to connect to the Ethereum client
+	client, err := protoUtils.ConnectToEthClient(core.DefaultRPCProvider)
+	if err != nil {
+		logger.Fatal("Failed to connect to Ethereum client:", err)
+	}
 
 	// Get the stake amount from the command flags
 	stakeAmount, _ := cmd.Flags().GetString("amount")

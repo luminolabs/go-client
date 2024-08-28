@@ -5,6 +5,7 @@ import (
 )
 
 func ValidatePassword(address common.Address, password string) error {
+	// TODO (1): Implement the ValidatePassword function
 	//// Get the keystore directory
 	//keystoreDir := filepath.Join(os.Getenv("HOME"), ".ethereum", "keystore")
 	//
@@ -20,7 +21,5 @@ func ValidatePassword(address common.Address, password string) error {
 	//	return fmt.Errorf("invalid password: %w", err)
 	//}
 	//
-	//return nil
-
 	return nil
 }

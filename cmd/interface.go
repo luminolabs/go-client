@@ -16,7 +16,7 @@ var stakeManagerUtils StakeManagerInterface
 
 type UtilsInterface interface {
 	GetEpoch(client *ethclient.Client) (uint32, error)
-	ConnectToEthClient(provider string) *ethclient.Client
+	ConnectToEthClient(provider string) (*ethclient.Client, error)
 	GetAmountInWei(amount *big.Int) *big.Int
 	GetDelayedState(client *ethclient.Client, buffer int32) (int64, error)
 }

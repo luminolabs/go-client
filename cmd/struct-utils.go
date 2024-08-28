@@ -1,8 +1,11 @@
 package cmd
 
 import (
+	"context"
+	"fmt"
 	"lumino/utils"
 	"math/big"
+	"time"
 
 	"github.com/ethereum/go-ethereum/ethclient"
 	"github.com/spf13/pflag"
@@ -102,12 +105,29 @@ func (u Utils) GetEpoch(client *ethclient.Client) (uint32, error) {
 	return utilsInterface.GetEpoch(client)
 }
 
-// This function connects to the client
-func (u Utils) ConnectToEthClient(provider string) *ethclient.Client {
-	returnedValues := utils.InvokeFunctionWithTimeout(utilsInterface, "ConnectToEthClient", provider)
-	returnedError := utils.CheckIfAnyError(returnedValues)
-	if returnedError != nil {
-		return nil
+// This function connects to the Ethereum client
+func (u Utils) ConnectToEthClient(provider string) (*ethclient.Client, error) {
+	// Set a longer timeout duration, e.g., 30 seconds
+	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
+	defer cancel()
+
+	// Attempt to connect to the Ethereum client using DialContext
+	fmt.Println("Attempting to connect to Ethereum client at:", provider)
+	client, err := ethclient.DialContext(ctx, provider)
+	if err != nil {
+		fmt.Println("Error connecting to Ethereum client:", err)
+		return nil, err
 	}
-	return returnedValues[0].Interface().(*ethclient.Client)
+
+	// Ping the client to check if it's responsive
+	_, err = client.ChainID(ctx)
+	if err != nil {
+		fmt.Println("Client is unresponsive or ChainID check failed:", err)
+		return nil, err
+	}
+
+	// Log successful connection
+	fmt.Println("Successfully connected to Ethereum client")
+
+	return client, nil
 }
