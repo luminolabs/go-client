@@ -1,13 +1,20 @@
 package cmd
 
 import (
+	"crypto/ecdsa"
+	"fmt"
 	"lumino/core/types"
+	"lumino/path"
 	"lumino/utils"
 	"math/big"
+	"os"
+	"time"
 
 	"github.com/ethereum/go-ethereum/accounts/abi/bind"
+	"github.com/ethereum/go-ethereum/crypto"
 	"github.com/ethereum/go-ethereum/ethclient"
 	"github.com/spf13/pflag"
+	"github.com/spf13/viper"
 )
 
 var utilsInterface = utils.UtilsInterface
@@ -16,6 +23,11 @@ var utilsInterface = utils.UtilsInterface
 func InitializeUtils() {
 	utilsInterface = &utils.UtilsStruct{}
 	utils.FlagSetInterface = &utils.FLagSetStruct{}
+}
+
+// This function returns the gas multiplier of root in float32
+func (flagSetUtils FlagSetUtils) GetRootFloat32GasMultiplier() (float32, error) {
+	return rootCmd.PersistentFlags().GetFloat32("gasmultiplier")
 }
 
 // GetRootInt32Buffer retrieves the buffer value from root command flags.
@@ -114,26 +126,81 @@ func (u Utils) GetOptions() bind.CallOpts {
 	return utilsInterface.GetOptions()
 }
 
+// This function returns the default path
+func (u Utils) GetDefaultPath() (string, error) {
+	return path.PathUtilsInterface.GetDefaultPath()
+}
+
+// This function returns the config file path
+func (u Utils) GetConfigFilePath() (string, error) {
+	return path.PathUtilsInterface.GetConfigFilePath()
+}
+
+// This function assigns the log file
+func (u Utils) AssignLogFile(flagSet *pflag.FlagSet) {
+	utilsInterface.AssignLogFile(flagSet)
+}
+
+// This function checks if the flag is passed
+func (u Utils) IsFlagPassed(name string) bool {
+	return utilsInterface.IsFlagPassed(name)
+}
+
 // This function connects to the client
 func (u Utils) ConnectToEthClient(provider string) *ethclient.Client {
-	returnedValues := utils.InvokeFunctionWithTimeout(utilsInterface, "ConnectToEthClient", provider)
-	returnedError := utils.CheckIfAnyError(returnedValues)
-	if returnedError != nil {
+	// returnedValues := utils.InvokeFunctionWithTimeout(utilsInterface, "ConnectToClient", provider)
+	// returnedError := utils.CheckIfAnyError(returnedValues)
+	// if returnedError != nil {
+	// 	return nil
+	// }
+	// return returnedValues[0].Interface().(*ethclient.Client)
+	log.Debug("Attempting to connect to Ethereum client at: ", provider)
+	client, err := ethclient.Dial(provider)
+	if err != nil {
+		log.Debug("Error in connecting: ", err)
 		return nil
 	}
-	return returnedValues[0].Interface().(*ethclient.Client)
+	log.Info("Connected to: ", provider)
+	return client
+}
+
+// This function is used to write config as
+func (v ViperUtils) ViperWriteConfigAs(path string) error {
+	return viper.WriteConfigAs(path)
+}
+
+// This function is used to convert from Hex to ECDSA
+func (c CryptoUtils) HexToECDSA(hexKey string) (*ecdsa.PrivateKey, error) {
+	return crypto.HexToECDSA(hexKey)
+}
+
+// This function is used for sleep
+func (t TimeUtils) Sleep(duration time.Duration) {
+	utils.Time.Sleep(duration)
 }
 
 // This function returns the staker Info
-func (stateManagerUtils StateManagerUtils) NetworkInfo(client *ethclient.Client, opts *bind.CallOpts, provider string) (types.NetworkInfo, error) {
-	stateManager := utilsInterface.GetStateManager(client)
-	epoch := utils.InvokeFunctionWithTimeout(stateManager, "GetEpoch", opts)
-	epochError := utils.CheckIfAnyError(epoch)
-	if epochError != nil {
-		return types.NetworkInfo{}, epochError
-	}
-	epochVal := epoch[0].Interface().(uint32)
+func (stateManagerUtils StateManagerUtils) NetworkInfo(client *ethclient.Client, opts *bind.CallOpts) (types.NetworkInfo, error) {
 
-	return types.NetworkInfo{
-		EpochNumber: epochVal, State: 3}, nil
+	epoch, state, err := cmdUtils.GetEpochAndState(client)
+	if err != nil {
+		return types.NetworkInfo{}, fmt.Errorf("failed to get epoch and state: %w", err)
+	}
+	return types.NetworkInfo{EpochNumber: epoch, State: types.EpochState(state)}, err
+	// TODO using rpc provider
+	// stateManager := utilsInterface.GetStateManager(client)
+	// epoch := utils.InvokeFunctionWithTimeout(stateManager, "GetEpoch", opts)
+	// epochError := utils.CheckIfAnyError(epoch)
+	// if epochError != nil {
+	// 	return types.NetworkInfo{}, epochError
+	// }
+	// epochVal := epoch[0].Interface().(uint32)
+
+	// return types.NetworkInfo{
+	// 	EpochNumber: epochVal, State: 3}, nil
+}
+
+// This function is used for exiting the code
+func (o OSUtils) Exit(code int) {
+	os.Exit(code)
 }
