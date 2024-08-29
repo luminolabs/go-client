@@ -15,3 +15,11 @@ func (*UtilsStruct) GetStateManager(client *ethclient.Client) *bindings.StateMan
 	}
 	return stateManagerContract
 }
+
+func (*UtilsStruct) GetBlockManager(client *ethclient.Client) *bindings.BlockManager {
+	blockManager, err := BindingsInterface.NewBlockManager(common.HexToAddress(core.BlockManagerAddress), client)
+	if err != nil {
+		log.Fatal(err)
+	}
+	return blockManager
+}

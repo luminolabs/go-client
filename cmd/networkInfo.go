@@ -1,6 +1,7 @@
 package cmd
 
 import (
+	"fmt"
 	"lumino/logger"
 	"lumino/utils"
 	"os"
@@ -32,23 +33,23 @@ func (*UtilsStruct) ExecuteNetworkInfo(flagSet *pflag.FlagSet) {
 	log.Debugf("ExecuteNetworkInfo: Config: %+v", config)
 
 	client := protoUtils.ConnectToEthClient(config.Provider)
+	if client == nil {
+		log.Fatal("Failed to connect to Ethereum client")
+		return
+	}
 	logger.SetLoggerParameters(client, "")
 
-	provider, err := flagSetUtils.GetRootStringProvider()
-	utils.CheckError("Error in getting provider: ", err)
-	log.Debug("ExecuteNetworkInfo: Provider: ", provider)
-
-	log.Debug("ExecuteNetworkInfo: Calling GetNetworkInfo() with arguments provider = ", provider)
-	err = cmdUtils.GetNetworkInfo(client, provider)
+	log.Debug("ExecuteNetworkInfo: Calling GetNetworkInfo()...")
+	err = cmdUtils.GetNetworkInfo(client)
 	utils.CheckError("Error in getting Network info : ", err)
 
 }
 
-func (*UtilsStruct) GetNetworkInfo(client *ethclient.Client, provider string) error {
+func (*UtilsStruct) GetNetworkInfo(client *ethclient.Client) error {
 	callOpts := protoUtils.GetOptions()
-	networkInfo, err := stateManagerUtils.NetworkInfo(client, &callOpts, provider)
+	networkInfo, err := stateManagerUtils.NetworkInfo(client, &callOpts)
 	if err != nil {
-		return err
+		return fmt.Errorf("failed to get network info: %w", err)
 	}
 	table := tablewriter.NewWriter(os.Stdout)
 	table.SetHeader([]string{"Epoch", "State", "Timestamp"})
@@ -63,10 +64,4 @@ func (*UtilsStruct) GetNetworkInfo(client *ethclient.Client, provider string) er
 
 func init() {
 	rootCmd.AddCommand(networkInfoCmd)
-
-	var (
-		Provider string
-	)
-
-	networkInfoCmd.Flags().StringP(Provider, "stakerId", "", "provider")
 }

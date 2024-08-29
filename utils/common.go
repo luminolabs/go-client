@@ -1,12 +1,16 @@
 package utils
 
 import (
+	"fmt"
 	"math/big"
+	"os"
 
 	"lumino/core"
+	"lumino/logger"
 
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/ethclient"
+	"github.com/spf13/pflag"
 )
 
 // GetStateName converts a state number to its corresponding string representation.
@@ -89,6 +93,12 @@ func (*UtilsStruct) GetDelayedState(client *ethclient.Client, buffer int32) (int
 // GetEpoch calculates the current epoch based on the latest block timestamp.
 // It returns the current epoch as a uint32 and an error if any occurred during the calculation.
 func (*UtilsStruct) GetEpoch(client *ethclient.Client) (uint32, error) {
+	if client == nil {
+		return 0, fmt.Errorf("ethclient is nil")
+	}
+	if UtilsInterface != nil {
+		log.Info("checkpoint 2 in common.go", client)
+	}
 	latestHeader, err := UtilsInterface.GetLatestBlockWithRetry(client)
 	if err != nil {
 		log.Error("Error in fetching block: ", err)
@@ -96,4 +106,27 @@ func (*UtilsStruct) GetEpoch(client *ethclient.Client) (uint32, error) {
 	}
 	epoch := uint64(latestHeader.Time) / uint64(core.EpochLength)
 	return uint32(epoch), nil
+}
+
+func (*UtilsStruct) AssignLogFile(flagSet *pflag.FlagSet) {
+	if UtilsInterface.IsFlagPassed("logFile") {
+		fileName, err := FlagSetInterface.GetLogFileName(flagSet)
+		if err != nil {
+			log.Fatal("Error in getting file name: ", err)
+		}
+		log.Debug("Log file name: ", fileName)
+		logger.InitializeLogger(fileName)
+	} else {
+		log.Debug("No `logFile` flag passed, not storing logs in any file")
+	}
+}
+
+func (*UtilsStruct) IsFlagPassed(name string) bool {
+	found := false
+	for _, arg := range os.Args {
+		if arg == "--"+name {
+			found = true
+		}
+	}
+	return found
 }
