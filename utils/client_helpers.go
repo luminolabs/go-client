@@ -39,6 +39,7 @@ func (*UtilsStruct) GetLatestBlockWithRetry(client *ethclient.Client) (*types.He
 		latestHeader *types.Header
 		err          error
 	)
+	log.Info("checkpoint 2 in client helpers.go", client)
 	err = retry.Do(
 		func() error {
 			latestHeader, err = ClientInterface.HeaderByNumber(client, context.Background(), nil)

@@ -41,6 +41,8 @@ type Utils interface {
 	GetStateName(stateNumber int64) string                                   // Converts state number to string representation
 	GetOptions() bind.CallOpts                                               //
 	GetStateManager(client *ethclient.Client) *bindings.StateManager
+	GetBlockManager(client *ethclient.Client) *bindings.BlockManager
+	GetBlockManagerWithOpts(client *ethclient.Client) (*bindings.BlockManager, bind.CallOpts)
 	AssignLogFile(flagSet *pflag.FlagSet)
 	IsFlagPassed(name string) bool
 }
@@ -65,6 +67,7 @@ type BlockManagerUtils interface {
 
 type BindingsUtils interface {
 	NewStateManager(address common.Address, client *ethclient.Client) (*bindings.StateManager, error)
+	NewBlockManager(address common.Address, client *ethclient.Client) (*bindings.BlockManager, error)
 }
 
 type TimeUtils interface {
@@ -73,7 +76,6 @@ type TimeUtils interface {
 
 type PathUtils interface {
 	GetDefaultPath() (string, error)
-	GetJobFilePath() (string, error)
 }
 
 type BindUtils interface {
