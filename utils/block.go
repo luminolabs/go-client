@@ -9,6 +9,10 @@ import (
 	"github.com/ethereum/go-ethereum/ethclient"
 )
 
+func (*UtilsStruct) GetBlockManagerWithOpts(client *ethclient.Client) (*bindings.BlockManager, bind.CallOpts) {
+	return UtilsInterface.GetBlockManager(client), UtilsInterface.GetOptions()
+}
+
 // GetStateBuffer retrieves the state buffer from the BlockManager contract.
 // It uses retry logic to handle potential network issues.
 func (*UtilsStruct) GetStateBuffer(client *ethclient.Client) (uint64, error) {
@@ -30,8 +34,4 @@ func (*UtilsStruct) GetStateBuffer(client *ethclient.Client) (uint64, error) {
 		return 0, err
 	}
 	return stateBuffer, nil
-}
-
-func (*UtilsStruct) GetBlockManagerWithOpts(client *ethclient.Client) (*bindings.BlockManager, bind.CallOpts) {
-	return UtilsInterface.GetBlockManager(client), UtilsInterface.GetOptions()
 }
