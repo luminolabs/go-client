@@ -33,10 +33,6 @@ func (*UtilsStruct) ExecuteNetworkInfo(flagSet *pflag.FlagSet) {
 	log.Debugf("ExecuteNetworkInfo: Config: %+v", config)
 
 	client := protoUtils.ConnectToEthClient(config.Provider)
-	if client == nil {
-		log.Fatal("Failed to connect to Ethereum client")
-		return
-	}
 	logger.SetLoggerParameters(client, "")
 
 	log.Debug("ExecuteNetworkInfo: Calling GetNetworkInfo()...")

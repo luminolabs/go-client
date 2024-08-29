@@ -2,15 +2,14 @@ package cmd
 
 import (
 	"crypto/ecdsa"
-	"fmt"
-	"lumino/core/types"
-	"lumino/path"
-	"lumino/utils"
 	"math/big"
 	"os"
 	"time"
 
+	"lumino/core/types"
+	"lumino/path"
 	"lumino/pkg/bindings"
+	"lumino/utils"
 
 	"github.com/ethereum/go-ethereum/accounts/abi/bind"
 	"github.com/ethereum/go-ethereum/crypto"
@@ -199,22 +198,23 @@ func (t TimeUtils) Sleep(duration time.Duration) {
 // This function returns the staker Info
 func (stateManagerUtils StateManagerUtils) NetworkInfo(client *ethclient.Client, opts *bind.CallOpts) (types.NetworkInfo, error) {
 
-	epoch, state, err := cmdUtils.GetEpochAndState(client)
-	if err != nil {
-		return types.NetworkInfo{}, fmt.Errorf("failed to get epoch and state: %w", err)
+	stateManager := utilsInterface.GetStateManager(client)
+	epoch := utils.InvokeFunctionWithTimeout(stateManager, "GetEpoch", opts)
+	epochError := utils.CheckIfAnyError(epoch)
+	if epochError != nil {
+		return types.NetworkInfo{}, epochError
 	}
-	return types.NetworkInfo{EpochNumber: epoch, State: types.EpochState(state)}, nil
-	// TODO using rpc provider
-	// stateManager := utilsInterface.GetStateManager(client)
-	// epoch := utils.InvokeFunctionWithTimeout(stateManager, "GetEpoch", opts)
-	// epochError := utils.CheckIfAnyError(epoch)
-	// if epochError != nil {
-	// 	return types.NetworkInfo{}, epochError
-	// }
-	// epochVal := epoch[0].Interface().(uint32)
+	epochVal := epoch[0].Interface().(uint32)
 
-	// return types.NetworkInfo{
-	// 	EpochNumber: epochVal, State: 3}, nil
+	state := utils.InvokeFunctionWithTimeout(stateManager, "GetState", opts, uint8(20))
+	stateError := utils.CheckIfAnyError(state)
+	if stateError != nil {
+		return types.NetworkInfo{}, stateError
+	}
+	stateVal := state[0].Interface().(uint8)
+
+	return types.NetworkInfo{
+		EpochNumber: epochVal, State: types.EpochState(stateVal), Timestamp: time.Now()}, nil
 }
 
 // This function is used for exiting the code
