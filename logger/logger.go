@@ -122,3 +122,9 @@ func Error(args ...interface{}) {
 func Fatal(args ...interface{}) {
 	standardLogger.Fatal(args...)
 }
+
+func SetLoggerParameters(client *ethclient.Client, address string) {
+	Address = address
+	Client = client
+	go core.CalculateLatestBlock(client)
+}

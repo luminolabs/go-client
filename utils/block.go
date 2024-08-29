@@ -2,8 +2,10 @@ package utils
 
 import (
 	"lumino/core"
+	"lumino/pkg/bindings"
 
 	"github.com/avast/retry-go"
+	"github.com/ethereum/go-ethereum/accounts/abi/bind"
 	"github.com/ethereum/go-ethereum/ethclient"
 )
 
@@ -28,4 +30,8 @@ func (*UtilsStruct) GetStateBuffer(client *ethclient.Client) (uint64, error) {
 		return 0, err
 	}
 	return stateBuffer, nil
+}
+
+func (*UtilsStruct) GetBlockManagerWithOpts(client *ethclient.Client) (*bindings.BlockManager, bind.CallOpts) {
+	return UtilsInterface.GetBlockManager(client), UtilsInterface.GetOptions()
 }
