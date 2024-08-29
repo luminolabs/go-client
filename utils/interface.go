@@ -33,7 +33,7 @@ type Utils interface {
 	GetStateName(stateNumber int64) string                                   // Converts state number to string representation
 	GetOptions() bind.CallOpts                                               // Retrieves the call options
 	//GetStateManager(client *ethclient.Client) *bindings.StateManager       //	Initializes the state manager
-	GetStakeManager(client *ethclient.Client) *bindings.StakeManager // Initializes the stake manager
+	GetStakeManager(client *ethclient.Client) (*bindings.StakeManager, error) // Initializes the stake manager
 }
 
 // EthClientUtils interface defines Ethereum client utility functions
