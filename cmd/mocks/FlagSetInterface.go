@@ -12,12 +12,208 @@ type FlagSetInterface struct {
 	mock.Mock
 }
 
+// GetFloat32GasLimit provides a mock function with given fields: flagSet
+func (_m *FlagSetInterface) GetFloat32GasLimit(flagSet *pflag.FlagSet) (float32, error) {
+	ret := _m.Called(flagSet)
+
+	if len(ret) == 0 {
+		panic("no return value specified for GetFloat32GasLimit")
+	}
+
+	var r0 float32
+	var r1 error
+	if rf, ok := ret.Get(0).(func(*pflag.FlagSet) (float32, error)); ok {
+		return rf(flagSet)
+	}
+	if rf, ok := ret.Get(0).(func(*pflag.FlagSet) float32); ok {
+		r0 = rf(flagSet)
+	} else {
+		r0 = ret.Get(0).(float32)
+	}
+
+	if rf, ok := ret.Get(1).(func(*pflag.FlagSet) error); ok {
+		r1 = rf(flagSet)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
+// GetFloat32GasMultiplier provides a mock function with given fields: flagSet
+func (_m *FlagSetInterface) GetFloat32GasMultiplier(flagSet *pflag.FlagSet) (float32, error) {
+	ret := _m.Called(flagSet)
+
+	if len(ret) == 0 {
+		panic("no return value specified for GetFloat32GasMultiplier")
+	}
+
+	var r0 float32
+	var r1 error
+	if rf, ok := ret.Get(0).(func(*pflag.FlagSet) (float32, error)); ok {
+		return rf(flagSet)
+	}
+	if rf, ok := ret.Get(0).(func(*pflag.FlagSet) float32); ok {
+		r0 = rf(flagSet)
+	} else {
+		r0 = ret.Get(0).(float32)
+	}
+
+	if rf, ok := ret.Get(1).(func(*pflag.FlagSet) error); ok {
+		r1 = rf(flagSet)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
+// GetInt32Buffer provides a mock function with given fields: flagSet
+func (_m *FlagSetInterface) GetInt32Buffer(flagSet *pflag.FlagSet) (int32, error) {
+	ret := _m.Called(flagSet)
+
+	if len(ret) == 0 {
+		panic("no return value specified for GetInt32Buffer")
+	}
+
+	var r0 int32
+	var r1 error
+	if rf, ok := ret.Get(0).(func(*pflag.FlagSet) (int32, error)); ok {
+		return rf(flagSet)
+	}
+	if rf, ok := ret.Get(0).(func(*pflag.FlagSet) int32); ok {
+		r0 = rf(flagSet)
+	} else {
+		r0 = ret.Get(0).(int32)
+	}
+
+	if rf, ok := ret.Get(1).(func(*pflag.FlagSet) error); ok {
+		r1 = rf(flagSet)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
+// GetInt32GasPrice provides a mock function with given fields: flagSet
+func (_m *FlagSetInterface) GetInt32GasPrice(flagSet *pflag.FlagSet) (int32, error) {
+	ret := _m.Called(flagSet)
+
+	if len(ret) == 0 {
+		panic("no return value specified for GetInt32GasPrice")
+	}
+
+	var r0 int32
+	var r1 error
+	if rf, ok := ret.Get(0).(func(*pflag.FlagSet) (int32, error)); ok {
+		return rf(flagSet)
+	}
+	if rf, ok := ret.Get(0).(func(*pflag.FlagSet) int32); ok {
+		r0 = rf(flagSet)
+	} else {
+		r0 = ret.Get(0).(int32)
+	}
+
+	if rf, ok := ret.Get(1).(func(*pflag.FlagSet) error); ok {
+		r1 = rf(flagSet)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
+// GetInt32Wait provides a mock function with given fields: flagSet
+func (_m *FlagSetInterface) GetInt32Wait(flagSet *pflag.FlagSet) (int32, error) {
+	ret := _m.Called(flagSet)
+
+	if len(ret) == 0 {
+		panic("no return value specified for GetInt32Wait")
+	}
+
+	var r0 int32
+	var r1 error
+	if rf, ok := ret.Get(0).(func(*pflag.FlagSet) (int32, error)); ok {
+		return rf(flagSet)
+	}
+	if rf, ok := ret.Get(0).(func(*pflag.FlagSet) int32); ok {
+		r0 = rf(flagSet)
+	} else {
+		r0 = ret.Get(0).(int32)
+	}
+
+	if rf, ok := ret.Get(1).(func(*pflag.FlagSet) error); ok {
+		r1 = rf(flagSet)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
+// GetInt64RPCTimeout provides a mock function with given fields: flagSet
+func (_m *FlagSetInterface) GetInt64RPCTimeout(flagSet *pflag.FlagSet) (int64, error) {
+	ret := _m.Called(flagSet)
+
+	if len(ret) == 0 {
+		panic("no return value specified for GetInt64RPCTimeout")
+	}
+
+	var r0 int64
+	var r1 error
+	if rf, ok := ret.Get(0).(func(*pflag.FlagSet) (int64, error)); ok {
+		return rf(flagSet)
+	}
+	if rf, ok := ret.Get(0).(func(*pflag.FlagSet) int64); ok {
+		r0 = rf(flagSet)
+	} else {
+		r0 = ret.Get(0).(int64)
+	}
+
+	if rf, ok := ret.Get(1).(func(*pflag.FlagSet) error); ok {
+		r1 = rf(flagSet)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
 // GetRootFloat32GasLimit provides a mock function with given fields:
 func (_m *FlagSetInterface) GetRootFloat32GasLimit() (float32, error) {
 	ret := _m.Called()
 
 	if len(ret) == 0 {
 		panic("no return value specified for GetRootFloat32GasLimit")
+	}
+
+	var r0 float32
+	var r1 error
+	if rf, ok := ret.Get(0).(func() (float32, error)); ok {
+		return rf()
+	}
+	if rf, ok := ret.Get(0).(func() float32); ok {
+		r0 = rf()
+	} else {
+		r0 = ret.Get(0).(float32)
+	}
+
+	if rf, ok := ret.Get(1).(func() error); ok {
+		r1 = rf()
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
+// GetRootFloat32GasMultiplier provides a mock function with given fields:
+func (_m *FlagSetInterface) GetRootFloat32GasMultiplier() (float32, error) {
+	ret := _m.Called()
+
+	if len(ret) == 0 {
+		panic("no return value specified for GetRootFloat32GasMultiplier")
 	}
 
 	var r0 float32

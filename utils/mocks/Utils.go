@@ -21,6 +21,61 @@ type Utils struct {
 	mock.Mock
 }
 
+// AssignLogFile provides a mock function with given fields: flagSet
+func (_m *Utils) AssignLogFile(flagSet *pflag.FlagSet) {
+	_m.Called(flagSet)
+}
+
+// GetBlockManager provides a mock function with given fields: client
+func (_m *Utils) GetBlockManager(client *ethclient.Client) *bindings.BlockManager {
+	ret := _m.Called(client)
+
+	if len(ret) == 0 {
+		panic("no return value specified for GetBlockManager")
+	}
+
+	var r0 *bindings.BlockManager
+	if rf, ok := ret.Get(0).(func(*ethclient.Client) *bindings.BlockManager); ok {
+		r0 = rf(client)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*bindings.BlockManager)
+		}
+	}
+
+	return r0
+}
+
+// GetBlockManagerWithOpts provides a mock function with given fields: client
+func (_m *Utils) GetBlockManagerWithOpts(client *ethclient.Client) (*bindings.BlockManager, bind.CallOpts) {
+	ret := _m.Called(client)
+
+	if len(ret) == 0 {
+		panic("no return value specified for GetBlockManagerWithOpts")
+	}
+
+	var r0 *bindings.BlockManager
+	var r1 bind.CallOpts
+	if rf, ok := ret.Get(0).(func(*ethclient.Client) (*bindings.BlockManager, bind.CallOpts)); ok {
+		return rf(client)
+	}
+	if rf, ok := ret.Get(0).(func(*ethclient.Client) *bindings.BlockManager); ok {
+		r0 = rf(client)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*bindings.BlockManager)
+		}
+	}
+
+	if rf, ok := ret.Get(1).(func(*ethclient.Client) bind.CallOpts); ok {
+		r1 = rf(client)
+	} else {
+		r1 = ret.Get(1).(bind.CallOpts)
+	}
+
+	return r0, r1
+}
+
 // GetDelayedState provides a mock function with given fields: client, buffer
 func (_m *Utils) GetDelayedState(client *ethclient.Client, buffer int32) (int64, error) {
 	ret := _m.Called(client, buffer)
@@ -217,6 +272,24 @@ func (_m *Utils) GetUint32(flagSet *pflag.FlagSet, name string) (uint32, error) 
 	}
 
 	return r0, r1
+}
+
+// IsFlagPassed provides a mock function with given fields: name
+func (_m *Utils) IsFlagPassed(name string) bool {
+	ret := _m.Called(name)
+
+	if len(ret) == 0 {
+		panic("no return value specified for IsFlagPassed")
+	}
+
+	var r0 bool
+	if rf, ok := ret.Get(0).(func(string) bool); ok {
+		r0 = rf(name)
+	} else {
+		r0 = ret.Get(0).(bool)
+	}
+
+	return r0
 }
 
 // NewUtils creates a new instance of Utils. It also registers a testing interface on the mock and a cleanup function to assert the mocks expectations.
