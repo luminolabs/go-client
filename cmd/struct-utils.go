@@ -16,6 +16,8 @@ var utilsInterface = utils.UtilsInterface
 // This function initializes the utils
 func InitializeUtils() {
 	utilsInterface = &utils.UtilsStruct{}
+	utils.UtilsInterface = &utils.UtilsStruct{}
+	utils.ClientInterface = &utils.ClientStruct{}
 	utils.FlagSetInterface = &utils.FLagSetStruct{}
 }
 
@@ -102,23 +104,7 @@ func (u Utils) GetAmountInWei(amount *big.Int) *big.Int {
 
 // This function returns the epoch
 func (u Utils) GetEpoch(client *ethclient.Client) (uint32, error) {
-	// Check if the client is nil
-	if client == nil {
-		return 0, fmt.Errorf("Ethereum client is not initialized")
-	}
-
-	// Check if utilsInterface is initialized
-	if utilsInterface == nil {
-		return 0, fmt.Errorf("utilsInterface is not initialized")
-	}
-
-	// Call the actual GetEpoch method
-	epoch, err := utilsInterface.GetEpoch(client)
-	if err != nil {
-		return 0, fmt.Errorf("failed to get epoch: %w", err)
-	}
-
-	return epoch, nil
+	return utilsInterface.GetEpoch(client)
 }
 
 // This function connects to the Ethereum client

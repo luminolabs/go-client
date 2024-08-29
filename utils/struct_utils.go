@@ -3,7 +3,11 @@ package utils
 import (
 	"context"
 	"errors"
+	"github.com/ethereum/go-ethereum"
 	"github.com/ethereum/go-ethereum/accounts/abi/bind"
+	"github.com/ethereum/go-ethereum/common"
+	"github.com/ethereum/go-ethereum/core/types"
+	"github.com/ethereum/go-ethereum/ethclient"
 	"math/big"
 	"reflect"
 	"time"
@@ -95,4 +99,68 @@ func (*UtilsStruct) GetOptions() bind.CallOpts {
 		BlockNumber: block,
 		Context:     context.Background(),
 	}
+}
+
+func (c ClientStruct) TransactionReceipt(client *ethclient.Client, ctx context.Context, txHash common.Hash) (*types.Receipt, error) {
+	returnedValues := InvokeFunctionWithTimeout(client, "TransactionReceipt", ctx, txHash)
+	returnedError := CheckIfAnyError(returnedValues)
+	if returnedError != nil {
+		return &types.Receipt{}, returnedError
+	}
+	return returnedValues[0].Interface().(*types.Receipt), nil
+}
+
+func (c ClientStruct) BalanceAt(client *ethclient.Client, ctx context.Context, account common.Address, blockNumber *big.Int) (*big.Int, error) {
+	returnedValues := InvokeFunctionWithTimeout(client, "BalanceAt", ctx, account, blockNumber)
+	returnedError := CheckIfAnyError(returnedValues)
+	if returnedError != nil {
+		return nil, returnedError
+	}
+	return returnedValues[0].Interface().(*big.Int), nil
+}
+
+func (c ClientStruct) HeaderByNumber(client *ethclient.Client, ctx context.Context, number *big.Int) (*types.Header, error) {
+	returnedValues := InvokeFunctionWithTimeout(client, "HeaderByNumber", ctx, number)
+	returnedError := CheckIfAnyError(returnedValues)
+	if returnedError != nil {
+		return &types.Header{}, returnedError
+	}
+	return returnedValues[0].Interface().(*types.Header), nil
+}
+
+func (c ClientStruct) NonceAt(client *ethclient.Client, ctx context.Context, account common.Address) (uint64, error) {
+	var blockNumber *big.Int
+	returnedValues := InvokeFunctionWithTimeout(client, "NonceAt", ctx, account, blockNumber)
+	returnedError := CheckIfAnyError(returnedValues)
+	if returnedError != nil {
+		return 0, returnedError
+	}
+	return returnedValues[0].Interface().(uint64), nil
+}
+
+func (c ClientStruct) SuggestGasPrice(client *ethclient.Client, ctx context.Context) (*big.Int, error) {
+	returnedValues := InvokeFunctionWithTimeout(client, "SuggestGasPrice", ctx)
+	returnedError := CheckIfAnyError(returnedValues)
+	if returnedError != nil {
+		return nil, returnedError
+	}
+	return returnedValues[0].Interface().(*big.Int), nil
+}
+
+func (c ClientStruct) EstimateGas(client *ethclient.Client, ctx context.Context, msg ethereum.CallMsg) (uint64, error) {
+	returnedValues := InvokeFunctionWithTimeout(client, "EstimateGas", ctx, msg)
+	returnedError := CheckIfAnyError(returnedValues)
+	if returnedError != nil {
+		return 0, returnedError
+	}
+	return returnedValues[0].Interface().(uint64), nil
+}
+
+func (c ClientStruct) FilterLogs(client *ethclient.Client, ctx context.Context, q ethereum.FilterQuery) ([]types.Log, error) {
+	returnedValues := InvokeFunctionWithTimeout(client, "FilterLogs", ctx, q)
+	returnedError := CheckIfAnyError(returnedValues)
+	if returnedError != nil {
+		return []types.Log{}, returnedError
+	}
+	return returnedValues[0].Interface().([]types.Log), nil
 }

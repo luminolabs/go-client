@@ -70,6 +70,8 @@ type FlagSetUtils interface {
 // Struct Definition
 // Each struct implements the corresponding interface
 type UtilsStruct struct{}
+type ClientStruct struct{}
+
 type BlockManagerStruct struct{}
 type FLagSetStruct struct{}
 
