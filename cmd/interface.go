@@ -5,6 +5,7 @@ import (
 	"crypto/ecdsa"
 	"lumino/core/types"
 	"lumino/path"
+	"lumino/pkg/bindings"
 	"math/big"
 	"time"
 
@@ -30,6 +31,7 @@ type UtilsInterface interface {
 	GetDelayedState(client *ethclient.Client, buffer int32) (int64, error)
 	AssignLogFile(flagSet *pflag.FlagSet)
 	GetConfigFilePath() (string, error)
+	GetBlockManager(client *ethclient.Client) *bindings.BlockManager
 }
 
 type FlagSetInterface interface {

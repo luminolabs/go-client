@@ -10,6 +10,8 @@ import (
 	"os"
 	"time"
 
+	"lumino/pkg/bindings"
+
 	"github.com/ethereum/go-ethereum/accounts/abi/bind"
 	"github.com/ethereum/go-ethereum/crypto"
 	"github.com/ethereum/go-ethereum/ethclient"
@@ -22,7 +24,17 @@ var utilsInterface = utils.UtilsInterface
 // This function initializes the utils
 func InitializeUtils() {
 	utilsInterface = &utils.UtilsStruct{}
+	utils.UtilsInterface = &utils.UtilsStruct{}
 	utils.FlagSetInterface = &utils.FLagSetStruct{}
+	utils.EthClient = &utils.EthClientStruct{}
+	utils.ClientInterface = &utils.ClientStruct{}
+	utils.Time = &utils.TimeStruct{}
+	utils.OS = &utils.OSStruct{}
+	utils.PathInterface = &utils.PathStruct{}
+	utils.BindInterface = &utils.BindStruct{}
+	utils.BlockManagerInterface = &utils.BlockManagerStruct{}
+	utils.BindingsInterface = &utils.BindingsStruct{}
+	utils.RetryInterface = &utils.RetryStruct{}
 }
 
 // This function returns the gas multiplier of root in float32
@@ -136,6 +148,11 @@ func (u Utils) GetConfigFilePath() (string, error) {
 	return path.PathUtilsInterface.GetConfigFilePath()
 }
 
+// This function retrns the block manager
+func (u Utils) GetBlockManager(client *ethclient.Client) *bindings.BlockManager {
+	return utilsInterface.GetBlockManager(client)
+}
+
 // This function assigns the log file
 func (u Utils) AssignLogFile(flagSet *pflag.FlagSet) {
 	utilsInterface.AssignLogFile(flagSet)
@@ -186,7 +203,7 @@ func (stateManagerUtils StateManagerUtils) NetworkInfo(client *ethclient.Client,
 	if err != nil {
 		return types.NetworkInfo{}, fmt.Errorf("failed to get epoch and state: %w", err)
 	}
-	return types.NetworkInfo{EpochNumber: epoch, State: types.EpochState(state)}, err
+	return types.NetworkInfo{EpochNumber: epoch, State: types.EpochState(state)}, nil
 	// TODO using rpc provider
 	// stateManager := utilsInterface.GetStateManager(client)
 	// epoch := utils.InvokeFunctionWithTimeout(stateManager, "GetEpoch", opts)
