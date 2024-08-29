@@ -1,7 +1,6 @@
 package cmd
 
 import (
-	"fmt"
 	"lumino/logger"
 	"lumino/utils"
 	"os"
@@ -45,7 +44,8 @@ func (*UtilsStruct) GetNetworkInfo(client *ethclient.Client) error {
 	callOpts := protoUtils.GetOptions()
 	networkInfo, err := stateManagerUtils.NetworkInfo(client, &callOpts)
 	if err != nil {
-		return fmt.Errorf("failed to get network info: %w", err)
+		log.Errorf("failed to get network info: %v", err)
+		return err
 	}
 	table := tablewriter.NewWriter(os.Stdout)
 	table.SetHeader([]string{"Epoch", "State", "Timestamp"})
