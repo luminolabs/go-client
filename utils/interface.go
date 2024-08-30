@@ -2,12 +2,16 @@ package utils
 
 import (
 	"context"
-	"github.com/ethereum/go-ethereum/accounts/abi/bind"
+	"crypto/ecdsa"
+	"io/fs"
 	"lumino/pkg/bindings"
 	"math/big"
+	"os"
+	"time"
 
 	"github.com/avast/retry-go"
 	"github.com/ethereum/go-ethereum"
+	"github.com/ethereum/go-ethereum/accounts/abi/bind"
 	"github.com/ethereum/go-ethereum/common"
 	Types "github.com/ethereum/go-ethereum/core/types"
 	"github.com/ethereum/go-ethereum/ethclient"
@@ -18,6 +22,10 @@ import (
 var UtilsInterface Utils
 var EthClient EthClientUtils
 var ClientInterface ClientUtils
+var OS OSUtils
+var PathInterface PathUtils
+var BindInterface BindUtils
+var Time TimeUtils
 var RetryInterface RetryUtils
 var BindingsInterface BindingsUtils
 var BlockManagerInterface BlockManagerUtils
@@ -31,9 +39,12 @@ type Utils interface {
 	GetStateBuffer(client *ethclient.Client) (uint64, error)                 // Retrieves the state buffer value
 	GetEpoch(client *ethclient.Client) (uint32, error)                       // Calculates the current epoch
 	GetStateName(stateNumber int64) string                                   // Converts state number to string representation
-	GetOptions() bind.CallOpts                                               // Retrieves the call options
-	//GetStateManager(client *ethclient.Client) *bindings.StateManager       //	Initializes the state manager
-	GetStakeManager(client *ethclient.Client) (*bindings.StakeManager, error) // Initializes the stake manager
+	GetOptions() bind.CallOpts                                               //
+	GetStateManager(client *ethclient.Client) *bindings.StateManager
+	GetBlockManager(client *ethclient.Client) *bindings.BlockManager
+	GetBlockManagerWithOpts(client *ethclient.Client) (*bindings.BlockManager, bind.CallOpts)
+	AssignLogFile(flagSet *pflag.FlagSet)
+	IsFlagPassed(name string) bool
 }
 
 // EthClientUtils interface defines Ethereum client utility functions
@@ -54,9 +65,33 @@ type BlockManagerUtils interface {
 	StateBuffer(client *ethclient.Client) (uint8, error)
 }
 
+type StakeManagerInterface interface {
+	GetStakeManager(client *ethclient.Client) (*bindings.StakeManager, error)
+}
+
 type BindingsUtils interface {
 	NewStateManager(address common.Address, client *ethclient.Client) (*bindings.StateManager, error)
+	NewBlockManager(address common.Address, client *ethclient.Client) (*bindings.BlockManager, error)
 	NewStakeManager(address common.Address, client *ethclient.Client) (*bindings.StakeManager, error)
+}
+
+type TimeUtils interface {
+	Sleep(duration time.Duration)
+}
+
+type PathUtils interface {
+	GetDefaultPath() (string, error)
+}
+
+type BindUtils interface {
+	NewKeyedTransactorWithChainID(key *ecdsa.PrivateKey, chainID *big.Int) (*bind.TransactOpts, error)
+}
+
+type OSUtils interface {
+	OpenFile(name string, flag int, perm fs.FileMode) (*os.File, error)
+	Open(name string) (*os.File, error)
+	WriteFile(name string, data []byte, perm fs.FileMode) error
+	ReadFile(filename string) ([]byte, error)
 }
 
 type RetryUtils interface {
@@ -70,13 +105,34 @@ type FlagSetUtils interface {
 // Struct Definition
 // Each struct implements the corresponding interface
 type UtilsStruct struct{}
+type EthClientStruct struct{}
 type ClientStruct struct{}
-
+type TimeStruct struct{}
+type OSStruct struct{}
+type PathStruct struct{}
+type BindStruct struct{}
 type BlockManagerStruct struct{}
+type BindingsStruct struct{}
+
+func (b BindingsStruct) NewStakeManager(address common.Address, client *ethclient.Client) (*bindings.StakeManager, error) {
+	//TODO implement me
+	panic("implement me")
+}
+
+type RetryStruct struct{}
 type FLagSetStruct struct{}
 
 // OptionPackageStruct
 type OptionsPackageStruct struct {
-	UtilsInterface   Utils
-	FlagSetInterface FlagSetUtils
+	UtilsInterface        Utils
+	EthClient             EthClientUtils
+	ClientInterface       ClientUtils
+	Time                  TimeUtils
+	OS                    OSUtils
+	PathInterface         PathUtils
+	BindInterface         BindUtils
+	BlockManagerInterface BlockManagerUtils
+	BindingsInterface     BindingsUtils
+	RetryInterface        RetryUtils
+	FlagSetInterface      FlagSetUtils
 }

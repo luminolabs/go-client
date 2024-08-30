@@ -35,10 +35,7 @@ func initializeStake(cmd *cobra.Command, args []string) {
 	ctx := context.Background()
 
 	// Attempt to connect to the Ethereum client
-	client, err := protoUtils.ConnectToEthClient(core.DefaultRPCProvider)
-	if err != nil {
-		logger.Fatal("Failed to connect to Ethereum client:", err)
-	}
+	client := protoUtils.ConnectToEthClient(core.DefaultRPCProvider)
 
 	// Get the stake amount from the command flags
 	stakeAmount, _ := cmd.Flags().GetString("amount")
@@ -125,6 +122,7 @@ func stakeTokens(ctx context.Context, args types.StakeArgs) error {
 
 	// Step 2: Get the StakeManager Contract Instance
 	//stakeManager := utilsInterface.GetStakeManager(args.Client)
+	utilsInterface := utils.UtilsStruct{}
 	stakeManager, err := utilsInterface.GetStakeManager(args.Client)
 	if err != nil {
 		return fmt.Errorf("failed to get stake manager: %w", err)

@@ -9,24 +9,12 @@ import (
 )
 
 // GetStateManager retrieves the StateManager contract instance
-func (*UtilsStruct) GetStateManager(client *ethclient.Client) (*bindings.StateManager, error) {
-	// Check if client is nil
-	if client == nil {
-		return nil, fmt.Errorf("Ethereum client is not initialized")
-	}
-
-	// Check if the StateManager address is set
-	if core.StateManagerAddress == "" {
-		return nil, fmt.Errorf("StateManager address is not set")
-	}
-
-	// Create a new StateManager contract instance
-	stateManagerContract, err := bindings.NewStateManager(common.HexToAddress(core.StateManagerAddress), client)
+func (*UtilsStruct) GetStateManager(client *ethclient.Client) *bindings.StateManager {
+	stateManagerContract, err := BindingsInterface.NewStateManager(common.HexToAddress(core.StateManagerAddress), client)
 	if err != nil {
-		return nil, fmt.Errorf("failed to create StateManager instance: %w", err)
+		log.Fatal(err)
 	}
-
-	return stateManagerContract, nil
+	return stateManagerContract
 }
 
 // GetStakeManager retrieves the StakeManager contract instance
@@ -48,4 +36,12 @@ func (*UtilsStruct) GetStakeManager(client *ethclient.Client) (*bindings.StakeMa
 	}
 
 	return stakeManagerContract, nil
+}
+
+func (*UtilsStruct) GetBlockManager(client *ethclient.Client) *bindings.BlockManager {
+	blockManager, err := BindingsInterface.NewBlockManager(common.HexToAddress(core.BlockManagerAddress), client)
+	if err != nil {
+		log.Fatal(err)
+	}
+	return blockManager
 }

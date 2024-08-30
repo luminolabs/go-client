@@ -2,7 +2,6 @@ package utils
 
 import (
 	"context"
-	"fmt"
 	"lumino/core"
 	"math/big"
 
@@ -35,72 +34,24 @@ func (*UtilsStruct) GetNonceAtWithRetry(client *ethclient.Client, accountAddress
 }
 
 // GetLatestBlockWithRetry fetches the latest block header with retry logic.
-//func (*UtilsStruct) GetLatestBlockWithRetry(client *ethclient.Client) (*types.Header, error) {
-//	var (
-//		latestHeader *types.Header
-//		err          error
-//	)
-//	err = retry.Do(
-//		func() error {
-//			latestHeader, err = ClientInterface.HeaderByNumber(client, context.Background(), nil)
-//			if err != nil {
-//				log.Error("Error in fetching latest block.... Retrying")
-//				return err
-//			}
-//			return nil
-//		}, RetryInterface.RetryAttempts(core.MaxRetries))
-//	if err != nil {
-//		return nil, err
-//	}
-//	return latestHeader, nil
-//}
-
-// GetLatestBlockWithRetry fetches the latest block header with retry logic.
 func (*UtilsStruct) GetLatestBlockWithRetry(client *ethclient.Client) (*types.Header, error) {
 	var (
 		latestHeader *types.Header
 		err          error
 	)
-
-	// Check if client is nil
-	if client == nil {
-		return nil, fmt.Errorf("Ethereum client is not initialized")
-	}
-
-	// Ensure ClientInterface is initialized
-	if ClientInterface == nil {
-		return nil, fmt.Errorf("ClientInterface is not initialized")
-	}
-
-	// Retry logic to fetch the latest block header
+	log.Info("checkpoint 2 in client helpers.go", client)
 	err = retry.Do(
 		func() error {
 			latestHeader, err = ClientInterface.HeaderByNumber(client, context.Background(), nil)
 			if err != nil {
-				log.Println("Error in fetching latest block... Retrying:", err)
+				log.Error("Error in fetching latest block.... Retrying")
 				return err
 			}
-			// Check if latestHeader is nil even if no error
-			if latestHeader == nil {
-				return fmt.Errorf("received nil header from Ethereum client")
-			}
 			return nil
-		},
-		retry.Attempts(core.MaxRetries),
-		retry.DelayType(retry.BackOffDelay), // Optional: Customize retry delay strategy
-	)
-
-	// If after retries, err is still non-nil, return it
+		}, RetryInterface.RetryAttempts(core.MaxRetries))
 	if err != nil {
-		log.Println("Failed to fetch latest block after retries:", err)
 		return nil, err
 	}
-
-	// Check if latestHeader is still nil
-	if latestHeader == nil {
-		return nil, fmt.Errorf("latest block header is nil after retries")
-	}
-
 	return latestHeader, nil
 }
 

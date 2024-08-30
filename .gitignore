@@ -24,7 +24,10 @@ pkg/*
 build
 
 .history
+
+./lumino
 lumino
+
 # IDE-specific files
 .idea/
 .vscode/
