@@ -65,7 +65,6 @@ func initializeStake(cmd *cobra.Command, args []string) {
 
 	// Execute the staking process
 	if err := executeStake(ctx, stakeArgs); err != nil {
-
 		logger.Fatal("Stake operation failed:", err)
 	}
 }
@@ -73,6 +72,7 @@ func initializeStake(cmd *cobra.Command, args []string) {
 // executeStake performs the main staking logic
 func executeStake(ctx context.Context, args types.StakeArgs) error {
 	if err := validateStakeArgs(ctx, args); err != nil {
+		logger.Error("Validation of stake arguments failed:", err)
 		return err
 	}
 
@@ -84,29 +84,32 @@ func executeStake(ctx context.Context, args types.StakeArgs) error {
 func validateStakeArgs(ctx context.Context, args types.StakeArgs) error {
 	// Validate the provided password
 	if err := core.ValidatePassword(args.Address, args.Password); err != nil {
-		return fmt.Errorf("invalid password: %w", err)
+		logger.Error("Invalid password:", err)
+		return err
 	}
 
 	// Check the LUMINO balance of the staker
 	balance, err := core.GetLuminoBalanceForStaker(ctx, args.Client, args.Address)
 	if err != nil {
-		return fmt.Errorf("failed to get LUMINO balance: %w", err)
+		logger.Error("Failed to get LUMINO balance:", err)
+		return err
 	}
 
 	// Ensure the staker has sufficient balance
 	if balance.Cmp(args.Amount) < 0 {
-		return fmt.Errorf("insufficient LUMINO balance. Have %s, need %s", balance.String(), args.Amount.String())
+		err = fmt.Errorf("insufficient LUMINO balance. Have %s, need %s", balance.String(), args.Amount.String())
+		logger.Error(err)
+		return err
 	}
 
-	//Use minstake from constants file
-	//minStake := big.NewInt(0)
-
+	// Use minstake from constants file
 	minStakeBigInt := big.NewInt(int64(core.MinimumStake))
 
 	// Ensure the stake amount meets the minimum requirement
 	if args.Amount.Cmp(minStakeBigInt) < 0 {
-		logger.Error("Stake amount is below minimum required", args.Amount.String(), minStakeBigInt.String())
-		return fmt.Errorf("stake amount (%s) is below minimum required (%s)", args.Amount.String(), minStakeBigInt.String())
+		err = fmt.Errorf("stake amount (%s) is below minimum required (%s)", args.Amount.String(), minStakeBigInt.String())
+		logger.Error(err)
+		return err
 	}
 
 	return nil
@@ -119,17 +122,17 @@ func stakeTokens(ctx context.Context, args types.StakeArgs) error {
 	// Step 1: Prepare the Transaction
 	transactOpts, err := utils.PrepareStakeTransaction(ctx, args.Client, args.Address, args.Amount, args.Password)
 	if err != nil {
-		logger.Error("Failed to prepare stake transaction")
+		logger.Error("Failed to prepare stake transaction:", err)
 		return err
 	}
 
-	logger.Debug("TransactOpts: ", transactOpts)
+	logger.Debug("TransactOpts:", transactOpts)
 
 	// Step 2: Get the StakeManager Contract Instance
 	utilsInterface := utils.UtilsStruct{}
 	stakeManager, err := utilsInterface.GetStakeManager(args.Client)
 	if err != nil {
-		logger.Error("Failed to get stake manager")
+		logger.Error("Failed to get stake manager:", err)
 		return err
 	}
 
@@ -137,13 +140,13 @@ func stakeTokens(ctx context.Context, args types.StakeArgs) error {
 	logger.Info("Staking LUMINO tokens...")
 	epoch, err := protoUtils.GetEpoch(args.Client)
 	if err != nil {
-		logger.Error("Failed to get epoch: ", err)
+		logger.Error("Failed to get epoch:", err)
 		return err
 	}
 
 	transaction, err := stakeManager.Stake(transactOpts, epoch, args.Amount, "")
 	if err != nil {
-		logger.Error("Failed to stake tokens: ", err)
+		logger.Error("Failed to stake tokens:", err)
 		return err
 	}
 
@@ -151,7 +154,7 @@ func stakeTokens(ctx context.Context, args types.StakeArgs) error {
 	logger.Info("Waiting for stake transaction to be mined...")
 	receipt, err := bind.WaitMined(ctx, args.Client, transaction)
 	if err != nil {
-		logger.Error("Failed waiting for stake transaction: ", err)
+		logger.Error("Failed waiting for stake transaction:", err)
 		return err
 	}
 

@@ -72,6 +72,8 @@ func PrepareStakeTransaction(ctx context.Context, client *ethclient.Client, from
 	}
 	txOpts.Nonce = big.NewInt(int64(nonce)) // Set nonce
 
+	//TODO - Set the gas price and gas limit
+
 	// Step 7: Estimate the gas limit (commented out but available if needed)
 	// gasLimit, err := client.EstimateGas(ctx, ethereum.CallMsg{
 	// 	From:     from,
