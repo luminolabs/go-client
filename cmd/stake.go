@@ -98,13 +98,15 @@ func validateStakeArgs(ctx context.Context, args types.StakeArgs) error {
 		return fmt.Errorf("insufficient LUMINO balance. Have %s, need %s", balance.String(), args.Amount.String())
 	}
 
-	minStake := big.NewInt(0)
+	//Use minstake from constants file
+	//minStake := big.NewInt(0)
 
-	//minStakeBigInt := big.NewInt(int64(core.MinimumStake))
+	minStakeBigInt := big.NewInt(int64(core.MinimumStake))
 
 	// Ensure the stake amount meets the minimum requirement
-	if args.Amount.Cmp(minStake) < 0 {
-		return fmt.Errorf("stake amount (%s) is below minimum required (%s)", args.Amount.String(), minStake.String())
+	if args.Amount.Cmp(minStakeBigInt) < 0 {
+		logger.Error("Stake amount is below minimum required", args.Amount.String(), minStakeBigInt.String())
+		return fmt.Errorf("stake amount (%s) is below minimum required (%s)", args.Amount.String(), minStakeBigInt.String())
 	}
 
 	return nil
@@ -117,53 +119,50 @@ func stakeTokens(ctx context.Context, args types.StakeArgs) error {
 	// Step 1: Prepare the Transaction
 	transactOpts, err := utils.PrepareStakeTransaction(ctx, args.Client, args.Address, args.Amount, args.Password)
 	if err != nil {
-		return fmt.Errorf("failed to prepare stake transaction: %w", err)
+		logger.Error("Failed to prepare stake transaction")
+		return err
 	}
 
+	logger.Debug("TransactOpts: ", transactOpts)
+
 	// Step 2: Get the StakeManager Contract Instance
-	//stakeManager := utilsInterface.GetStakeManager(args.Client)
 	utilsInterface := utils.UtilsStruct{}
 	stakeManager, err := utilsInterface.GetStakeManager(args.Client)
 	if err != nil {
-		return fmt.Errorf("failed to get stake manager: %w", err)
+		logger.Error("Failed to get stake manager")
+		return err
 	}
 
 	// Step 3: Stake the Tokens using the Contract Instance
 	logger.Info("Staking LUMINO tokens...")
-
 	epoch, err := protoUtils.GetEpoch(args.Client)
+	if err != nil {
+		logger.Error("Failed to get epoch: ", err)
+		return err
+	}
 
 	transaction, err := stakeManager.Stake(transactOpts, epoch, args.Amount, "")
-	//tx, err := stakeManager.Stake(_)
-
 	if err != nil {
-		return fmt.Errorf("failed to stake tokens: %w", err)
+		logger.Error("Failed to stake tokens: ", err)
+		return err
 	}
 
 	// Step 4: Wait for the Transaction to be Mined
 	logger.Info("Waiting for stake transaction to be mined...")
 	receipt, err := bind.WaitMined(ctx, args.Client, transaction)
 	if err != nil {
-		return fmt.Errorf("failed waiting for stake transaction: %w", err)
+		logger.Error("Failed waiting for stake transaction: ", err)
+		return err
 	}
 
-	// Step 5: Check Transaction Status
 	if receipt.Status == 0 {
-		return fmt.Errorf("stake transaction failed")
+		err := fmt.Errorf("stake transaction failed")
+		logger.Error(err)
+		return err
 	}
 
-	// Successful staking operation
 	logger.Info("Successfully staked", args.Amount, "LUMINO tokens")
 	return nil
-}
-
-func (*UtilsStruct) GetOptions() bind.CallOpts {
-	block, _ := new(big.Int).SetString("", 10)
-	return bind.CallOpts{
-		Pending:     false,
-		BlockNumber: block,
-		Context:     context.Background(),
-	}
 }
 
 // init function is called when the package is initialized
