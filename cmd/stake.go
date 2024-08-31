@@ -164,7 +164,7 @@ func stakeTokens(ctx context.Context, args types.StakeArgs) error {
 		return err
 	}
 
-	logger.Info("Successfully staked", args.Amount, "LUMINO tokens")
+	logger.Info("Successfully staked", args.Amount, " LUMINO tokens")
 	return nil
 }
 
