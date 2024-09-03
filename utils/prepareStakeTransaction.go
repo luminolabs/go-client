@@ -18,7 +18,7 @@ import (
 // PrepareStakeTransaction prepares the transaction options for staking
 func PrepareStakeTransaction(ctx context.Context, client *ethclient.Client, from common.Address, amount *big.Int, password string) (*bind.TransactOpts, error) {
 	// Step 1: Get the keystore directory
-	keystoreDir := filepath.Join(os.Getenv("HOME"), ".ethereum", "keystore")
+	keystoreDir := filepath.Join(os.Getenv("HOME"), ".lumino", "keystore")
 	keyStore := keystore.NewKeyStore(keystoreDir, keystore.StandardScryptN, keystore.StandardScryptP)
 
 	// Step 2: Find the account in the keystore

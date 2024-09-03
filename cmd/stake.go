@@ -2,7 +2,6 @@ package cmd
 
 import (
 	"context"
-	"fmt"
 	"lumino/core"
 	"lumino/core/types"
 	"lumino/logger"
@@ -97,9 +96,8 @@ func validateStakeArgs(ctx context.Context, args types.StakeArgs) error {
 
 	// Ensure the staker has sufficient balance
 	if balance.Cmp(args.Amount) < 0 {
-		err = fmt.Errorf("insufficient LUMINO balance. Have %s, need %s", balance.String(), args.Amount.String())
-		logger.Error(err)
-		return err
+		logger.Error("Insufficient LUMINO balance. Have", balance.String(), "need", args.Amount.String())
+		return nil
 	}
 
 	// Use minstake from constants file
@@ -107,9 +105,7 @@ func validateStakeArgs(ctx context.Context, args types.StakeArgs) error {
 
 	// Ensure the stake amount meets the minimum requirement
 	if args.Amount.Cmp(minStakeBigInt) < 0 {
-		err = fmt.Errorf("stake amount (%s) is below minimum required (%s)", args.Amount.String(), minStakeBigInt.String())
-		logger.Error(err)
-		return err
+		logger.Fatal("Stake amount", args.Amount.String(), "is below minimum required", minStakeBigInt.String())
 	}
 
 	return nil
@@ -159,12 +155,10 @@ func stakeTokens(ctx context.Context, args types.StakeArgs) error {
 	}
 
 	if receipt.Status == 0 {
-		err := fmt.Errorf("stake transaction failed")
-		logger.Error(err)
-		return err
+		logger.Fatal("stake transaction failed")
 	}
 
-	logger.Info("Successfully staked", args.Amount, " LUMINO tokens")
+	logger.Info("Successfully staked ", args.Amount, " LUMINO tokens")
 	return nil
 }
 

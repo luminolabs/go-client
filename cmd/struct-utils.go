@@ -3,8 +3,6 @@ package cmd
 import (
 	"crypto/ecdsa"
 	"fmt"
-	"github.com/ethereum/go-ethereum/common"
-	"lumino/core"
 	"lumino/core/types"
 	"lumino/path"
 	"lumino/utils"
@@ -217,24 +215,6 @@ func (stateManagerUtils StateManagerUtils) NetworkInfo(client *ethclient.Client,
 
 	// return types.NetworkInfo{
 	// 	EpochNumber: epochVal, State: 3}, nil
-}
-
-// GetStakeManager retrieves the StakeManager contract instance
-func (s *StakeManagerUtils) GetStakeManager(client *ethclient.Client) (*bindings.StakeManager, error) {
-	if client == nil {
-		return nil, fmt.Errorf("Ethereum client is not initialized")
-	}
-
-	if core.StakeManagerAddress == "" {
-		return nil, fmt.Errorf("StakeManager address is not set")
-	}
-
-	stakeManagerContract, err := bindings.NewStakeManager(common.HexToAddress(core.StakeManagerAddress), client)
-	if err != nil {
-		return nil, fmt.Errorf("failed to create StakeManager instance: %w", err)
-	}
-
-	return stakeManagerContract, nil
 }
 
 // This function is used for exiting the code

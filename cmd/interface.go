@@ -58,8 +58,10 @@ type StateManagerInterface interface {
 	NetworkInfo(client *ethclient.Client, opts *bind.CallOpts) (types.NetworkInfo, error)
 }
 
+// StakeManagerInterface will be used to define methods that must be implemented
+// by any type that handles staking operations in the system. Currently, it's
+// a placeholder for future methods related to StakeManager.
 type StakeManagerInterface interface {
-	GetStakeManager(client *ethclient.Client) (*bindings.StakeManager, error)
 }
 
 type UtilsCmdInterface interface {

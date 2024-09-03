@@ -75,6 +75,7 @@ type BindingsUtils interface {
 	NewStakeManager(address common.Address, client *ethclient.Client) (*bindings.StakeManager, error)
 }
 
+
 type TimeUtils interface {
 	Sleep(duration time.Duration)
 }
@@ -113,11 +114,6 @@ type PathStruct struct{}
 type BindStruct struct{}
 type BlockManagerStruct struct{}
 type BindingsStruct struct{}
-
-func (b BindingsStruct) NewStakeManager(address common.Address, client *ethclient.Client) (*bindings.StakeManager, error) {
-	//TODO implement me
-	panic("implement me")
-}
 
 type RetryStruct struct{}
 type FLagSetStruct struct{}
