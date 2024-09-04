@@ -9,6 +9,7 @@ import (
 	"math/big"
 	"time"
 
+	"github.com/ethereum/go-ethereum/accounts"
 	"github.com/ethereum/go-ethereum/accounts/abi/bind"
 	"github.com/ethereum/go-ethereum/ethclient"
 	"github.com/spf13/pflag"
@@ -18,6 +19,7 @@ var flagSetUtils FlagSetInterface
 var protoUtils UtilsInterface
 var cmdUtils UtilsCmdInterface
 var stateManagerUtils StateManagerInterface
+var keystoreUtils KeystoreInterface
 var cryptoUtils CryptoInterface
 var viperUtils ViperInterface
 var timeUtils TimeInterface
@@ -32,6 +34,10 @@ type UtilsInterface interface {
 	AssignLogFile(flagSet *pflag.FlagSet)
 	GetConfigFilePath() (string, error)
 	GetBlockManager(client *ethclient.Client) *bindings.BlockManager
+	GetDefaultPath() (string, error)
+	PrivateKeyPrompt() string
+	PasswordPrompt() string
+	AssignPassword(flagSet *pflag.FlagSet) string
 }
 
 type FlagSetInterface interface {
@@ -71,6 +77,14 @@ type UtilsCmdInterface interface {
 	GetRPCProvider() (string, error)
 	ExecuteNetworkInfo(flagSet *pflag.FlagSet)
 	GetNetworkInfo(client *ethclient.Client) error
+	ExecuteImport(flagSet *pflag.FlagSet)
+	ImportAccount() (accounts.Account, error)
+	ExecuteCreate(flagSet *pflag.FlagSet)
+	Create(password string) (accounts.Account, error)
+}
+
+type KeystoreInterface interface {
+	ImportECDSA(path string, priv *ecdsa.PrivateKey, passphrase string) (accounts.Account, error)
 }
 
 type CryptoInterface interface {
@@ -93,6 +107,7 @@ type Utils struct{}
 type FlagSetUtils struct{}
 type UtilsStruct struct{}
 type StateManagerUtils struct{}
+type KeystoreUtils struct{}
 type CryptoUtils struct{}
 type ViperUtils struct{}
 type TimeUtils struct{}
@@ -103,6 +118,7 @@ func InitializeInterfaces() {
 	flagSetUtils = FlagSetUtils{}
 	cmdUtils = &UtilsStruct{}
 	stateManagerUtils = &StateManagerUtils{}
+	keystoreUtils = KeystoreUtils{}
 	cryptoUtils = CryptoUtils{}
 	viperUtils = ViperUtils{}
 	timeUtils = TimeUtils{}
