@@ -80,7 +80,7 @@ func AssignPassword(flagSet *pflag.FlagSet) string {
 
 // This function checks if the password is strong enough or not
 func strongPassword(input string) bool {
-	l, u, p, d := 0, 0, 0, 0
+	l, u, n, s := 0, 0, 0, 0
 	if len(input) >= 8 {
 		for _, char := range input {
 			switch {
@@ -89,11 +89,11 @@ func strongPassword(input string) bool {
 			case unicode.IsLower(char):
 				l += 1
 			case unicode.IsNumber(char):
-				d += 1
+				n += 1
 			case unicode.IsPunct(char) || unicode.IsSymbol(char):
-				p += 1
+				s += 1
 			}
 		}
 	}
-	return (l >= 1 && u >= 1 && p >= 1 && d >= 1) && (l+u+p+d == len(input))
+	return (l >= 1 && u >= 1 && n >= 1 && s >= 1) && (l+u+n+s == len(input))
 }
