@@ -25,6 +25,24 @@ func (_m *UtilsInterface) AssignLogFile(flagSet *pflag.FlagSet) {
 	_m.Called(flagSet)
 }
 
+// AssignPassword provides a mock function with given fields: flagSet
+func (_m *UtilsInterface) AssignPassword(flagSet *pflag.FlagSet) string {
+	ret := _m.Called(flagSet)
+
+	if len(ret) == 0 {
+		panic("no return value specified for AssignPassword")
+	}
+
+	var r0 string
+	if rf, ok := ret.Get(0).(func(*pflag.FlagSet) string); ok {
+		r0 = rf(flagSet)
+	} else {
+		r0 = ret.Get(0).(string)
+	}
+
+	return r0
+}
+
 // ConnectToEthClient provides a mock function with given fields: provider
 func (_m *UtilsInterface) ConnectToEthClient(provider string) *ethclient.Client {
 	ret := _m.Called(provider)
@@ -91,6 +109,34 @@ func (_m *UtilsInterface) GetConfigFilePath() (string, error) {
 
 	if len(ret) == 0 {
 		panic("no return value specified for GetConfigFilePath")
+	}
+
+	var r0 string
+	var r1 error
+	if rf, ok := ret.Get(0).(func() (string, error)); ok {
+		return rf()
+	}
+	if rf, ok := ret.Get(0).(func() string); ok {
+		r0 = rf()
+	} else {
+		r0 = ret.Get(0).(string)
+	}
+
+	if rf, ok := ret.Get(1).(func() error); ok {
+		r1 = rf()
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
+// GetDefaultPath provides a mock function with given fields:
+func (_m *UtilsInterface) GetDefaultPath() (string, error) {
+	ret := _m.Called()
+
+	if len(ret) == 0 {
+		panic("no return value specified for GetDefaultPath")
 	}
 
 	var r0 string
@@ -182,6 +228,42 @@ func (_m *UtilsInterface) GetOptions() bind.CallOpts {
 		r0 = rf()
 	} else {
 		r0 = ret.Get(0).(bind.CallOpts)
+	}
+
+	return r0
+}
+
+// PasswordPrompt provides a mock function with given fields:
+func (_m *UtilsInterface) PasswordPrompt() string {
+	ret := _m.Called()
+
+	if len(ret) == 0 {
+		panic("no return value specified for PasswordPrompt")
+	}
+
+	var r0 string
+	if rf, ok := ret.Get(0).(func() string); ok {
+		r0 = rf()
+	} else {
+		r0 = ret.Get(0).(string)
+	}
+
+	return r0
+}
+
+// PrivateKeyPrompt provides a mock function with given fields:
+func (_m *UtilsInterface) PrivateKeyPrompt() string {
+	ret := _m.Called()
+
+	if len(ret) == 0 {
+		panic("no return value specified for PrivateKeyPrompt")
+	}
+
+	var r0 string
+	if rf, ok := ret.Get(0).(func() string); ok {
+		r0 = rf()
+	} else {
+		r0 = ret.Get(0).(string)
 	}
 
 	return r0
