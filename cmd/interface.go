@@ -3,6 +3,7 @@ package cmd
 
 import (
 	"crypto/ecdsa"
+	Accounts "lumino/accounts"
 	"lumino/core/types"
 	"lumino/path"
 	"lumino/pkg/bindings"
@@ -124,6 +125,7 @@ func InitializeInterfaces() {
 	timeUtils = TimeUtils{}
 	osUtils = OSUtils{}
 
+	Accounts.AccountUtilsInterface = Accounts.AccountUtils{}
 	path.PathUtilsInterface = path.PathUtils{}
 	path.OSUtilsInterface = path.OSUtils{}
 	InitializeUtils()
