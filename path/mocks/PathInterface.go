@@ -9,34 +9,6 @@ type PathInterface struct {
 	mock.Mock
 }
 
-// GetCommitDataFileName provides a mock function with given fields: address
-func (_m *PathInterface) GetCommitDataFileName(address string) (string, error) {
-	ret := _m.Called(address)
-
-	if len(ret) == 0 {
-		panic("no return value specified for GetCommitDataFileName")
-	}
-
-	var r0 string
-	var r1 error
-	if rf, ok := ret.Get(0).(func(string) (string, error)); ok {
-		return rf(address)
-	}
-	if rf, ok := ret.Get(0).(func(string) string); ok {
-		r0 = rf(address)
-	} else {
-		r0 = ret.Get(0).(string)
-	}
-
-	if rf, ok := ret.Get(1).(func(string) error); ok {
-		r1 = rf(address)
-	} else {
-		r1 = ret.Error(1)
-	}
-
-	return r0, r1
-}
-
 // GetConfigFilePath provides a mock function with given fields:
 func (_m *PathInterface) GetConfigFilePath() (string, error) {
 	ret := _m.Called()
@@ -93,62 +65,6 @@ func (_m *PathInterface) GetDefaultPath() (string, error) {
 	return r0, r1
 }
 
-// GetDisputeDataFileName provides a mock function with given fields: address
-func (_m *PathInterface) GetDisputeDataFileName(address string) (string, error) {
-	ret := _m.Called(address)
-
-	if len(ret) == 0 {
-		panic("no return value specified for GetDisputeDataFileName")
-	}
-
-	var r0 string
-	var r1 error
-	if rf, ok := ret.Get(0).(func(string) (string, error)); ok {
-		return rf(address)
-	}
-	if rf, ok := ret.Get(0).(func(string) string); ok {
-		r0 = rf(address)
-	} else {
-		r0 = ret.Get(0).(string)
-	}
-
-	if rf, ok := ret.Get(1).(func(string) error); ok {
-		r1 = rf(address)
-	} else {
-		r1 = ret.Error(1)
-	}
-
-	return r0, r1
-}
-
-// GetJobFilePath provides a mock function with given fields:
-func (_m *PathInterface) GetJobFilePath() (string, error) {
-	ret := _m.Called()
-
-	if len(ret) == 0 {
-		panic("no return value specified for GetJobFilePath")
-	}
-
-	var r0 string
-	var r1 error
-	if rf, ok := ret.Get(0).(func() (string, error)); ok {
-		return rf()
-	}
-	if rf, ok := ret.Get(0).(func() string); ok {
-		r0 = rf()
-	} else {
-		r0 = ret.Get(0).(string)
-	}
-
-	if rf, ok := ret.Get(1).(func() error); ok {
-		r1 = rf()
-	} else {
-		r1 = ret.Error(1)
-	}
-
-	return r0, r1
-}
-
 // GetLogFilePath provides a mock function with given fields: fileName
 func (_m *PathInterface) GetLogFilePath(fileName string) (string, error) {
 	ret := _m.Called(fileName)
@@ -170,34 +86,6 @@ func (_m *PathInterface) GetLogFilePath(fileName string) (string, error) {
 
 	if rf, ok := ret.Get(1).(func(string) error); ok {
 		r1 = rf(fileName)
-	} else {
-		r1 = ret.Error(1)
-	}
-
-	return r0, r1
-}
-
-// GetProposeDataFileName provides a mock function with given fields: address
-func (_m *PathInterface) GetProposeDataFileName(address string) (string, error) {
-	ret := _m.Called(address)
-
-	if len(ret) == 0 {
-		panic("no return value specified for GetProposeDataFileName")
-	}
-
-	var r0 string
-	var r1 error
-	if rf, ok := ret.Get(0).(func(string) (string, error)); ok {
-		return rf(address)
-	}
-	if rf, ok := ret.Get(0).(func(string) string); ok {
-		r0 = rf(address)
-	} else {
-		r0 = ret.Get(0).(string)
-	}
-
-	if rf, ok := ret.Get(1).(func(string) error); ok {
-		r1 = rf(address)
 	} else {
 		r1 = ret.Error(1)
 	}

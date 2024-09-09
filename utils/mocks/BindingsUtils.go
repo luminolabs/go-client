@@ -16,6 +16,36 @@ type BindingsUtils struct {
 	mock.Mock
 }
 
+// NewBlockManager provides a mock function with given fields: address, client
+func (_m *BindingsUtils) NewBlockManager(address common.Address, client *ethclient.Client) (*bindings.BlockManager, error) {
+	ret := _m.Called(address, client)
+
+	if len(ret) == 0 {
+		panic("no return value specified for NewBlockManager")
+	}
+
+	var r0 *bindings.BlockManager
+	var r1 error
+	if rf, ok := ret.Get(0).(func(common.Address, *ethclient.Client) (*bindings.BlockManager, error)); ok {
+		return rf(address, client)
+	}
+	if rf, ok := ret.Get(0).(func(common.Address, *ethclient.Client) *bindings.BlockManager); ok {
+		r0 = rf(address, client)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*bindings.BlockManager)
+		}
+	}
+
+	if rf, ok := ret.Get(1).(func(common.Address, *ethclient.Client) error); ok {
+		r1 = rf(address, client)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
 // NewStateManager provides a mock function with given fields: address, client
 func (_m *BindingsUtils) NewStateManager(address common.Address, client *ethclient.Client) (*bindings.StateManager, error) {
 	ret := _m.Called(address, client)

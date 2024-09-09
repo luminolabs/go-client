@@ -1,7 +1,6 @@
 package cmd
 
 import (
-	"fmt"
 	"lumino/logger"
 	"lumino/utils"
 	"os"
@@ -33,10 +32,6 @@ func (*UtilsStruct) ExecuteNetworkInfo(flagSet *pflag.FlagSet) {
 	log.Debugf("ExecuteNetworkInfo: Config: %+v", config)
 
 	client := protoUtils.ConnectToEthClient(config.Provider)
-	if client == nil {
-		log.Fatal("Failed to connect to Ethereum client")
-		return
-	}
 	logger.SetLoggerParameters(client, "")
 
 	log.Debug("ExecuteNetworkInfo: Calling GetNetworkInfo()...")
@@ -49,7 +44,8 @@ func (*UtilsStruct) GetNetworkInfo(client *ethclient.Client) error {
 	callOpts := protoUtils.GetOptions()
 	networkInfo, err := stateManagerUtils.NetworkInfo(client, &callOpts)
 	if err != nil {
-		return fmt.Errorf("failed to get network info: %w", err)
+		log.Errorf("failed to get network info: %v", err)
+		return err
 	}
 	table := tablewriter.NewWriter(os.Stdout)
 	table.SetHeader([]string{"Epoch", "State", "Timestamp"})

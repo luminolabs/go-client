@@ -43,6 +43,14 @@ var RPCTimeout int64
 // IntialiseLuminoUtils initializes the utility interfaces with the provided options.
 func IntialiseLuminoUtils(optionsPackageStruct OptionsPackageStruct) Utils {
 	UtilsInterface = optionsPackageStruct.UtilsInterface
+	ClientInterface = optionsPackageStruct.ClientInterface
+	Time = optionsPackageStruct.Time
+	OS = optionsPackageStruct.OS
+	PathInterface = optionsPackageStruct.PathInterface
+	BindInterface = optionsPackageStruct.BindInterface
+	BlockManagerInterface = optionsPackageStruct.BlockManagerInterface
+	BindingsInterface = optionsPackageStruct.BindingsInterface
+	RetryInterface = optionsPackageStruct.RetryInterface
 	FlagSetInterface = optionsPackageStruct.FlagSetInterface
 	return &UtilsStruct{}
 }

@@ -17,9 +17,9 @@ type StateManagerInterface struct {
 	mock.Mock
 }
 
-// NetworkInfo provides a mock function with given fields: client, opts, provider
-func (_m *StateManagerInterface) NetworkInfo(client *ethclient.Client, opts *bind.CallOpts, provider string) (types.NetworkInfo, error) {
-	ret := _m.Called(client, opts, provider)
+// NetworkInfo provides a mock function with given fields: client, opts
+func (_m *StateManagerInterface) NetworkInfo(client *ethclient.Client, opts *bind.CallOpts) (types.NetworkInfo, error) {
+	ret := _m.Called(client, opts)
 
 	if len(ret) == 0 {
 		panic("no return value specified for NetworkInfo")
@@ -27,17 +27,17 @@ func (_m *StateManagerInterface) NetworkInfo(client *ethclient.Client, opts *bin
 
 	var r0 types.NetworkInfo
 	var r1 error
-	if rf, ok := ret.Get(0).(func(*ethclient.Client, *bind.CallOpts, string) (types.NetworkInfo, error)); ok {
-		return rf(client, opts, provider)
+	if rf, ok := ret.Get(0).(func(*ethclient.Client, *bind.CallOpts) (types.NetworkInfo, error)); ok {
+		return rf(client, opts)
 	}
-	if rf, ok := ret.Get(0).(func(*ethclient.Client, *bind.CallOpts, string) types.NetworkInfo); ok {
-		r0 = rf(client, opts, provider)
+	if rf, ok := ret.Get(0).(func(*ethclient.Client, *bind.CallOpts) types.NetworkInfo); ok {
+		r0 = rf(client, opts)
 	} else {
 		r0 = ret.Get(0).(types.NetworkInfo)
 	}
 
-	if rf, ok := ret.Get(1).(func(*ethclient.Client, *bind.CallOpts, string) error); ok {
-		r1 = rf(client, opts, provider)
+	if rf, ok := ret.Get(1).(func(*ethclient.Client, *bind.CallOpts) error); ok {
+		r1 = rf(client, opts)
 	} else {
 		r1 = ret.Error(1)
 	}

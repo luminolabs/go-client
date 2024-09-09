@@ -41,6 +41,7 @@ type Utils interface {
 	GetStateName(stateNumber int64) string                                   // Converts state number to string representation
 	GetOptions() bind.CallOpts                                               //
 	GetStateManager(client *ethclient.Client) *bindings.StateManager
+	GetStateManagerWithOpts(client *ethclient.Client) (*bindings.StateManager, bind.CallOpts)
 	GetStakeManager(client *ethclient.Client) (*bindings.StakeManager, error)
 	GetBlockManager(client *ethclient.Client) *bindings.BlockManager
 	GetBlockManagerWithOpts(client *ethclient.Client) (*bindings.BlockManager, bind.CallOpts)
