@@ -96,7 +96,7 @@ func validateStakeArgs(ctx context.Context, args types.StakeArgs) error {
 
 	// Ensure the staker has sufficient balance
 	if balance.Cmp(args.Amount) < 0 {
-		logger.Error("Insufficient LUMINO balance. Have", balance.String(), "need", args.Amount.String())
+		logger.Error("Insufficient LUMINO balance. Have ", balance.String(), " need ", args.Amount.String())
 		return nil
 	}
 
