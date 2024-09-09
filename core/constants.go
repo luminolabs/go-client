@@ -7,7 +7,7 @@ var ChainID = 1
 var MaxRetries uint = 8
 
 // DefaultRPCProvider is the default RPC provider URL
-var DefaultRPCProvider = "https://optimism.drpc.org"
+var DefaultRPCProvider = "https://ethereum-holesky-rpc.publicnode.com"
 
 // DefaultBufferPercent is the default buffer percentage for state transitions
 var DefaultBufferPercent = 20

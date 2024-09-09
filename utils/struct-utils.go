@@ -228,6 +228,10 @@ func (b BindingsStruct) NewStateManager(address common.Address, client *ethclien
 	return bindings.NewStateManager(address, client)
 }
 
+func (b BindingsStruct) NewStakeManager(address common.Address, client *ethclient.Client) (*bindings.StakeManager, error) {
+	return bindings.NewStakeManager(address, client)
+}
+
 func (r RetryStruct) RetryAttempts(numberOfAttempts uint) retry.Option {
 	return retry.Attempts(numberOfAttempts)
 }
