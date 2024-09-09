@@ -18,7 +18,6 @@ var flagSetUtils FlagSetInterface
 var protoUtils UtilsInterface
 var cmdUtils UtilsCmdInterface
 var stateManagerUtils StateManagerInterface
-
 var cryptoUtils CryptoInterface
 var viperUtils ViperInterface
 var timeUtils TimeInterface

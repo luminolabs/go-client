@@ -95,7 +95,7 @@ func validateStakeArgs(ctx context.Context, args types.StakeArgs) error {
 	}
 
 	// Check the LUMINO balance of the staker
-	balance, err := core.GetLuminoBalanceForStaker(ctx, args.Client, args.Address)
+	balance, err := GetLuminoBalanceForStaker(ctx, args.Client, args.Address)
 	if err != nil {
 		logger.Error("Failed to get LUMINO balance:", err)
 		return err
@@ -165,6 +165,16 @@ func stakeTokens(ctx context.Context, args types.StakeArgs) error {
 
 	logger.Info("Successfully staked ", args.Amount, " LUMINO tokens")
 	return nil
+}
+
+func GetLuminoBalanceForStaker(ctx context.Context, client *ethclient.Client, address common.Address) (*big.Int, error) {
+	// Get the balance of the address in Wei (smallest unit of Ether)
+	balance, err := client.BalanceAt(ctx, address, nil)
+	if err != nil {
+		return nil, err
+	}
+
+	return balance, nil
 }
 
 func init() {
