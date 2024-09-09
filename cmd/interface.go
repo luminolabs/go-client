@@ -18,7 +18,7 @@ var flagSetUtils FlagSetInterface
 var protoUtils UtilsInterface
 var cmdUtils UtilsCmdInterface
 var stateManagerUtils StateManagerInterface
-var stakeManagerUtils StakeManagerInterface
+
 var cryptoUtils CryptoInterface
 var viperUtils ViperInterface
 var timeUtils TimeInterface
@@ -58,12 +58,6 @@ type StateManagerInterface interface {
 	NetworkInfo(client *ethclient.Client, opts *bind.CallOpts) (types.NetworkInfo, error)
 }
 
-// StakeManagerInterface will be used to define methods that must be implemented
-// by any type that handles staking operations in the system. Currently, it's
-// a placeholder for future methods related to StakeManager.
-type StakeManagerInterface interface {
-}
-
 type UtilsCmdInterface interface {
 	GetBufferPercent() (int32, error)
 	SetConfig(flagSet *pflag.FlagSet) error
@@ -78,6 +72,8 @@ type UtilsCmdInterface interface {
 	GetRPCProvider() (string, error)
 	ExecuteNetworkInfo(flagSet *pflag.FlagSet)
 	GetNetworkInfo(client *ethclient.Client) error
+	ExecuteStake(flagSet *pflag.FlagSet)
+	GetStakeArgs(flagSet *pflag.FlagSet, client *ethclient.Client) (types.StakeArgs, error)
 }
 
 type CryptoInterface interface {
@@ -100,7 +96,6 @@ type Utils struct{}
 type FlagSetUtils struct{}
 type UtilsStruct struct{}
 type StateManagerUtils struct{}
-type StakeManagerUtils struct{}
 
 type CryptoUtils struct{}
 type ViperUtils struct{}
@@ -112,7 +107,6 @@ func InitializeInterfaces() {
 	flagSetUtils = FlagSetUtils{}
 	cmdUtils = &UtilsStruct{}
 	stateManagerUtils = &StateManagerUtils{}
-	stakeManagerUtils = &StakeManagerUtils{}
 	cryptoUtils = CryptoUtils{}
 	viperUtils = ViperUtils{}
 	timeUtils = TimeUtils{}

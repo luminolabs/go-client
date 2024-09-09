@@ -2,15 +2,17 @@ package cmd
 
 import (
 	"context"
+	"github.com/ethereum/go-ethereum/accounts/abi/bind"
+	"github.com/ethereum/go-ethereum/ethclient"
 	"lumino/core"
 	"lumino/core/types"
 	"lumino/logger"
 	"lumino/utils"
 	"math/big"
 
-	"github.com/ethereum/go-ethereum/accounts/abi/bind"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/spf13/cobra"
+	"github.com/spf13/pflag"
 )
 
 // stakeCmd represents the stake command
@@ -27,59 +29,64 @@ Example:
 	Run: initializeStake,
 }
 
-// initializeStake is the entry point for the stake command
-// It prepares the necessary arguments and calls executeStake
 func initializeStake(cmd *cobra.Command, args []string) {
-	// Create a background context
-	ctx := context.Background()
+	cmdUtils.ExecuteStake(cmd.Flags())
+}
 
-	// Attempt to connect to the Ethereum client
-	client := protoUtils.ConnectToEthClient(core.DefaultRPCProvider)
+func (*UtilsStruct) ExecuteStake(flagSet *pflag.FlagSet) {
+	config, err := cmdUtils.GetConfigData()
+	utils.CheckError("Error in getting config: ", err)
+	log.Debugf("ExecuteStake: Config: %+v", config)
 
-	// Get the stake amount from the command flags
-	stakeAmount, _ := cmd.Flags().GetString("amount")
+	client := protoUtils.ConnectToEthClient(config.Provider)
+	if client == nil {
+		log.Fatal("Failed to connect to Ethereum client")
+		return
+	}
+	logger.SetLoggerParameters(client, "")
 
-	// Parse the stake amount from string to big.Int
+	// Retrieve required parameters from the flags
+	stakeArgs, err := cmdUtils.GetStakeArgs(flagSet, client)
+	utils.CheckError("Error in getting stake arguments: ", err)
+
+	// Execute the staking logic
+	err = executeStake(context.Background(), stakeArgs)
+	utils.CheckError("Error during staking process: ", err)
+}
+
+func (*UtilsStruct) GetStakeArgs(flagSet *pflag.FlagSet, client *ethclient.Client) (types.StakeArgs, error) {
+	// Get the stake amount
+	stakeAmount, _ := flagSet.GetString("amount")
 	amount, err := utils.ParseBigInt(stakeAmount)
 	if err != nil {
-		logger.Fatal("Invalid stake amount:", err)
+		return types.StakeArgs{}, err
 	}
 
-	// Get the stake address from the command flags
-	stakeAddress, _ := cmd.Flags().GetString("address")
-
-	// Convert the address string to Ethereum address type
+	// Get the stake address
+	stakeAddress, _ := flagSet.GetString("address")
 	address := common.HexToAddress(stakeAddress)
 
-	// Get the password from the command flags
-	password, _ := cmd.Flags().GetString("password")
+	// Get the password
+	password, _ := flagSet.GetString("password")
 
-	// Prepare the arguments for staking
-	stakeArgs := types.StakeArgs{ //check inside core - > staker.go and define there
+	return types.StakeArgs{
 		Client:   client,
 		Address:  address,
 		Amount:   amount,
 		Password: password,
-	}
-
-	// Execute the staking process
-	if err := executeStake(ctx, stakeArgs); err != nil {
-		logger.Fatal("Stake operation failed:", err)
-	}
+	}, nil
 }
 
-// executeStake performs the main staking logic
 func executeStake(ctx context.Context, args types.StakeArgs) error {
 	if err := validateStakeArgs(ctx, args); err != nil {
 		logger.Error("Validation of stake arguments failed:", err)
 		return err
 	}
 
-	// Directly stake tokens since no approval is needed
+	// Directly stake tokens
 	return stakeTokens(ctx, args)
 }
 
-// validateStakeArgs checks if the provided arguments are valid
 func validateStakeArgs(ctx context.Context, args types.StakeArgs) error {
 	// Validate the provided password
 	if err := core.ValidatePassword(args.Address, args.Password); err != nil {
@@ -112,10 +119,8 @@ func validateStakeArgs(ctx context.Context, args types.StakeArgs) error {
 }
 
 func stakeTokens(ctx context.Context, args types.StakeArgs) error {
-	// Logging the start of the staking process
 	logger.Info("Preparing to stake LUMINO tokens...")
 
-	// Step 1: Prepare the Transaction
 	transactOpts, err := utils.PrepareStakeTransaction(ctx, args.Client, args.Address, args.Amount, args.Password)
 	if err != nil {
 		logger.Error("Failed to prepare stake transaction:", err)
@@ -124,7 +129,7 @@ func stakeTokens(ctx context.Context, args types.StakeArgs) error {
 
 	logger.Debug("TransactOpts:", transactOpts)
 
-	// Step 2: Get the StakeManager Contract Instance
+	// Get the StakeManager Contract Instance
 	utilsInterface := utils.UtilsStruct{}
 	stakeManager, err := utilsInterface.GetStakeManager(args.Client)
 	if err != nil {
@@ -132,7 +137,7 @@ func stakeTokens(ctx context.Context, args types.StakeArgs) error {
 		return err
 	}
 
-	// Step 3: Stake the Tokens using the Contract Instance
+	// Stake the Tokens using the Contract Instance
 	logger.Info("Staking LUMINO tokens...")
 	epoch, err := protoUtils.GetEpoch(args.Client)
 	if err != nil {
@@ -146,7 +151,7 @@ func stakeTokens(ctx context.Context, args types.StakeArgs) error {
 		return err
 	}
 
-	// Step 4: Wait for the Transaction to be Mined
+	// Wait for the Transaction to be Mined
 	logger.Info("Waiting for stake transaction to be mined...")
 	receipt, err := bind.WaitMined(ctx, args.Client, transaction)
 	if err != nil {
@@ -162,9 +167,7 @@ func stakeTokens(ctx context.Context, args types.StakeArgs) error {
 	return nil
 }
 
-// init function is called when the package is initialized
 func init() {
-	// Add the stake command to the root command
 	rootCmd.AddCommand(stakeCmd)
 
 	var (
@@ -173,12 +176,10 @@ func init() {
 		password     string // Password for the staker's account
 	)
 
-	// Define flags for the stake command
 	stakeCmd.Flags().StringVar(&stakeAmount, "amount", "", "Amount of LUMINO tokens to stake")
 	stakeCmd.Flags().StringVar(&stakeAddress, "address", "", "Address of the staker")
 	stakeCmd.Flags().StringVar(&password, "password", "", "Password for the staker's account")
 
-	// Mark flags as required
 	stakeCmd.MarkFlagRequired("amount")
 	stakeCmd.MarkFlagRequired("address")
 	stakeCmd.MarkFlagRequired("password")
