@@ -82,6 +82,8 @@ type UtilsCmdInterface interface {
 	ImportAccount() (accounts.Account, error)
 	ExecuteCreate(flagSet *pflag.FlagSet)
 	Create(password string) (accounts.Account, error)
+	ExecuteStake(flagSet *pflag.FlagSet)
+	GetStakeArgs(flagSet *pflag.FlagSet, client *ethclient.Client) (types.StakeArgs, error)
 }
 
 type KeystoreInterface interface {
