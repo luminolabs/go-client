@@ -71,6 +71,8 @@ type UtilsCmdInterface interface {
 	GetRPCProvider() (string, error)
 	ExecuteNetworkInfo(flagSet *pflag.FlagSet)
 	GetNetworkInfo(client *ethclient.Client) error
+	ExecuteStake(flagSet *pflag.FlagSet)
+	GetStakeArgs(flagSet *pflag.FlagSet, client *ethclient.Client) (types.StakeArgs, error)
 }
 
 type CryptoInterface interface {
@@ -93,6 +95,7 @@ type Utils struct{}
 type FlagSetUtils struct{}
 type UtilsStruct struct{}
 type StateManagerUtils struct{}
+
 type CryptoUtils struct{}
 type ViperUtils struct{}
 type TimeUtils struct{}
