@@ -228,6 +228,36 @@ func (_m *Utils) GetStateManager(client *ethclient.Client) *bindings.StateManage
 	return r0
 }
 
+// GetStateManagerWithOpts provides a mock function with given fields: client
+func (_m *Utils) GetStateManagerWithOpts(client *ethclient.Client) (*bindings.StateManager, bind.CallOpts) {
+	ret := _m.Called(client)
+
+	if len(ret) == 0 {
+		panic("no return value specified for GetStateManagerWithOpts")
+	}
+
+	var r0 *bindings.StateManager
+	var r1 bind.CallOpts
+	if rf, ok := ret.Get(0).(func(*ethclient.Client) (*bindings.StateManager, bind.CallOpts)); ok {
+		return rf(client)
+	}
+	if rf, ok := ret.Get(0).(func(*ethclient.Client) *bindings.StateManager); ok {
+		r0 = rf(client)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*bindings.StateManager)
+		}
+	}
+
+	if rf, ok := ret.Get(1).(func(*ethclient.Client) bind.CallOpts); ok {
+		r1 = rf(client)
+	} else {
+		r1 = ret.Get(1).(bind.CallOpts)
+	}
+
+	return r0, r1
+}
+
 // GetStateName provides a mock function with given fields: stateNumber
 func (_m *Utils) GetStateName(stateNumber int64) string {
 	ret := _m.Called(stateNumber)

@@ -11,7 +11,9 @@ import (
 	"lumino/pkg/bindings"
 	"lumino/utils"
 
+	"github.com/ethereum/go-ethereum/accounts"
 	"github.com/ethereum/go-ethereum/accounts/abi/bind"
+	"github.com/ethereum/go-ethereum/accounts/keystore"
 	"github.com/ethereum/go-ethereum/crypto"
 	"github.com/ethereum/go-ethereum/ethclient"
 	"github.com/spf13/pflag"
@@ -162,14 +164,23 @@ func (u Utils) IsFlagPassed(name string) bool {
 	return utilsInterface.IsFlagPassed(name)
 }
 
+// This function assigns the password
+func (u Utils) AssignPassword(flagSet *pflag.FlagSet) string {
+	return utils.AssignPassword(flagSet)
+}
+
+// This function prompts the password
+func (u Utils) PasswordPrompt() string {
+	return utils.PasswordPrompt()
+}
+
+// This function prompts the private key
+func (u Utils) PrivateKeyPrompt() string {
+	return utils.PrivateKeyPrompt()
+}
+
 // This function connects to the client
 func (u Utils) ConnectToEthClient(provider string) *ethclient.Client {
-	// returnedValues := utils.InvokeFunctionWithTimeout(utilsInterface, "ConnectToClient", provider)
-	// returnedError := utils.CheckIfAnyError(returnedValues)
-	// if returnedError != nil {
-	// 	return nil
-	// }
-	// return returnedValues[0].Interface().(*ethclient.Client)
 	log.Debug("Attempting to connect to Ethereum client at: ", provider)
 	client, err := ethclient.Dial(provider)
 	if err != nil {
@@ -178,6 +189,11 @@ func (u Utils) ConnectToEthClient(provider string) *ethclient.Client {
 	}
 	log.Info("Connected to: ", provider)
 	return client
+}
+
+func (keystoreUtils KeystoreUtils) ImportECDSA(path string, priv *ecdsa.PrivateKey, passphrase string) (accounts.Account, error) {
+	ks := keystore.NewKeyStore(path, keystore.StandardScryptN, keystore.StandardScryptP)
+	return ks.ImportECDSA(priv, passphrase)
 }
 
 // This function is used to write config as
