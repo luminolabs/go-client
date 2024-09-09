@@ -42,6 +42,7 @@ type Utils interface {
 	GetOptions() bind.CallOpts                                               //
 	GetStateManager(client *ethclient.Client) *bindings.StateManager
 	GetStateManagerWithOpts(client *ethclient.Client) (*bindings.StateManager, bind.CallOpts)
+	GetStakeManager(client *ethclient.Client) (*bindings.StakeManager, error)
 	GetBlockManager(client *ethclient.Client) *bindings.BlockManager
 	GetBlockManagerWithOpts(client *ethclient.Client) (*bindings.BlockManager, bind.CallOpts)
 	AssignLogFile(flagSet *pflag.FlagSet)
@@ -69,6 +70,7 @@ type BlockManagerUtils interface {
 type BindingsUtils interface {
 	NewStateManager(address common.Address, client *ethclient.Client) (*bindings.StateManager, error)
 	NewBlockManager(address common.Address, client *ethclient.Client) (*bindings.BlockManager, error)
+	NewStakeManager(address common.Address, client *ethclient.Client) (*bindings.StakeManager, error)
 }
 
 type TimeUtils interface {
