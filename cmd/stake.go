@@ -2,15 +2,15 @@ package cmd
 
 import (
 	"context"
-	"github.com/ethereum/go-ethereum/accounts/abi/bind"
-	"github.com/ethereum/go-ethereum/ethclient"
 	"lumino/core"
 	"lumino/core/types"
 	"lumino/logger"
+	"lumino/pkg/bindings"
 	"lumino/utils"
 	"math/big"
 
 	"github.com/ethereum/go-ethereum/common"
+
 	"github.com/spf13/cobra"
 	"github.com/spf13/pflag"
 )
@@ -39,158 +39,98 @@ func (*UtilsStruct) ExecuteStake(flagSet *pflag.FlagSet) {
 	log.Debugf("ExecuteStake: Config: %+v", config)
 
 	client := protoUtils.ConnectToEthClient(config.Provider)
-	if client == nil {
-		log.Fatal("Failed to connect to Ethereum client")
-		return
-	}
-	logger.SetLoggerParameters(client, "")
 
-	// Retrieve required parameters from the flags
-	stakeArgs, err := cmdUtils.GetStakeArgs(flagSet, client)
-	utils.CheckError("Error in getting stake arguments: ", err)
+	address, err := flagSetUtils.GetStringAddress(flagSet)
+	utils.CheckError("Error in getting address: ", err)
+	log.Debug("ExecuteStake: Address: ", address)
 
-	// Execute the staking logic
-	err = executeStake(context.Background(), stakeArgs)
-	utils.CheckError("Error during staking process: ", err)
-}
+	logger.SetLoggerParameters(client, address)
+	log.Debug("Checking to assign log file...")
+	protoUtils.AssignLogFile(flagSet)
 
-func (*UtilsStruct) GetStakeArgs(flagSet *pflag.FlagSet, client *ethclient.Client) (types.StakeArgs, error) {
-	// Get the stake amount
-	stakeAmount, _ := flagSet.GetString("amount")
-	amount, err := utils.ParseBigInt(stakeAmount)
-	if err != nil {
-		return types.StakeArgs{}, err
-	}
-
-	// Get the stake address
-	stakeAddress, _ := flagSet.GetString("address")
-	address := common.HexToAddress(stakeAddress)
-
-	// Get the password
-	password, _ := flagSet.GetString("password")
-
-	return types.StakeArgs{
-		Client:   client,
-		Address:  address,
-		Amount:   amount,
-		Password: password,
-	}, nil
-}
-
-func executeStake(ctx context.Context, args types.StakeArgs) error {
-	if err := validateStakeArgs(ctx, args); err != nil {
-		logger.Error("Validation of stake arguments failed:", err)
-		return err
-	}
-
-	// Directly stake tokens
-	return stakeTokens(ctx, args)
-}
-
-func validateStakeArgs(ctx context.Context, args types.StakeArgs) error {
-	// Validate the provided password
-	if err := core.ValidatePassword(args.Address, args.Password); err != nil {
-		logger.Error("Invalid password:", err)
-		return err
-	}
+	log.Debug("Getting password...")
+	password := protoUtils.AssignPassword(flagSet)
 
 	// Check the LUMINO balance of the staker
-	balance, err := GetLuminoBalanceForStaker(ctx, args.Client, args.Address)
-	if err != nil {
-		logger.Error("Failed to get LUMINO balance:", err)
-		return err
-	}
+	balance, err := protoUtils.FetchBalance(context.Background(), client, common.HexToAddress(address))
+	utils.CheckError("Failed to get LUMINO balance:"+address, err)
 
-	// Ensure the staker has sufficient balance
-	if balance.Cmp(args.Amount) < 0 {
-		logger.Error("Insufficient LUMINO balance. Have ", balance.String(), " need ", args.Amount.String())
-		return nil
-	}
+	log.Debug("Getting amount in wei...")
+	valueInWei, err := cmdUtils.AssignAmountInWei(flagSet)
+	utils.CheckError("Error in getting amount: ", err)
+	log.Debug("ExecuteStake: Amount in wei: ", valueInWei)
 
-	// Use minstake from constants file
+	log.Debug("Checking for sufficient balance...")
+	protoUtils.CheckAmountAndBalance(valueInWei, balance)
+
+	// TODO: fetch minStake from contracts in Future
 	minStakeBigInt := big.NewInt(int64(core.MinimumStake))
 
 	// Ensure the stake amount meets the minimum requirement
-	if args.Amount.Cmp(minStakeBigInt) < 0 {
-		logger.Fatal("Stake amount", args.Amount.String(), "is below minimum required", minStakeBigInt.String())
+	if valueInWei.Cmp(minStakeBigInt) < 0 {
+		logger.Fatal("Stake amount", valueInWei.String(), "is below minimum required", minStakeBigInt.String())
 	}
 
-	return nil
+	stakerId, err := protoUtils.GetStakerId(client, address)
+	utils.CheckError("Error in getting stakerId: ", err)
+	log.Debug("ExecuteStake: Staker Id: ", stakerId)
+
+	txnArgs := types.TransactionOptions{
+		Client:         client,
+		AccountAddress: address,
+		Password:       password,
+		Amount:         valueInWei,
+		ChainId:        core.ChainID,
+		Config:         config,
+	}
+
+	log.Debug("ExecuteStake: Calling StakeTokens() for amount: ", txnArgs.Amount)
+	stakeTxnHash, err := cmdUtils.StakeTokens(txnArgs)
+	utils.CheckError("Stake error: ", err)
+
+	err = protoUtils.WaitForBlockCompletion(txnArgs.Client, stakeTxnHash.String())
+	utils.CheckError("Error in WaitForBlockCompletion for stake: ", err)
 }
 
-func stakeTokens(ctx context.Context, args types.StakeArgs) error {
-	logger.Info("Preparing to stake LUMINO tokens...")
-
-	transactOpts, err := utils.PrepareStakeTransaction(ctx, args.Client, args.Address, args.Amount, args.Password)
+// This function allows the user to stake razors in the razor network and returns the hash
+func (*UtilsStruct) StakeTokens(txnArgs types.TransactionOptions) (common.Hash, error) {
+	epoch, err := protoUtils.GetEpoch(txnArgs.Client)
 	if err != nil {
-		logger.Error("Failed to prepare stake transaction:", err)
-		return err
+		return common.Hash{0x00}, err
 	}
+	log.Debug("StakeCoins: Epoch: ", epoch)
 
-	logger.Debug("TransactOpts:", transactOpts)
-
-	// Get the StakeManager Contract Instance
-	utilsInterface := utils.UtilsStruct{}
-	stakeManager, err := utilsInterface.GetStakeManager(args.Client)
+	txnArgs.ContractAddress = core.StakeManagerAddress
+	txnArgs.MethodName = "stake"
+	txnArgs.Parameters = []interface{}{epoch, txnArgs.Amount}
+	txnArgs.ABI = bindings.StakeManagerABI
+	txnOpts := protoUtils.GetTransactionOpts(txnArgs)
+	log.Debugf("Executing Stake transaction with epoch = %d, amount = %d", epoch, txnArgs.Amount)
+	tx, err := stakeManagerUtils.Stake(txnArgs.Client, txnOpts, epoch, txnArgs.Amount)
 	if err != nil {
-		logger.Error("Failed to get stake manager:", err)
-		return err
+		return common.Hash{0x00}, err
 	}
-
-	// Stake the Tokens using the Contract Instance
-	logger.Info("Staking LUMINO tokens...")
-	epoch, err := protoUtils.GetEpoch(args.Client)
-	if err != nil {
-		logger.Error("Failed to get epoch:", err)
-		return err
-	}
-
-	transaction, err := stakeManager.Stake(transactOpts, epoch, args.Amount, "")
-	if err != nil {
-		logger.Error("Failed to stake tokens:", err)
-		return err
-	}
-
-	// Wait for the Transaction to be Mined
-	logger.Info("Waiting for stake transaction to be mined...")
-	receipt, err := bind.WaitMined(ctx, args.Client, transaction)
-	if err != nil {
-		logger.Error("Failed waiting for stake transaction:", err)
-		return err
-	}
-
-	if receipt.Status == 0 {
-		logger.Fatal("stake transaction failed")
-	}
-
-	logger.Info("Successfully staked ", args.Amount, " LUMINO tokens")
-	return nil
-}
-
-func GetLuminoBalanceForStaker(ctx context.Context, client *ethclient.Client, address common.Address) (*big.Int, error) {
-	// Get the balance of the address in Wei (smallest unit of Ether)
-	balance, err := client.BalanceAt(ctx, address, nil)
-	if err != nil {
-		return nil, err
-	}
-
-	return balance, nil
+	log.Info("Txn Hash: ", transactionUtils.Hash(tx).Hex())
+	return transactionUtils.Hash(tx), nil
 }
 
 func init() {
 	rootCmd.AddCommand(stakeCmd)
 
 	var (
-		stakeAmount  string // Amount of LUMINO tokens to stake
-		stakeAddress string // Address of the staker
-		password     string // Password for the staker's account
+		stakeValue    string // Amount of LUMINO tokens to stake
+		stakerAddress string // Address of the staker
+		password      string // Password for the staker's account
+		IsWei         bool
 	)
 
-	stakeCmd.Flags().StringVar(&stakeAmount, "amount", "", "Amount of LUMINO tokens to stake")
-	stakeCmd.Flags().StringVar(&stakeAddress, "address", "", "Address of the staker")
-	stakeCmd.Flags().StringVar(&password, "password", "", "Password for the staker's account")
+	stakeCmd.Flags().StringVarP(&stakeValue, "amount", "v", "0", "Amount of LUMINO tokens to stake")
+	stakeCmd.Flags().StringVarP(&stakerAddress, "address", "a", "", "Address of the staker")
+	stakeCmd.Flags().StringVarP(&password, "password", "", "", "Password for the staker's account")
+	stakeCmd.Flags().BoolVarP(&IsWei, "weiValue", "", false, "value passed in wei")
 
-	stakeCmd.MarkFlagRequired("amount")
-	stakeCmd.MarkFlagRequired("address")
-	stakeCmd.MarkFlagRequired("password")
+	stakeAmountErr := stakeCmd.MarkFlagRequired("amount")
+	utils.CheckError("Value error: ", stakeAmountErr)
+	stakerAddrErr := stakeCmd.MarkFlagRequired("address")
+	utils.CheckError("Address error: ", stakerAddrErr)
 }

@@ -1,6 +1,7 @@
 package cmd
 
 import (
+	"context"
 	"crypto/ecdsa"
 	"math/big"
 	"os"
@@ -14,6 +15,8 @@ import (
 	"github.com/ethereum/go-ethereum/accounts"
 	"github.com/ethereum/go-ethereum/accounts/abi/bind"
 	"github.com/ethereum/go-ethereum/accounts/keystore"
+	"github.com/ethereum/go-ethereum/common"
+	Types "github.com/ethereum/go-ethereum/core/types"
 	"github.com/ethereum/go-ethereum/crypto"
 	"github.com/ethereum/go-ethereum/ethclient"
 	"github.com/spf13/pflag"
@@ -33,9 +36,19 @@ func InitializeUtils() {
 	utils.OS = &utils.OSStruct{}
 	utils.PathInterface = &utils.PathStruct{}
 	utils.BindInterface = &utils.BindStruct{}
+	utils.StakeManagerInterface = &utils.StakeManagerStruct{}
 	utils.BlockManagerInterface = &utils.BlockManagerStruct{}
 	utils.BindingsInterface = &utils.BindingsStruct{}
 	utils.RetryInterface = &utils.RetryStruct{}
+}
+
+func ExecuteTransaction(interfaceName interface{}, methodName string, args ...interface{}) (*Types.Transaction, error) {
+	returnedValues := utils.InvokeFunctionWithTimeout(interfaceName, methodName, args...)
+	returnedError := utils.CheckIfAnyError(returnedValues)
+	if returnedError != nil {
+		return nil, returnedError
+	}
+	return returnedValues[0].Interface().(*Types.Transaction), nil
 }
 
 // This function returns the gas multiplier of root in float32
@@ -118,6 +131,21 @@ func (flagSetUtils FlagSetUtils) GetRootStringProvider() (string, error) {
 	return rootCmd.PersistentFlags().GetString("provider")
 }
 
+// This function returns the string address
+func (flagSetUtils FlagSetUtils) GetStringAddress(flagSet *pflag.FlagSet) (string, error) {
+	return flagSet.GetString("address")
+}
+
+// This function returns the value in string
+func (flagSetUtils FlagSetUtils) GetStringValue(flagSet *pflag.FlagSet) (string, error) {
+	return flagSet.GetString("value")
+}
+
+// This function is used to check if weiRazor is passed or not
+func (flagSetUtils FlagSetUtils) GetBoolWeiRazor(flagSet *pflag.FlagSet) (bool, error) {
+	return flagSet.GetBool("weiRazor")
+}
+
 // GetDelayedState calculates the delayed state based on the current block and buffer.
 // It returns the delayed state as an int64 and an error if calculation fails.
 func (u Utils) GetDelayedState(client *ethclient.Client, buffer int32) (int64, error) {
@@ -179,6 +207,31 @@ func (u Utils) PrivateKeyPrompt() string {
 	return utils.PrivateKeyPrompt()
 }
 
+// This function fetches the balance
+func (u Utils) FetchBalance(ctx context.Context, client *ethclient.Client, accountAddress common.Address) (*big.Int, error) {
+	return utilsInterface.FetchBalance(ctx, client, accountAddress)
+}
+
+// This function checks the amount and balance
+func (u Utils) CheckAmountAndBalance(amountInWei *big.Int, balance *big.Int) *big.Int {
+	return utils.CheckAmountAndBalance(amountInWei, balance)
+}
+
+// This function returns the stakerId
+func (u Utils) GetStakerId(client *ethclient.Client, address string) (uint32, error) {
+	return utilsInterface.GetStakerId(client, address)
+}
+
+// This function waits for the block completion
+func (u Utils) WaitForBlockCompletion(client *ethclient.Client, hashToRead string) error {
+	return utilsInterface.WaitForBlockCompletion(client, hashToRead)
+}
+
+// This function returns the transaction opts
+func (u Utils) GetTransactionOpts(transactionData types.TransactionOptions) *bind.TransactOpts {
+	return utilsInterface.GetTransactionOpts(transactionData)
+}
+
 // This function connects to the client
 func (u Utils) ConnectToEthClient(provider string) *ethclient.Client {
 	log.Debug("Attempting to connect to Ethereum client at: ", provider)
@@ -189,6 +242,17 @@ func (u Utils) ConnectToEthClient(provider string) *ethclient.Client {
 	}
 	log.Info("Connected to: ", provider)
 	return client
+}
+
+// This function returns the hash
+func (transactionUtils TransactionUtils) Hash(txn *Types.Transaction) common.Hash {
+	return txn.Hash()
+}
+
+// This function is of staking the razors
+func (stakeManagerUtils StakeManagerUtils) Stake(client *ethclient.Client, txnOpts *bind.TransactOpts, epoch uint32, amount *big.Int) (*Types.Transaction, error) {
+	stakeManager := utilsInterface.GetStakeManager(client)
+	return ExecuteTransaction(stakeManager, "Stake", txnOpts, epoch, amount)
 }
 
 func (keystoreUtils KeystoreUtils) ImportECDSA(path string, priv *ecdsa.PrivateKey, passphrase string) (accounts.Account, error) {
