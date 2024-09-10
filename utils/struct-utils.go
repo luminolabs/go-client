@@ -47,7 +47,9 @@ func IntialiseLuminoUtils(optionsPackageStruct OptionsPackageStruct) Utils {
 	Time = optionsPackageStruct.Time
 	OS = optionsPackageStruct.OS
 	PathInterface = optionsPackageStruct.PathInterface
+	ABIInterface = optionsPackageStruct.ABIInterface
 	BindInterface = optionsPackageStruct.BindInterface
+	StakeManagerInterface = optionsPackageStruct.StakeManagerInterface
 	BlockManagerInterface = optionsPackageStruct.BlockManagerInterface
 	BindingsInterface = optionsPackageStruct.BindingsInterface
 	RetryInterface = optionsPackageStruct.RetryInterface
@@ -226,6 +228,16 @@ func (b BlockManagerStruct) StateBuffer(client *ethclient.Client) (uint8, error)
 		return 0, returnedError
 	}
 	return returnedValues[0].Interface().(uint8), nil
+}
+
+func (s StakeManagerStruct) GetStakerId(client *ethclient.Client, address common.Address) (uint32, error) {
+	stakeManager, opts := UtilsInterface.GetStakeManagerWithOpts(client)
+	returnedValues := InvokeFunctionWithTimeout(stakeManager, "GetStakerId", &opts, address)
+	returnedError := CheckIfAnyError(returnedValues)
+	if returnedError != nil {
+		return 0, returnedError
+	}
+	return returnedValues[0].Interface().(uint32), nil
 }
 
 func (b BindingsStruct) NewBlockManager(address common.Address, client *ethclient.Client) (*bindings.BlockManager, error) {
