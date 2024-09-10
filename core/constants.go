@@ -1,7 +1,13 @@
 package core
 
+import (
+	"math/big"
+
+	"github.com/ethereum/go-ethereum/common"
+)
+
 // ChainID represents the Ethereum chain ID (1 for Mainnet)
-var ChainID = 1
+var ChainID = big.NewInt(17000)
 
 // MaxRetries defines the maximum number of retry attempts for operations
 var MaxRetries uint = 8
@@ -18,6 +24,9 @@ var DefaultWaitTime = 1
 var DefaultGasLimit = 2
 var DefaultRPCTimeout = 10
 var DefaultLogLevel = ""
+
+var NilHash = common.Hash{0x00}
+var BlockCompletionTimeout = 30
 
 // EpochLength defines the duration of an epoch in seconds (20 minutes)
 var EpochLength int64 = 1200
