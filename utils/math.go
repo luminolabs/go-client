@@ -21,7 +21,7 @@ func ParseBigInt(s string) (*big.Int, error) {
 
 func CheckAmountAndBalance(amountInWei *big.Int, balance *big.Int) *big.Int {
 	if amountInWei.Cmp(balance) > 0 {
-		log.Fatal("Not enough razor balance")
+		log.Fatal("Not enough Lumino token balance")
 	}
 	return amountInWei
 }

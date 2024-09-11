@@ -92,7 +92,7 @@ func (*UtilsStruct) ExecuteStake(flagSet *pflag.FlagSet) {
 	utils.CheckError("Error in WaitForBlockCompletion for stake: ", err)
 }
 
-// This function allows the user to stake razors in the razor network and returns the hash
+// This function allows the user to stake tokens in the lumino network and returns the hash
 func (*UtilsStruct) StakeTokens(txnArgs types.TransactionOptions) (common.Hash, error) {
 	epoch, err := protoUtils.GetEpoch(txnArgs.Client)
 	if err != nil {
@@ -124,12 +124,12 @@ func init() {
 		IsWei         bool
 	)
 
-	stakeCmd.Flags().StringVarP(&stakeValue, "amount", "v", "0", "Amount of LUMINO tokens to stake")
+	stakeCmd.Flags().StringVarP(&stakeValue, "value", "v", "0", "Amount of LUMINO tokens to stake")
 	stakeCmd.Flags().StringVarP(&stakerAddress, "address", "a", "", "Address of the staker")
 	stakeCmd.Flags().StringVarP(&password, "password", "", "", "Password for the staker's account")
 	stakeCmd.Flags().BoolVarP(&IsWei, "weiValue", "", false, "value passed in wei")
 
-	stakeAmountErr := stakeCmd.MarkFlagRequired("amount")
+	stakeAmountErr := stakeCmd.MarkFlagRequired("value")
 	utils.CheckError("Value error: ", stakeAmountErr)
 	stakerAddrErr := stakeCmd.MarkFlagRequired("address")
 	utils.CheckError("Address error: ", stakerAddrErr)

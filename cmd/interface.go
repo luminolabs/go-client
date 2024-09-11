@@ -71,7 +71,7 @@ type FlagSetInterface interface {
 	GetRootInt64RPCTimeout() (int64, error)
 	GetStringAddress(flagSet *pflag.FlagSet) (string, error)
 	GetStringValue(flagSet *pflag.FlagSet) (string, error)
-	GetBoolWeiRazor(flagSet *pflag.FlagSet) (bool, error)
+	GetBoolWeiLumino(flagSet *pflag.FlagSet) (bool, error)
 }
 
 type StateManagerInterface interface {

@@ -45,14 +45,14 @@ func (*UtilsStruct) AssignAmountInWei(flagSet *pflag.FlagSet) (*big.Int, error) 
 		return nil, errors.New("SetString: error")
 	}
 	var amountInWei *big.Int
-	if utils.UtilsInterface.IsFlagPassed("weiRazor") {
-		weiRazorPassed, err := flagSetUtils.GetBoolWeiRazor(flagSet)
+	if utils.UtilsInterface.IsFlagPassed("weiLumino") {
+		weiLuminoPassed, err := flagSetUtils.GetBoolWeiLumino(flagSet)
 		if err != nil {
-			log.Error("Error in getting weiRazorBool Value: ", err)
+			log.Error("Error in getting weiLuminoBool Value: ", err)
 			return nil, err
 		}
-		if weiRazorPassed {
-			log.Debug("weiRazor flag is passed as true, considering teh value input in wei")
+		if weiLuminoPassed {
+			log.Debug("weiLumino flag is passed as true, considering teh value input in wei")
 			amountInWei = _amount
 		}
 	} else {

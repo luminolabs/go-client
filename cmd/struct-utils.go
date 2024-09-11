@@ -141,9 +141,9 @@ func (flagSetUtils FlagSetUtils) GetStringValue(flagSet *pflag.FlagSet) (string,
 	return flagSet.GetString("value")
 }
 
-// This function is used to check if weiRazor is passed or not
-func (flagSetUtils FlagSetUtils) GetBoolWeiRazor(flagSet *pflag.FlagSet) (bool, error) {
-	return flagSet.GetBool("weiRazor")
+// This function is used to check if weiLumino is passed or not
+func (flagSetUtils FlagSetUtils) GetBoolWeiLumino(flagSet *pflag.FlagSet) (bool, error) {
+	return flagSet.GetBool("weiLumino")
 }
 
 // GetDelayedState calculates the delayed state based on the current block and buffer.
@@ -249,7 +249,7 @@ func (transactionUtils TransactionUtils) Hash(txn *Types.Transaction) common.Has
 	return txn.Hash()
 }
 
-// This function is of staking the razors
+// This function is of staking the Lumino token
 func (stakeManagerUtils StakeManagerUtils) Stake(client *ethclient.Client, txnOpts *bind.TransactOpts, epoch uint32, amount *big.Int) (*Types.Transaction, error) {
 	stakeManager := utilsInterface.GetStakeManager(client)
 	return ExecuteTransaction(stakeManager, "Stake", txnOpts, epoch, amount)

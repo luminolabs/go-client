@@ -31,7 +31,7 @@ func (*UtilsStruct) GetTransactionOpts(transactionData types.TransactionOptions)
 	keystorePath := path.Join(defaultPath, "keystore_files")
 	privateKey, err := AccountsInterface.GetPrivateKey(transactionData.AccountAddress, transactionData.Password, keystorePath)
 	if privateKey == nil || err != nil {
-		CheckError("Error in fetching private key: ", errors.New(transactionData.AccountAddress+" not present in razor-go"))
+		CheckError("Error in fetching private key: ", errors.New(transactionData.AccountAddress+" not present in lumino client"))
 	}
 	nonce, err := UtilsInterface.GetNonceAtWithRetry(transactionData.Client, common.HexToAddress(transactionData.AccountAddress))
 	CheckError("Error in fetching nonce: ", err)
