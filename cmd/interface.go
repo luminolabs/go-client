@@ -153,6 +153,7 @@ func InitializeInterfaces() {
 	flagSetUtils = FlagSetUtils{}
 	cmdUtils = &UtilsStruct{}
 	stateManagerUtils = &StateManagerUtils{}
+	stakeManagerUtils = &StakeManagerUtils{}
 	transactionUtils = TransactionUtils{}
 	keystoreUtils = KeystoreUtils{}
 	cryptoUtils = CryptoUtils{}

@@ -255,8 +255,8 @@ func (transactionUtils TransactionUtils) Hash(txn *Types.Transaction) common.Has
 // This function is of staking the Lumino token
 func (stakeManagerUtils StakeManagerUtils) Stake(client *ethclient.Client, txnOpts *bind.TransactOpts, epoch uint32, amount *big.Int) (*Types.Transaction, error) {
 	stakeManager := utilsInterface.GetStakeManager(client)
-	log.Debug("works until here")
-	return ExecuteTransaction(stakeManager, "Stake", txnOpts, epoch, amount)
+	// TODO: machineSpec
+	return ExecuteTransaction(stakeManager, "Stake", txnOpts, epoch, amount, "")
 }
 
 func (keystoreUtils KeystoreUtils) ImportECDSA(path string, priv *ecdsa.PrivateKey, passphrase string) (accounts.Account, error) {
