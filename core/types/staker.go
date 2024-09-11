@@ -1,6 +1,8 @@
 package types
 
-import "math/big"
+import (
+	"math/big"
+)
 
 // Staker represents a staker in the Lumino network
 type Staker struct {

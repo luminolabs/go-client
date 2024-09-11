@@ -3,9 +3,12 @@
 package cmd
 
 import (
+	"errors"
 	"lumino/utils"
+	"math/big"
 
 	"github.com/ethereum/go-ethereum/ethclient"
+	"github.com/spf13/pflag"
 )
 
 // GetEpochAndState retrieves the current epoch and state from the Ethereum client.
@@ -26,4 +29,34 @@ func (*UtilsStruct) GetEpochAndState(client *ethclient.Client) (uint32, int64, e
 	log.Debug("Epoch ", epoch)
 	log.Debug("State ", utils.UtilsInterface.GetStateName(state))
 	return epoch, state, nil
+}
+
+// This function assignes amount in wei
+func (*UtilsStruct) AssignAmountInWei(flagSet *pflag.FlagSet) (*big.Int, error) {
+	amount, err := flagSetUtils.GetStringValue(flagSet)
+	if err != nil {
+		log.Error("Error in reading value: ", err)
+		return nil, err
+	}
+	log.Debug("AssignAmountInWei: Amount: ", amount)
+	_amount, ok := new(big.Int).SetString(amount, 10)
+
+	if !ok {
+		return nil, errors.New("SetString: error")
+	}
+	var amountInWei *big.Int
+	if utils.UtilsInterface.IsFlagPassed("weiLumino") {
+		weiLuminoPassed, err := flagSetUtils.GetBoolWeiLumino(flagSet)
+		if err != nil {
+			log.Error("Error in getting weiLuminoBool Value: ", err)
+			return nil, err
+		}
+		if weiLuminoPassed {
+			log.Debug("weiLumino flag is passed as true, considering teh value input in wei")
+			amountInWei = _amount
+		}
+	} else {
+		amountInWei = protoUtils.GetAmountInWei(_amount)
+	}
+	return amountInWei, nil
 }

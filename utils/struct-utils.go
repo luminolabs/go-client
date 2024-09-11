@@ -4,17 +4,20 @@ import (
 	"context"
 	"crypto/ecdsa"
 	"errors"
+	"io"
 	"io/fs"
 	"math/big"
 	"os"
 	"reflect"
 	"time"
 
+	"lumino/accounts"
 	"lumino/path"
 	"lumino/pkg/bindings"
 
 	"github.com/avast/retry-go"
 	"github.com/ethereum/go-ethereum"
+	"github.com/ethereum/go-ethereum/accounts/abi"
 	"github.com/ethereum/go-ethereum/accounts/abi/bind"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/core/types"
@@ -47,7 +50,9 @@ func IntialiseLuminoUtils(optionsPackageStruct OptionsPackageStruct) Utils {
 	Time = optionsPackageStruct.Time
 	OS = optionsPackageStruct.OS
 	PathInterface = optionsPackageStruct.PathInterface
+	ABIInterface = optionsPackageStruct.ABIInterface
 	BindInterface = optionsPackageStruct.BindInterface
+	StakeManagerInterface = optionsPackageStruct.StakeManagerInterface
 	BlockManagerInterface = optionsPackageStruct.BlockManagerInterface
 	BindingsInterface = optionsPackageStruct.BindingsInterface
 	RetryInterface = optionsPackageStruct.RetryInterface
@@ -210,6 +215,18 @@ func (c ClientStruct) FilterLogs(client *ethclient.Client, ctx context.Context, 
 	return returnedValues[0].Interface().([]types.Log), nil
 }
 
+func (a AccountsStruct) GetPrivateKey(address string, password string, keystorePath string) (*ecdsa.PrivateKey, error) {
+	return accounts.AccountUtilsInterface.GetPrivateKey(address, password, keystorePath)
+}
+
+func (a ABIStruct) Parse(reader io.Reader) (abi.ABI, error) {
+	return abi.JSON(reader)
+}
+
+func (a ABIStruct) Pack(parsedData abi.ABI, name string, args ...interface{}) ([]byte, error) {
+	return parsedData.Pack(name, args...)
+}
+
 func (p PathStruct) GetDefaultPath() (string, error) {
 	return path.PathUtilsInterface.GetDefaultPath()
 }
@@ -228,12 +245,26 @@ func (b BlockManagerStruct) StateBuffer(client *ethclient.Client) (uint8, error)
 	return returnedValues[0].Interface().(uint8), nil
 }
 
+func (s StakeManagerStruct) GetStakerId(client *ethclient.Client, address common.Address) (uint32, error) {
+	stakeManager, opts := UtilsInterface.GetStakeManagerWithOpts(client)
+	returnedValues := InvokeFunctionWithTimeout(stakeManager, "GetStakerId", &opts, address)
+	returnedError := CheckIfAnyError(returnedValues)
+	if returnedError != nil {
+		return 0, returnedError
+	}
+	return returnedValues[0].Interface().(uint32), nil
+}
+
 func (b BindingsStruct) NewBlockManager(address common.Address, client *ethclient.Client) (*bindings.BlockManager, error) {
 	return bindings.NewBlockManager(address, client)
 }
 
 func (b BindingsStruct) NewStateManager(address common.Address, client *ethclient.Client) (*bindings.StateManager, error) {
 	return bindings.NewStateManager(address, client)
+}
+
+func (b BindingsStruct) NewStakeManager(address common.Address, client *ethclient.Client) (*bindings.StakeManager, error) {
+	return bindings.NewStakeManager(address, client)
 }
 
 func (r RetryStruct) RetryAttempts(numberOfAttempts uint) retry.Option {
