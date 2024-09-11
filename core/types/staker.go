@@ -21,3 +21,15 @@ const (
 	StakerStatusUnstaking
 	StakerStatusSlashed
 )
+
+type UnstakeInput struct {
+	Address    string
+	Password   string
+	ValueInWei *big.Int
+	StakerId   uint32
+}
+
+type Locks struct {
+	Amount      *big.Int
+	UnlockAfter *big.Int
+}
