@@ -144,6 +144,7 @@ type PathStruct struct{}
 type BindStruct struct{}
 type BlockManagerStruct struct{}
 type StakeManagerStruct struct{}
+type AccountsStruct struct{}
 type ABIStruct struct{}
 type BindingsStruct struct{}
 type RetryStruct struct{}

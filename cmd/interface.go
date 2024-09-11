@@ -12,6 +12,7 @@ import (
 	"time"
 
 	"github.com/ethereum/go-ethereum/accounts"
+	"github.com/ethereum/go-ethereum/accounts/abi"
 	"github.com/ethereum/go-ethereum/accounts/abi/bind"
 	"github.com/ethereum/go-ethereum/common"
 	Types "github.com/ethereum/go-ethereum/core/types"
@@ -25,6 +26,7 @@ var cmdUtils UtilsCmdInterface
 var stateManagerUtils StateManagerInterface
 var stakeManagerUtils StakeManagerInterface
 var transactionUtils TransactionInterface
+var abiUtils AbiInterface
 var keystoreUtils KeystoreInterface
 var cryptoUtils CryptoInterface
 var viperUtils ViperInterface
@@ -117,6 +119,10 @@ type CryptoInterface interface {
 	HexToECDSA(hexKey string) (*ecdsa.PrivateKey, error)
 }
 
+type AbiInterface interface {
+	Unpack(abi abi.ABI, name string, data []byte) ([]interface{}, error)
+}
+
 type ViperInterface interface {
 	ViperWriteConfigAs(path string) error
 }
@@ -139,6 +145,7 @@ type KeystoreUtils struct{}
 type CryptoUtils struct{}
 type ViperUtils struct{}
 type TimeUtils struct{}
+type AbiUtils struct{}
 type OSUtils struct{}
 
 func InitializeInterfaces() {
@@ -150,6 +157,7 @@ func InitializeInterfaces() {
 	keystoreUtils = KeystoreUtils{}
 	cryptoUtils = CryptoUtils{}
 	viperUtils = ViperUtils{}
+	abiUtils = AbiUtils{}
 	timeUtils = TimeUtils{}
 	osUtils = OSUtils{}
 

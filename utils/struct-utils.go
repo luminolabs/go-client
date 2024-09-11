@@ -4,17 +4,20 @@ import (
 	"context"
 	"crypto/ecdsa"
 	"errors"
+	"io"
 	"io/fs"
 	"math/big"
 	"os"
 	"reflect"
 	"time"
 
+	"lumino/accounts"
 	"lumino/path"
 	"lumino/pkg/bindings"
 
 	"github.com/avast/retry-go"
 	"github.com/ethereum/go-ethereum"
+	"github.com/ethereum/go-ethereum/accounts/abi"
 	"github.com/ethereum/go-ethereum/accounts/abi/bind"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/core/types"
@@ -210,6 +213,18 @@ func (c ClientStruct) FilterLogs(client *ethclient.Client, ctx context.Context, 
 		return []types.Log{}, returnedError
 	}
 	return returnedValues[0].Interface().([]types.Log), nil
+}
+
+func (a AccountsStruct) GetPrivateKey(address string, password string, keystorePath string) (*ecdsa.PrivateKey, error) {
+	return accounts.AccountUtilsInterface.GetPrivateKey(address, password, keystorePath)
+}
+
+func (a ABIStruct) Parse(reader io.Reader) (abi.ABI, error) {
+	return abi.JSON(reader)
+}
+
+func (a ABIStruct) Pack(parsedData abi.ABI, name string, args ...interface{}) ([]byte, error) {
+	return parsedData.Pack(name, args...)
 }
 
 func (p PathStruct) GetDefaultPath() (string, error) {

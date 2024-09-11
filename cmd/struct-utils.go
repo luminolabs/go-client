@@ -13,6 +13,7 @@ import (
 	"lumino/utils"
 
 	"github.com/ethereum/go-ethereum/accounts"
+	"github.com/ethereum/go-ethereum/accounts/abi"
 	"github.com/ethereum/go-ethereum/accounts/abi/bind"
 	"github.com/ethereum/go-ethereum/accounts/keystore"
 	"github.com/ethereum/go-ethereum/common"
@@ -35,6 +36,8 @@ func InitializeUtils() {
 	utils.Time = &utils.TimeStruct{}
 	utils.OS = &utils.OSStruct{}
 	utils.PathInterface = &utils.PathStruct{}
+	utils.AccountsInterface = &utils.AccountsStruct{}
+	utils.ABIInterface = &utils.ABIStruct{}
 	utils.BindInterface = &utils.BindStruct{}
 	utils.StakeManagerInterface = &utils.StakeManagerStruct{}
 	utils.BlockManagerInterface = &utils.BlockManagerStruct{}
@@ -252,6 +255,7 @@ func (transactionUtils TransactionUtils) Hash(txn *Types.Transaction) common.Has
 // This function is of staking the Lumino token
 func (stakeManagerUtils StakeManagerUtils) Stake(client *ethclient.Client, txnOpts *bind.TransactOpts, epoch uint32, amount *big.Int) (*Types.Transaction, error) {
 	stakeManager := utilsInterface.GetStakeManager(client)
+	log.Debug("works until here")
 	return ExecuteTransaction(stakeManager, "Stake", txnOpts, epoch, amount)
 }
 
@@ -273,6 +277,11 @@ func (c CryptoUtils) HexToECDSA(hexKey string) (*ecdsa.PrivateKey, error) {
 // This function is used for sleep
 func (t TimeUtils) Sleep(duration time.Duration) {
 	utils.Time.Sleep(duration)
+}
+
+// This function is used for unpacking
+func (a AbiUtils) Unpack(abi abi.ABI, name string, data []byte) ([]interface{}, error) {
+	return abi.Unpack(name, data)
 }
 
 // This function returns the staker Info
