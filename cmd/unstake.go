@@ -78,7 +78,7 @@ func (*UtilsStruct) ExecuteUnstake(flagSet *pflag.FlagSet) {
 	}
 }
 
-// This function allows user to unstake their sRZRs in the razor network
+// This function allows user to unstake their tokens in the lumino network
 func (*UtilsStruct) Unstake(config types.Configurations, client *ethclient.Client, input types.UnstakeInput) (common.Hash, error) {
 	txnArgs := types.TransactionOptions{
 		Client:         client,
@@ -133,14 +133,14 @@ func init() {
 		Address         string
 		AmountToUnStake string
 		Password        string
-		Weilumino       bool
+		WeiLumino       bool
 		StakerId        uint32
 	)
 
 	unstakeCmd.Flags().StringVarP(&Address, "address", "a", "", "user's address")
 	unstakeCmd.Flags().StringVarP(&AmountToUnStake, "value", "v", "0", "value of lumino tokens to un-stake")
 	unstakeCmd.Flags().StringVarP(&Password, "password", "", "", "password path to protect the keystore")
-	unstakeCmd.Flags().BoolVarP(&Weilumino, "weiRazor", "", false, "value can be passed in wei")
+	unstakeCmd.Flags().BoolVarP(&WeiLumino, "weiLumino", "", false, "value can be passed in wei")
 	unstakeCmd.Flags().Uint32VarP(&StakerId, "stakerId", "", 0, "staker id")
 
 	addrErr := unstakeCmd.MarkFlagRequired("address")

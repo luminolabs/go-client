@@ -274,7 +274,7 @@ func (stakeManagerUtils StakeManagerUtils) Stake(client *ethclient.Client, txnOp
 	return ExecuteTransaction(stakeManager, "Stake", txnOpts, epoch, amount, "")
 }
 
-// This function allows to unstake the razors
+// This function allows to unstake the token
 func (stakeManagerUtils StakeManagerUtils) Unstake(client *ethclient.Client, opts *bind.TransactOpts, stakerId uint32, amount *big.Int) (*Types.Transaction, error) {
 	stakeManager := utilsInterface.GetStakeManager(client)
 	return ExecuteTransaction(stakeManager, "Unstake", opts, stakerId, amount)
