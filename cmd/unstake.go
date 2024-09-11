@@ -138,7 +138,7 @@ func init() {
 	)
 
 	unstakeCmd.Flags().StringVarP(&Address, "address", "a", "", "user's address")
-	unstakeCmd.Flags().StringVarP(&AmountToUnStake, "value", "v", "0", "value of sluminos to un-stake")
+	unstakeCmd.Flags().StringVarP(&AmountToUnStake, "value", "v", "0", "value of lumino tokens to un-stake")
 	unstakeCmd.Flags().StringVarP(&Password, "password", "", "", "password path to protect the keystore")
 	unstakeCmd.Flags().BoolVarP(&Weilumino, "weiRazor", "", false, "value can be passed in wei")
 	unstakeCmd.Flags().Uint32VarP(&StakerId, "stakerId", "", 0, "staker id")
