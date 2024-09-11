@@ -235,6 +235,21 @@ func (u Utils) GetTransactionOpts(transactionData types.TransactionOptions) *bin
 	return utilsInterface.GetTransactionOpts(transactionData)
 }
 
+// This function returns the staker
+func (u Utils) GetStaker(client *ethclient.Client, stakerId uint32) (bindings.StructsStaker, error) {
+	return utilsInterface.GetStaker(client, stakerId)
+}
+
+// This function assigns the stakerId
+func (u Utils) AssignStakerId(flagSet *pflag.FlagSet, client *ethclient.Client, address string) (uint32, error) {
+	return utilsInterface.AssignStakerId(flagSet, client, address)
+}
+
+// This function returns the lock
+func (u Utils) GetLock(client *ethclient.Client, address string) (types.Locks, error) {
+	return utilsInterface.GetLock(client, address)
+}
+
 // This function connects to the client
 func (u Utils) ConnectToEthClient(provider string) *ethclient.Client {
 	log.Debug("Attempting to connect to Ethereum client at: ", provider)
@@ -257,6 +272,12 @@ func (stakeManagerUtils StakeManagerUtils) Stake(client *ethclient.Client, txnOp
 	stakeManager := utilsInterface.GetStakeManager(client)
 	// TODO: machineSpec
 	return ExecuteTransaction(stakeManager, "Stake", txnOpts, epoch, amount, "")
+}
+
+// This function allows to unstake the razors
+func (stakeManagerUtils StakeManagerUtils) Unstake(client *ethclient.Client, opts *bind.TransactOpts, stakerId uint32, amount *big.Int) (*Types.Transaction, error) {
+	stakeManager := utilsInterface.GetStakeManager(client)
+	return ExecuteTransaction(stakeManager, "Unstake", opts, stakerId, amount)
 }
 
 func (keystoreUtils KeystoreUtils) ImportECDSA(path string, priv *ecdsa.PrivateKey, passphrase string) (accounts.Account, error) {

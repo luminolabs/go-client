@@ -52,6 +52,9 @@ type UtilsInterface interface {
 	GetStakerId(client *ethclient.Client, address string) (uint32, error)
 	WaitForBlockCompletion(client *ethclient.Client, hashToRead string) error
 	GetTransactionOpts(transactionData types.TransactionOptions) *bind.TransactOpts
+	AssignStakerId(flagSet *pflag.FlagSet, client *ethclient.Client, address string) (uint32, error)
+	GetStaker(client *ethclient.Client, stakerId uint32) (bindings.StructsStaker, error)
+	GetLock(client *ethclient.Client, address string) (types.Locks, error)
 }
 
 type FlagSetInterface interface {
@@ -82,6 +85,7 @@ type StateManagerInterface interface {
 
 type StakeManagerInterface interface {
 	Stake(client *ethclient.Client, txnOpts *bind.TransactOpts, epoch uint32, amount *big.Int) (*Types.Transaction, error)
+	Unstake(client *ethclient.Client, opts *bind.TransactOpts, stakerId uint32, amount *big.Int) (*Types.Transaction, error)
 }
 
 type TransactionInterface interface {
@@ -109,6 +113,8 @@ type UtilsCmdInterface interface {
 	ExecuteStake(flagSet *pflag.FlagSet)
 	AssignAmountInWei(flagSet *pflag.FlagSet) (*big.Int, error)
 	StakeTokens(txnArgs types.TransactionOptions) (common.Hash, error)
+	ExecuteUnstake(flagSet *pflag.FlagSet)
+	Unstake(config types.Configurations, client *ethclient.Client, input types.UnstakeInput) (common.Hash, error)
 }
 
 type KeystoreInterface interface {
