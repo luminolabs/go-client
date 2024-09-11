@@ -49,6 +49,34 @@ func (_m *UtilsInterface) AssignPassword(flagSet *pflag.FlagSet) string {
 	return r0
 }
 
+// AssignStakerId provides a mock function with given fields: flagSet, client, address
+func (_m *UtilsInterface) AssignStakerId(flagSet *pflag.FlagSet, client *ethclient.Client, address string) (uint32, error) {
+	ret := _m.Called(flagSet, client, address)
+
+	if len(ret) == 0 {
+		panic("no return value specified for AssignStakerId")
+	}
+
+	var r0 uint32
+	var r1 error
+	if rf, ok := ret.Get(0).(func(*pflag.FlagSet, *ethclient.Client, string) (uint32, error)); ok {
+		return rf(flagSet, client, address)
+	}
+	if rf, ok := ret.Get(0).(func(*pflag.FlagSet, *ethclient.Client, string) uint32); ok {
+		r0 = rf(flagSet, client, address)
+	} else {
+		r0 = ret.Get(0).(uint32)
+	}
+
+	if rf, ok := ret.Get(1).(func(*pflag.FlagSet, *ethclient.Client, string) error); ok {
+		r1 = rf(flagSet, client, address)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
 // CheckAmountAndBalance provides a mock function with given fields: amountInWei, balance
 func (_m *UtilsInterface) CheckAmountAndBalance(amountInWei *big.Int, balance *big.Int) *big.Int {
 	ret := _m.Called(amountInWei, balance)
@@ -271,6 +299,34 @@ func (_m *UtilsInterface) GetEpoch(client *ethclient.Client) (uint32, error) {
 	return r0, r1
 }
 
+// GetLock provides a mock function with given fields: client, address
+func (_m *UtilsInterface) GetLock(client *ethclient.Client, address string) (types.Locks, error) {
+	ret := _m.Called(client, address)
+
+	if len(ret) == 0 {
+		panic("no return value specified for GetLock")
+	}
+
+	var r0 types.Locks
+	var r1 error
+	if rf, ok := ret.Get(0).(func(*ethclient.Client, string) (types.Locks, error)); ok {
+		return rf(client, address)
+	}
+	if rf, ok := ret.Get(0).(func(*ethclient.Client, string) types.Locks); ok {
+		r0 = rf(client, address)
+	} else {
+		r0 = ret.Get(0).(types.Locks)
+	}
+
+	if rf, ok := ret.Get(1).(func(*ethclient.Client, string) error); ok {
+		r1 = rf(client, address)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
 // GetOptions provides a mock function with given fields:
 func (_m *UtilsInterface) GetOptions() bind.CallOpts {
 	ret := _m.Called()
@@ -287,6 +343,34 @@ func (_m *UtilsInterface) GetOptions() bind.CallOpts {
 	}
 
 	return r0
+}
+
+// GetStaker provides a mock function with given fields: client, stakerId
+func (_m *UtilsInterface) GetStaker(client *ethclient.Client, stakerId uint32) (bindings.StructsStaker, error) {
+	ret := _m.Called(client, stakerId)
+
+	if len(ret) == 0 {
+		panic("no return value specified for GetStaker")
+	}
+
+	var r0 bindings.StructsStaker
+	var r1 error
+	if rf, ok := ret.Get(0).(func(*ethclient.Client, uint32) (bindings.StructsStaker, error)); ok {
+		return rf(client, stakerId)
+	}
+	if rf, ok := ret.Get(0).(func(*ethclient.Client, uint32) bindings.StructsStaker); ok {
+		r0 = rf(client, stakerId)
+	} else {
+		r0 = ret.Get(0).(bindings.StructsStaker)
+	}
+
+	if rf, ok := ret.Get(1).(func(*ethclient.Client, uint32) error); ok {
+		r1 = rf(client, stakerId)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
 }
 
 // GetStakerId provides a mock function with given fields: client, address

@@ -101,6 +101,11 @@ func (_m *UtilsCmdInterface) ExecuteStake(flagSet *pflag.FlagSet) {
 	_m.Called(flagSet)
 }
 
+// ExecuteUnstake provides a mock function with given fields: flagSet
+func (_m *UtilsCmdInterface) ExecuteUnstake(flagSet *pflag.FlagSet) {
+	_m.Called(flagSet)
+}
+
 // GetBufferPercent provides a mock function with given fields:
 func (_m *UtilsCmdInterface) GetBufferPercent() (int32, error) {
 	ret := _m.Called()
@@ -475,6 +480,36 @@ func (_m *UtilsCmdInterface) StakeTokens(txnArgs types.TransactionOptions) (comm
 
 	if rf, ok := ret.Get(1).(func(types.TransactionOptions) error); ok {
 		r1 = rf(txnArgs)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
+// Unstake provides a mock function with given fields: config, client, input
+func (_m *UtilsCmdInterface) Unstake(config types.Configurations, client *ethclient.Client, input types.UnstakeInput) (common.Hash, error) {
+	ret := _m.Called(config, client, input)
+
+	if len(ret) == 0 {
+		panic("no return value specified for Unstake")
+	}
+
+	var r0 common.Hash
+	var r1 error
+	if rf, ok := ret.Get(0).(func(types.Configurations, *ethclient.Client, types.UnstakeInput) (common.Hash, error)); ok {
+		return rf(config, client, input)
+	}
+	if rf, ok := ret.Get(0).(func(types.Configurations, *ethclient.Client, types.UnstakeInput) common.Hash); ok {
+		r0 = rf(config, client, input)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(common.Hash)
+		}
+	}
+
+	if rf, ok := ret.Get(1).(func(types.Configurations, *ethclient.Client, types.UnstakeInput) error); ok {
+		r1 = rf(config, client, input)
 	} else {
 		r1 = ret.Error(1)
 	}

@@ -49,6 +49,36 @@ func (_m *StakeManagerInterface) Stake(client *ethclient.Client, txnOpts *bind.T
 	return r0, r1
 }
 
+// Unstake provides a mock function with given fields: client, opts, stakerId, amount
+func (_m *StakeManagerInterface) Unstake(client *ethclient.Client, opts *bind.TransactOpts, stakerId uint32, amount *big.Int) (*types.Transaction, error) {
+	ret := _m.Called(client, opts, stakerId, amount)
+
+	if len(ret) == 0 {
+		panic("no return value specified for Unstake")
+	}
+
+	var r0 *types.Transaction
+	var r1 error
+	if rf, ok := ret.Get(0).(func(*ethclient.Client, *bind.TransactOpts, uint32, *big.Int) (*types.Transaction, error)); ok {
+		return rf(client, opts, stakerId, amount)
+	}
+	if rf, ok := ret.Get(0).(func(*ethclient.Client, *bind.TransactOpts, uint32, *big.Int) *types.Transaction); ok {
+		r0 = rf(client, opts, stakerId, amount)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*types.Transaction)
+		}
+	}
+
+	if rf, ok := ret.Get(1).(func(*ethclient.Client, *bind.TransactOpts, uint32, *big.Int) error); ok {
+		r1 = rf(client, opts, stakerId, amount)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
 // NewStakeManagerInterface creates a new instance of StakeManagerInterface. It also registers a testing interface on the mock and a cleanup function to assert the mocks expectations.
 // The first argument is typically a *testing.T value.
 func NewStakeManagerInterface(t interface {
