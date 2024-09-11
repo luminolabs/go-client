@@ -170,3 +170,10 @@ func (*UtilsStruct) IsFlagPassed(name string) bool {
 	}
 	return found
 }
+
+func (*UtilsStruct) AssignStakerId(flagSet *pflag.FlagSet, client *ethclient.Client, address string) (uint32, error) {
+	if UtilsInterface.IsFlagPassed("stakerId") {
+		return UtilsInterface.GetUint32(flagSet, "stakerId")
+	}
+	return UtilsInterface.GetStakerId(client, address)
+}
