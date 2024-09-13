@@ -104,6 +104,7 @@ func (*UtilsStruct) StakeTokens(txnArgs types.TransactionOptions) (common.Hash, 
 	txnArgs.MethodName = "stake"
 	txnArgs.Parameters = []interface{}{epoch, txnArgs.Amount}
 	txnArgs.ABI = bindings.StakeManagerABI
+	txnArgs.EtherValue = txnArgs.Amount
 	txnOpts := protoUtils.GetTransactionOpts(txnArgs)
 	log.Debugf("Executing Stake transaction with epoch = %d, amount = %d", epoch, txnArgs.Amount)
 	tx, err := stakeManagerUtils.Stake(txnArgs.Client, txnOpts, epoch, txnArgs.Amount)
