@@ -7,6 +7,8 @@ import (
 
 	accounts "github.com/ethereum/go-ethereum/accounts"
 
+	bind "github.com/ethereum/go-ethereum/accounts/abi/bind"
+
 	common "github.com/ethereum/go-ethereum/common"
 
 	ethclient "github.com/ethereum/go-ethereum/ethclient"
@@ -103,6 +105,11 @@ func (_m *UtilsCmdInterface) ExecuteStake(flagSet *pflag.FlagSet) {
 
 // ExecuteUnstake provides a mock function with given fields: flagSet
 func (_m *UtilsCmdInterface) ExecuteUnstake(flagSet *pflag.FlagSet) {
+	_m.Called(flagSet)
+}
+
+// ExecuteWithdraw provides a mock function with given fields: flagSet
+func (_m *UtilsCmdInterface) ExecuteWithdraw(flagSet *pflag.FlagSet) {
 	_m.Called(flagSet)
 }
 
@@ -411,6 +418,36 @@ func (_m *UtilsCmdInterface) GetWaitTime() (int32, error) {
 	return r0, r1
 }
 
+// HandleUnstakeLock provides a mock function with given fields: client, account, configurations, stakerId
+func (_m *UtilsCmdInterface) HandleUnstakeLock(client *ethclient.Client, account types.Account, configurations types.Configurations, stakerId uint32) (common.Hash, error) {
+	ret := _m.Called(client, account, configurations, stakerId)
+
+	if len(ret) == 0 {
+		panic("no return value specified for HandleUnstakeLock")
+	}
+
+	var r0 common.Hash
+	var r1 error
+	if rf, ok := ret.Get(0).(func(*ethclient.Client, types.Account, types.Configurations, uint32) (common.Hash, error)); ok {
+		return rf(client, account, configurations, stakerId)
+	}
+	if rf, ok := ret.Get(0).(func(*ethclient.Client, types.Account, types.Configurations, uint32) common.Hash); ok {
+		r0 = rf(client, account, configurations, stakerId)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(common.Hash)
+		}
+	}
+
+	if rf, ok := ret.Get(1).(func(*ethclient.Client, types.Account, types.Configurations, uint32) error); ok {
+		r1 = rf(client, account, configurations, stakerId)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
 // ImportAccount provides a mock function with given fields:
 func (_m *UtilsCmdInterface) ImportAccount() (accounts.Account, error) {
 	ret := _m.Called()
@@ -510,6 +547,36 @@ func (_m *UtilsCmdInterface) Unstake(config types.Configurations, client *ethcli
 
 	if rf, ok := ret.Get(1).(func(types.Configurations, *ethclient.Client, types.UnstakeInput) error); ok {
 		r1 = rf(config, client, input)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
+// Withdraw provides a mock function with given fields: client, txnOpts, stakerId
+func (_m *UtilsCmdInterface) Withdraw(client *ethclient.Client, txnOpts *bind.TransactOpts, stakerId uint32) (common.Hash, error) {
+	ret := _m.Called(client, txnOpts, stakerId)
+
+	if len(ret) == 0 {
+		panic("no return value specified for Withdraw")
+	}
+
+	var r0 common.Hash
+	var r1 error
+	if rf, ok := ret.Get(0).(func(*ethclient.Client, *bind.TransactOpts, uint32) (common.Hash, error)); ok {
+		return rf(client, txnOpts, stakerId)
+	}
+	if rf, ok := ret.Get(0).(func(*ethclient.Client, *bind.TransactOpts, uint32) common.Hash); ok {
+		r0 = rf(client, txnOpts, stakerId)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(common.Hash)
+		}
+	}
+
+	if rf, ok := ret.Get(1).(func(*ethclient.Client, *bind.TransactOpts, uint32) error); ok {
+		r1 = rf(client, txnOpts, stakerId)
 	} else {
 		r1 = ret.Error(1)
 	}
