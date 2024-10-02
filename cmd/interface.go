@@ -2,6 +2,7 @@
 package cmd
 
 import (
+	"context"
 	"crypto/ecdsa"
 	Accounts "lumino/accounts"
 	"lumino/core/types"
@@ -11,7 +12,10 @@ import (
 	"time"
 
 	"github.com/ethereum/go-ethereum/accounts"
+	"github.com/ethereum/go-ethereum/accounts/abi"
 	"github.com/ethereum/go-ethereum/accounts/abi/bind"
+	"github.com/ethereum/go-ethereum/common"
+	Types "github.com/ethereum/go-ethereum/core/types"
 	"github.com/ethereum/go-ethereum/ethclient"
 	"github.com/spf13/pflag"
 )
@@ -20,6 +24,9 @@ var flagSetUtils FlagSetInterface
 var protoUtils UtilsInterface
 var cmdUtils UtilsCmdInterface
 var stateManagerUtils StateManagerInterface
+var stakeManagerUtils StakeManagerInterface
+var transactionUtils TransactionInterface
+var abiUtils AbiInterface
 var keystoreUtils KeystoreInterface
 var cryptoUtils CryptoInterface
 var viperUtils ViperInterface
@@ -39,6 +46,12 @@ type UtilsInterface interface {
 	PrivateKeyPrompt() string
 	PasswordPrompt() string
 	AssignPassword(flagSet *pflag.FlagSet) string
+	FetchBalance(ctx context.Context, client *ethclient.Client, accountAddress common.Address) (*big.Int, error)
+	IsFlagPassed(name string) bool
+	CheckAmountAndBalance(amountInWei *big.Int, balance *big.Int) *big.Int
+	GetStakerId(client *ethclient.Client, address string) (uint32, error)
+	WaitForBlockCompletion(client *ethclient.Client, hashToRead string) error
+	GetTransactionOpts(transactionData types.TransactionOptions) *bind.TransactOpts
 }
 
 type FlagSetInterface interface {
@@ -58,10 +71,21 @@ type FlagSetInterface interface {
 	GetRootStringLogLevel() (string, error)
 	GetRootFloat32GasLimit() (float32, error)
 	GetRootInt64RPCTimeout() (int64, error)
+	GetStringAddress(flagSet *pflag.FlagSet) (string, error)
+	GetStringValue(flagSet *pflag.FlagSet) (string, error)
+	GetBoolWeiLumino(flagSet *pflag.FlagSet) (bool, error)
 }
 
 type StateManagerInterface interface {
 	NetworkInfo(client *ethclient.Client, opts *bind.CallOpts) (types.NetworkInfo, error)
+}
+
+type StakeManagerInterface interface {
+	Stake(client *ethclient.Client, txnOpts *bind.TransactOpts, epoch uint32, amount *big.Int) (*Types.Transaction, error)
+}
+
+type TransactionInterface interface {
+	Hash(txn *Types.Transaction) common.Hash
 }
 
 type UtilsCmdInterface interface {
@@ -83,7 +107,8 @@ type UtilsCmdInterface interface {
 	ExecuteCreate(flagSet *pflag.FlagSet)
 	Create(password string) (accounts.Account, error)
 	ExecuteStake(flagSet *pflag.FlagSet)
-	GetStakeArgs(flagSet *pflag.FlagSet, client *ethclient.Client) (types.StakeArgs, error)
+	AssignAmountInWei(flagSet *pflag.FlagSet) (*big.Int, error)
+	StakeTokens(txnArgs types.TransactionOptions) (common.Hash, error)
 }
 
 type KeystoreInterface interface {
@@ -92,6 +117,10 @@ type KeystoreInterface interface {
 
 type CryptoInterface interface {
 	HexToECDSA(hexKey string) (*ecdsa.PrivateKey, error)
+}
+
+type AbiInterface interface {
+	Unpack(abi abi.ABI, name string, data []byte) ([]interface{}, error)
 }
 
 type ViperInterface interface {
@@ -110,10 +139,13 @@ type Utils struct{}
 type FlagSetUtils struct{}
 type UtilsStruct struct{}
 type StateManagerUtils struct{}
+type StakeManagerUtils struct{}
+type TransactionUtils struct{}
 type KeystoreUtils struct{}
 type CryptoUtils struct{}
 type ViperUtils struct{}
 type TimeUtils struct{}
+type AbiUtils struct{}
 type OSUtils struct{}
 
 func InitializeInterfaces() {
@@ -121,9 +153,12 @@ func InitializeInterfaces() {
 	flagSetUtils = FlagSetUtils{}
 	cmdUtils = &UtilsStruct{}
 	stateManagerUtils = &StateManagerUtils{}
+	stakeManagerUtils = &StakeManagerUtils{}
+	transactionUtils = TransactionUtils{}
 	keystoreUtils = KeystoreUtils{}
 	cryptoUtils = CryptoUtils{}
 	viperUtils = ViperUtils{}
+	abiUtils = AbiUtils{}
 	timeUtils = TimeUtils{}
 	osUtils = OSUtils{}
 

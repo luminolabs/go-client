@@ -1,9 +1,12 @@
 package utils
 
 import (
+	"context"
+	"errors"
 	"fmt"
 	"math/big"
 	"os"
+	"time"
 
 	"lumino/core"
 	"lumino/logger"
@@ -28,6 +31,43 @@ func (*UtilsStruct) GetStateName(stateNumber int64) string {
 		stateName = "Buffer"
 	}
 	return stateName
+}
+
+func (*UtilsStruct) FetchBalance(ctx context.Context, client *ethclient.Client, address common.Address) (*big.Int, error) {
+	// Get the balance of the address in Wei (smallest unit of Ether)
+	balance, err := client.BalanceAt(ctx, address, nil)
+	if err != nil {
+		return nil, err
+	}
+	return balance, nil
+}
+
+func (*UtilsStruct) WaitForBlockCompletion(client *ethclient.Client, hashToRead string) error {
+	timeout := core.BlockCompletionTimeout
+	for start := time.Now(); time.Since(start) < time.Duration(timeout)*time.Second; {
+		log.Debug("Checking if transaction is mined....")
+		transactionStatus := UtilsInterface.CheckTransactionReceipt(client, hashToRead)
+		if transactionStatus == 0 {
+			err := errors.New("transaction mining unsuccessful")
+			log.Error(err)
+			return err
+		} else if transactionStatus == 1 {
+			log.Info("Transaction mined successfully")
+			return nil
+		}
+		Time.Sleep(3 * time.Second)
+	}
+	log.Info("Timeout Passed")
+	return errors.New("timeout passed for transaction mining")
+}
+
+func (*UtilsStruct) CheckTransactionReceipt(client *ethclient.Client, _txHash string) int {
+	txHash := common.HexToHash(_txHash)
+	tx, err := ClientInterface.TransactionReceipt(client, context.Background(), txHash)
+	if err != nil {
+		return -1
+	}
+	return int(tx.Status)
 }
 
 // ToWei converts an ether value to its wei representation.
