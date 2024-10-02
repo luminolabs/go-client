@@ -390,6 +390,34 @@ func (_m *UtilsCmdInterface) GetRPCTimeout() (int64, error) {
 	return r0, r1
 }
 
+// GetStakeArgs provides a mock function with given fields: flagSet, client
+func (_m *UtilsCmdInterface) GetStakeArgs(flagSet *pflag.FlagSet, client *ethclient.Client) (types.StakeArgs, error) {
+	ret := _m.Called(flagSet, client)
+
+	if len(ret) == 0 {
+		panic("no return value specified for GetStakeArgs")
+	}
+
+	var r0 types.StakeArgs
+	var r1 error
+	if rf, ok := ret.Get(0).(func(*pflag.FlagSet, *ethclient.Client) (types.StakeArgs, error)); ok {
+		return rf(flagSet, client)
+	}
+	if rf, ok := ret.Get(0).(func(*pflag.FlagSet, *ethclient.Client) types.StakeArgs); ok {
+		r0 = rf(flagSet, client)
+	} else {
+		r0 = ret.Get(0).(types.StakeArgs)
+	}
+
+	if rf, ok := ret.Get(1).(func(*pflag.FlagSet, *ethclient.Client) error); ok {
+		r1 = rf(flagSet, client)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
 // GetWaitTime provides a mock function with given fields:
 func (_m *UtilsCmdInterface) GetWaitTime() (int32, error) {
 	ret := _m.Called()
