@@ -268,16 +268,22 @@ func (transactionUtils TransactionUtils) Hash(txn *Types.Transaction) common.Has
 }
 
 // This function is of staking the Lumino token
-func (stakeManagerUtils StakeManagerUtils) Stake(client *ethclient.Client, txnOpts *bind.TransactOpts, epoch uint32, amount *big.Int) (*Types.Transaction, error) {
+func (stakeManagerUtils StakeManagerUtils) Stake(client *ethclient.Client, txnOpts *bind.TransactOpts, epoch uint32, amount *big.Int, machineSpecs string) (*Types.Transaction, error) {
 	stakeManager := utilsInterface.GetStakeManager(client)
 	// TODO: machineSpec
-	return ExecuteTransaction(stakeManager, "Stake", txnOpts, epoch, amount, "")
+	return ExecuteTransaction(stakeManager, "Stake", txnOpts, epoch, amount, machineSpecs)
 }
 
 // This function allows to unstake the token
 func (stakeManagerUtils StakeManagerUtils) Unstake(client *ethclient.Client, opts *bind.TransactOpts, stakerId uint32, amount *big.Int) (*Types.Transaction, error) {
 	stakeManager := utilsInterface.GetStakeManager(client)
 	return ExecuteTransaction(stakeManager, "Unstake", opts, stakerId, amount)
+}
+
+// This function withdraws the withdraw amount
+func (stakeManagerUtils StakeManagerUtils) Withdraw(client *ethclient.Client, opts *bind.TransactOpts, stakerId uint32) (*Types.Transaction, error) {
+	stakeManager := utilsInterface.GetStakeManager(client)
+	return ExecuteTransaction(stakeManager, "Withdraw", opts, stakerId)
 }
 
 func (keystoreUtils KeystoreUtils) ImportECDSA(path string, priv *ecdsa.PrivateKey, passphrase string) (accounts.Account, error) {
