@@ -19,9 +19,9 @@ type StakeManagerInterface struct {
 	mock.Mock
 }
 
-// Stake provides a mock function with given fields: client, txnOpts, epoch, amount
-func (_m *StakeManagerInterface) Stake(client *ethclient.Client, txnOpts *bind.TransactOpts, epoch uint32, amount *big.Int) (*types.Transaction, error) {
-	ret := _m.Called(client, txnOpts, epoch, amount)
+// Stake provides a mock function with given fields: client, opts, epoch, amount, machineSpecs
+func (_m *StakeManagerInterface) Stake(client *ethclient.Client, opts *bind.TransactOpts, epoch uint32, amount *big.Int, machineSpecs string) (*types.Transaction, error) {
+	ret := _m.Called(client, opts, epoch, amount, machineSpecs)
 
 	if len(ret) == 0 {
 		panic("no return value specified for Stake")
@@ -29,19 +29,19 @@ func (_m *StakeManagerInterface) Stake(client *ethclient.Client, txnOpts *bind.T
 
 	var r0 *types.Transaction
 	var r1 error
-	if rf, ok := ret.Get(0).(func(*ethclient.Client, *bind.TransactOpts, uint32, *big.Int) (*types.Transaction, error)); ok {
-		return rf(client, txnOpts, epoch, amount)
+	if rf, ok := ret.Get(0).(func(*ethclient.Client, *bind.TransactOpts, uint32, *big.Int, string) (*types.Transaction, error)); ok {
+		return rf(client, opts, epoch, amount, machineSpecs)
 	}
-	if rf, ok := ret.Get(0).(func(*ethclient.Client, *bind.TransactOpts, uint32, *big.Int) *types.Transaction); ok {
-		r0 = rf(client, txnOpts, epoch, amount)
+	if rf, ok := ret.Get(0).(func(*ethclient.Client, *bind.TransactOpts, uint32, *big.Int, string) *types.Transaction); ok {
+		r0 = rf(client, opts, epoch, amount, machineSpecs)
 	} else {
 		if ret.Get(0) != nil {
 			r0 = ret.Get(0).(*types.Transaction)
 		}
 	}
 
-	if rf, ok := ret.Get(1).(func(*ethclient.Client, *bind.TransactOpts, uint32, *big.Int) error); ok {
-		r1 = rf(client, txnOpts, epoch, amount)
+	if rf, ok := ret.Get(1).(func(*ethclient.Client, *bind.TransactOpts, uint32, *big.Int, string) error); ok {
+		r1 = rf(client, opts, epoch, amount, machineSpecs)
 	} else {
 		r1 = ret.Error(1)
 	}

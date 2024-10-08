@@ -268,10 +268,10 @@ func (transactionUtils TransactionUtils) Hash(txn *Types.Transaction) common.Has
 }
 
 // This function is of staking the Lumino token
-func (stakeManagerUtils StakeManagerUtils) Stake(client *ethclient.Client, txnOpts *bind.TransactOpts, epoch uint32, amount *big.Int) (*Types.Transaction, error) {
+func (stakeManagerUtils StakeManagerUtils) Stake(client *ethclient.Client, txnOpts *bind.TransactOpts, epoch uint32, amount *big.Int, machineSpecs string) (*Types.Transaction, error) {
 	stakeManager := utilsInterface.GetStakeManager(client)
 	// TODO: machineSpec
-	return ExecuteTransaction(stakeManager, "Stake", txnOpts, epoch, amount, "")
+	return ExecuteTransaction(stakeManager, "Stake", txnOpts, epoch, amount, machineSpecs)
 }
 
 // This function allows to unstake the token

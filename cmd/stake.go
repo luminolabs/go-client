@@ -2,6 +2,7 @@ package cmd
 
 import (
 	"context"
+	"lumino/cmd/systemspecs"
 	"lumino/core"
 	"lumino/core/types"
 	"lumino/logger"
@@ -84,8 +85,16 @@ func (*UtilsStruct) ExecuteStake(flagSet *pflag.FlagSet) {
 		Config:         config,
 	}
 
+	// Get system specifications
+	machineSpecs, err := systemspecs.GetSystemSpecs()
+	log.Info("Machine Specs in JSON : ", machineSpecs)
+	if err != nil {
+		log.Error("Failed to get system specifications: ", err)
+		machineSpecs = "{}" // Use empty JSON object if specs couldn't be retrieved
+	}
+
 	log.Debug("ExecuteStake: Calling StakeTokens() for amount: ", txnArgs.Amount)
-	stakeTxnHash, err := cmdUtils.StakeTokens(txnArgs)
+	stakeTxnHash, err := cmdUtils.StakeTokens(txnArgs, machineSpecs)
 	utils.CheckError("Stake error: ", err)
 
 	err = protoUtils.WaitForBlockCompletion(txnArgs.Client, stakeTxnHash.String())
@@ -93,7 +102,7 @@ func (*UtilsStruct) ExecuteStake(flagSet *pflag.FlagSet) {
 }
 
 // This function allows the user to stake tokens in the lumino network and returns the hash
-func (*UtilsStruct) StakeTokens(txnArgs types.TransactionOptions) (common.Hash, error) {
+func (*UtilsStruct) StakeTokens(txnArgs types.TransactionOptions, machineSpecs string) (common.Hash, error) {
 	epoch, err := protoUtils.GetEpoch(txnArgs.Client)
 	if err != nil {
 		return common.Hash{0x00}, err
@@ -102,12 +111,12 @@ func (*UtilsStruct) StakeTokens(txnArgs types.TransactionOptions) (common.Hash, 
 
 	txnArgs.ContractAddress = core.StakeManagerAddress
 	txnArgs.MethodName = "stake"
-	txnArgs.Parameters = []interface{}{epoch, txnArgs.Amount}
+	txnArgs.Parameters = []interface{}{epoch, txnArgs.Amount, machineSpecs}
 	txnArgs.ABI = bindings.StakeManagerABI
 	txnArgs.EtherValue = txnArgs.Amount
 	txnOpts := protoUtils.GetTransactionOpts(txnArgs)
-	log.Debugf("Executing Stake transaction with epoch = %d, amount = %d", epoch, txnArgs.Amount)
-	tx, err := stakeManagerUtils.Stake(txnArgs.Client, txnOpts, epoch, txnArgs.Amount)
+	log.Debugf("Executing Stake transaction with epoch = %d, amount = %d, machineSpecs = %s", epoch, txnArgs.Amount, machineSpecs)
+	tx, err := stakeManagerUtils.Stake(txnArgs.Client, txnOpts, epoch, txnArgs.Amount, machineSpecs)
 	if err != nil {
 		return common.Hash{0x00}, err
 	}

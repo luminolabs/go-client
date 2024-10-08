@@ -494,9 +494,9 @@ func (_m *UtilsCmdInterface) SetConfig(flagSet *pflag.FlagSet) error {
 	return r0
 }
 
-// StakeTokens provides a mock function with given fields: txnArgs
-func (_m *UtilsCmdInterface) StakeTokens(txnArgs types.TransactionOptions) (common.Hash, error) {
-	ret := _m.Called(txnArgs)
+// StakeTokens provides a mock function with given fields: txnArgs, machineSpecs
+func (_m *UtilsCmdInterface) StakeTokens(txnArgs types.TransactionOptions, machineSpecs string) (common.Hash, error) {
+	ret := _m.Called(txnArgs, machineSpecs)
 
 	if len(ret) == 0 {
 		panic("no return value specified for StakeTokens")
@@ -504,19 +504,19 @@ func (_m *UtilsCmdInterface) StakeTokens(txnArgs types.TransactionOptions) (comm
 
 	var r0 common.Hash
 	var r1 error
-	if rf, ok := ret.Get(0).(func(types.TransactionOptions) (common.Hash, error)); ok {
-		return rf(txnArgs)
+	if rf, ok := ret.Get(0).(func(types.TransactionOptions, string) (common.Hash, error)); ok {
+		return rf(txnArgs, machineSpecs)
 	}
-	if rf, ok := ret.Get(0).(func(types.TransactionOptions) common.Hash); ok {
-		r0 = rf(txnArgs)
+	if rf, ok := ret.Get(0).(func(types.TransactionOptions, string) common.Hash); ok {
+		r0 = rf(txnArgs, machineSpecs)
 	} else {
 		if ret.Get(0) != nil {
 			r0 = ret.Get(0).(common.Hash)
 		}
 	}
 
-	if rf, ok := ret.Get(1).(func(types.TransactionOptions) error); ok {
-		r1 = rf(txnArgs)
+	if rf, ok := ret.Get(1).(func(types.TransactionOptions, string) error); ok {
+		r1 = rf(txnArgs, machineSpecs)
 	} else {
 		r1 = ret.Error(1)
 	}
