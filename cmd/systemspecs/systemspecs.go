@@ -85,8 +85,6 @@ func getGPUSpec() ([]GPUSpec, error) {
 			return nil, fmt.Errorf("failed to get memory info: %v", err)
 		}
 
-		fmt.Println(memory, someInt)
-
 		// powerLimit, err := device.PowerManagementLimit()
 		// if err != nil {
 		// 	return nil, fmt.Errorf("failed to get power limit: %v", err)
