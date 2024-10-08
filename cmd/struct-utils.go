@@ -280,6 +280,12 @@ func (stakeManagerUtils StakeManagerUtils) Unstake(client *ethclient.Client, opt
 	return ExecuteTransaction(stakeManager, "Unstake", opts, stakerId, amount)
 }
 
+// This function withdraws the withdraw amount
+func (stakeManagerUtils StakeManagerUtils) Withdraw(client *ethclient.Client, opts *bind.TransactOpts, stakerId uint32) (*Types.Transaction, error) {
+	stakeManager := utilsInterface.GetStakeManager(client)
+	return ExecuteTransaction(stakeManager, "Withdraw", opts, stakerId)
+}
+
 func (keystoreUtils KeystoreUtils) ImportECDSA(path string, priv *ecdsa.PrivateKey, passphrase string) (accounts.Account, error) {
 	ks := keystore.NewKeyStore(path, keystore.StandardScryptN, keystore.StandardScryptP)
 	return ks.ImportECDSA(priv, passphrase)

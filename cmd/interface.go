@@ -86,6 +86,7 @@ type StateManagerInterface interface {
 type StakeManagerInterface interface {
 	Stake(client *ethclient.Client, txnOpts *bind.TransactOpts, epoch uint32, amount *big.Int) (*Types.Transaction, error)
 	Unstake(client *ethclient.Client, opts *bind.TransactOpts, stakerId uint32, amount *big.Int) (*Types.Transaction, error)
+	Withdraw(client *ethclient.Client, opts *bind.TransactOpts, stakerId uint32) (*Types.Transaction, error)
 }
 
 type TransactionInterface interface {
@@ -115,6 +116,9 @@ type UtilsCmdInterface interface {
 	StakeTokens(txnArgs types.TransactionOptions) (common.Hash, error)
 	ExecuteUnstake(flagSet *pflag.FlagSet)
 	Unstake(config types.Configurations, client *ethclient.Client, input types.UnstakeInput) (common.Hash, error)
+	ExecuteWithdraw(flagSet *pflag.FlagSet)
+	HandleUnstakeLock(client *ethclient.Client, account types.Account, configurations types.Configurations, stakerId uint32) (common.Hash, error)
+	Withdraw(client *ethclient.Client, txnOpts *bind.TransactOpts, stakerId uint32) (common.Hash, error)
 }
 
 type KeystoreInterface interface {
