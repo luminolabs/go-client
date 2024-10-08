@@ -66,6 +66,9 @@ type Utils interface {
 	MultiplyFloatAndBigInt(bigIntVal *big.Int, floatingVal float64) *big.Int
 	EstimateGasWithRetry(client *ethclient.Client, message ethereum.CallMsg) (uint64, error)
 	IncreaseGasLimitValue(client *ethclient.Client, gasLimit uint64, gasLimitMultiplier float32) (uint64, error)
+	AssignStakerId(flagSet *pflag.FlagSet, client *ethclient.Client, address string) (uint32, error)
+	GetStaker(client *ethclient.Client, stakerId uint32) (bindings.StructsStaker, error)
+	GetLock(client *ethclient.Client, address string) (types.Locks, error)
 }
 
 // EthClientUtils interface defines Ethereum client utility functions
@@ -93,6 +96,8 @@ type BlockManagerUtils interface {
 
 type StakeManagerUtils interface {
 	GetStakerId(client *ethclient.Client, address common.Address) (uint32, error)
+	GetStaker(client *ethclient.Client, stakerId uint32) (bindings.StructsStaker, error)
+	Locks(client *ethclient.Client, address common.Address) (types.Locks, error)
 }
 
 type ABIUtils interface {

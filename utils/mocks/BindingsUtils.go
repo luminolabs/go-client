@@ -46,6 +46,36 @@ func (_m *BindingsUtils) NewBlockManager(address common.Address, client *ethclie
 	return r0, r1
 }
 
+// NewStakeManager provides a mock function with given fields: address, client
+func (_m *BindingsUtils) NewStakeManager(address common.Address, client *ethclient.Client) (*bindings.StakeManager, error) {
+	ret := _m.Called(address, client)
+
+	if len(ret) == 0 {
+		panic("no return value specified for NewStakeManager")
+	}
+
+	var r0 *bindings.StakeManager
+	var r1 error
+	if rf, ok := ret.Get(0).(func(common.Address, *ethclient.Client) (*bindings.StakeManager, error)); ok {
+		return rf(address, client)
+	}
+	if rf, ok := ret.Get(0).(func(common.Address, *ethclient.Client) *bindings.StakeManager); ok {
+		r0 = rf(address, client)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*bindings.StakeManager)
+		}
+	}
+
+	if rf, ok := ret.Get(1).(func(common.Address, *ethclient.Client) error); ok {
+		r1 = rf(address, client)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
 // NewStateManager provides a mock function with given fields: address, client
 func (_m *BindingsUtils) NewStateManager(address common.Address, client *ethclient.Client) (*bindings.StateManager, error) {
 	ret := _m.Called(address, client)

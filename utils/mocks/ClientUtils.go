@@ -198,6 +198,36 @@ func (_m *ClientUtils) SuggestGasPrice(client *ethclient.Client, ctx context.Con
 	return r0, r1
 }
 
+// TransactionReceipt provides a mock function with given fields: client, ctx, txHash
+func (_m *ClientUtils) TransactionReceipt(client *ethclient.Client, ctx context.Context, txHash common.Hash) (*types.Receipt, error) {
+	ret := _m.Called(client, ctx, txHash)
+
+	if len(ret) == 0 {
+		panic("no return value specified for TransactionReceipt")
+	}
+
+	var r0 *types.Receipt
+	var r1 error
+	if rf, ok := ret.Get(0).(func(*ethclient.Client, context.Context, common.Hash) (*types.Receipt, error)); ok {
+		return rf(client, ctx, txHash)
+	}
+	if rf, ok := ret.Get(0).(func(*ethclient.Client, context.Context, common.Hash) *types.Receipt); ok {
+		r0 = rf(client, ctx, txHash)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*types.Receipt)
+		}
+	}
+
+	if rf, ok := ret.Get(1).(func(*ethclient.Client, context.Context, common.Hash) error); ok {
+		r1 = rf(client, ctx, txHash)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
 // NewClientUtils creates a new instance of ClientUtils. It also registers a testing interface on the mock and a cleanup function to assert the mocks expectations.
 // The first argument is typically a *testing.T value.
 func NewClientUtils(t interface {

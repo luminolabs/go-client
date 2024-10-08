@@ -12,6 +12,7 @@ import (
 	"time"
 
 	"lumino/accounts"
+	lumTypes "lumino/core/types"
 	"lumino/path"
 	"lumino/pkg/bindings"
 
@@ -253,6 +254,30 @@ func (s StakeManagerStruct) GetStakerId(client *ethclient.Client, address common
 		return 0, returnedError
 	}
 	return returnedValues[0].Interface().(uint32), nil
+}
+
+func (s StakeManagerStruct) GetStaker(client *ethclient.Client, stakerId uint32) (bindings.StructsStaker, error) {
+	stakeManager, opts := UtilsInterface.GetStakeManagerWithOpts(client)
+	returnedValues := InvokeFunctionWithTimeout(stakeManager, "GetStaker", &opts, stakerId)
+	returnedError := CheckIfAnyError(returnedValues)
+	if returnedError != nil {
+		return bindings.StructsStaker{}, returnedError
+	}
+	return returnedValues[0].Interface().(bindings.StructsStaker), nil
+}
+
+func (s StakeManagerStruct) Locks(client *ethclient.Client, address common.Address) (lumTypes.Locks, error) {
+	stakeManager, opts := UtilsInterface.GetStakeManagerWithOpts(client)
+	returnedValues := InvokeFunctionWithTimeout(stakeManager, "Locks", &opts, address)
+	returnedError := CheckIfAnyError(returnedValues)
+	if returnedError != nil {
+		return lumTypes.Locks{}, returnedError
+	}
+	locks := returnedValues[0].Interface().(struct {
+		Amount      *big.Int
+		UnlockAfter *big.Int
+	})
+	return locks, nil
 }
 
 func (b BindingsStruct) NewBlockManager(address common.Address, client *ethclient.Client) (*bindings.BlockManager, error) {

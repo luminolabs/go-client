@@ -12,6 +12,34 @@ type FlagSetInterface struct {
 	mock.Mock
 }
 
+// GetBoolWeiLumino provides a mock function with given fields: flagSet
+func (_m *FlagSetInterface) GetBoolWeiLumino(flagSet *pflag.FlagSet) (bool, error) {
+	ret := _m.Called(flagSet)
+
+	if len(ret) == 0 {
+		panic("no return value specified for GetBoolWeiLumino")
+	}
+
+	var r0 bool
+	var r1 error
+	if rf, ok := ret.Get(0).(func(*pflag.FlagSet) (bool, error)); ok {
+		return rf(flagSet)
+	}
+	if rf, ok := ret.Get(0).(func(*pflag.FlagSet) bool); ok {
+		r0 = rf(flagSet)
+	} else {
+		r0 = ret.Get(0).(bool)
+	}
+
+	if rf, ok := ret.Get(1).(func(*pflag.FlagSet) error); ok {
+		r1 = rf(flagSet)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
 // GetFloat32GasLimit provides a mock function with given fields: flagSet
 func (_m *FlagSetInterface) GetFloat32GasLimit(flagSet *pflag.FlagSet) (float32, error) {
 	ret := _m.Called(flagSet)
@@ -404,6 +432,34 @@ func (_m *FlagSetInterface) GetRootStringProvider() (string, error) {
 	return r0, r1
 }
 
+// GetStringAddress provides a mock function with given fields: flagSet
+func (_m *FlagSetInterface) GetStringAddress(flagSet *pflag.FlagSet) (string, error) {
+	ret := _m.Called(flagSet)
+
+	if len(ret) == 0 {
+		panic("no return value specified for GetStringAddress")
+	}
+
+	var r0 string
+	var r1 error
+	if rf, ok := ret.Get(0).(func(*pflag.FlagSet) (string, error)); ok {
+		return rf(flagSet)
+	}
+	if rf, ok := ret.Get(0).(func(*pflag.FlagSet) string); ok {
+		r0 = rf(flagSet)
+	} else {
+		r0 = ret.Get(0).(string)
+	}
+
+	if rf, ok := ret.Get(1).(func(*pflag.FlagSet) error); ok {
+		r1 = rf(flagSet)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
 // GetStringLogLevel provides a mock function with given fields: flagSet
 func (_m *FlagSetInterface) GetStringLogLevel(flagSet *pflag.FlagSet) (string, error) {
 	ret := _m.Called(flagSet)
@@ -438,6 +494,34 @@ func (_m *FlagSetInterface) GetStringProvider(flagSet *pflag.FlagSet) (string, e
 
 	if len(ret) == 0 {
 		panic("no return value specified for GetStringProvider")
+	}
+
+	var r0 string
+	var r1 error
+	if rf, ok := ret.Get(0).(func(*pflag.FlagSet) (string, error)); ok {
+		return rf(flagSet)
+	}
+	if rf, ok := ret.Get(0).(func(*pflag.FlagSet) string); ok {
+		r0 = rf(flagSet)
+	} else {
+		r0 = ret.Get(0).(string)
+	}
+
+	if rf, ok := ret.Get(1).(func(*pflag.FlagSet) error); ok {
+		r1 = rf(flagSet)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
+// GetStringValue provides a mock function with given fields: flagSet
+func (_m *FlagSetInterface) GetStringValue(flagSet *pflag.FlagSet) (string, error) {
+	ret := _m.Called(flagSet)
+
+	if len(ret) == 0 {
+		panic("no return value specified for GetStringValue")
 	}
 
 	var r0 string
