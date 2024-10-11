@@ -23,6 +23,50 @@ type TorchTuneWrapperConfig struct {
 	NumGpus       string `json:"num_gpus"`
 }
 
+// Validate ensures all required fields are present and non-empty, with logging for each missing field
+func (c *TorchTuneWrapperConfig) Validate() error {
+	var missingFields []string
+
+	if c.JobConfigName == "" {
+		missingFields = append(missingFields, "job_config_name")
+		logger.Error("Missing required field: job_config_name")
+	}
+	if c.JobID == "" {
+		missingFields = append(missingFields, "job_id")
+		logger.Error("Missing required field: job_id")
+	}
+	if c.DatasetID == "" {
+		missingFields = append(missingFields, "dataset_id")
+		logger.Error("Missing required field: dataset_id")
+	}
+	if c.BatchSize == "" {
+		missingFields = append(missingFields, "batch_size")
+		logger.Error("Missing required field: batch_size")
+	}
+	if c.NumEpochs == "" {
+		missingFields = append(missingFields, "num_epochs")
+		logger.Error("Missing required field: num_epochs")
+	}
+	if c.LearningRate == "" {
+		missingFields = append(missingFields, "lr (learning rate)")
+		logger.Error("Missing required field: lr")
+	}
+	if c.Seed == "" {
+		missingFields = append(missingFields, "seed")
+		logger.Error("Missing required field: seed")
+	}
+	if c.NumGpus == "" {
+		missingFields = append(missingFields, "num_gpus")
+		logger.Error("Missing required field: num_gpus")
+	}
+
+	if len(missingFields) > 0 {
+		return fmt.Errorf("missing required fields: %v", missingFields)
+	}
+
+	return nil
+}
+
 // RunTorchTuneWrapper runs the torchtunewrapper workflow with the provided configuration from a JSON file
 func RunTorchTuneWrapper(configFile string) (string, error) {
 	// Read the config file
@@ -37,6 +81,12 @@ func RunTorchTuneWrapper(configFile string) (string, error) {
 	err = json.Unmarshal(configData, &config)
 	if err != nil {
 		logger.Error("Error parsing JSON config: ", err)
+		return "", err
+	}
+
+	// Validate required fields
+	if err := config.Validate(); err != nil {
+		logger.Error("Invalid config: ", err)
 		return "", err
 	}
 
@@ -56,6 +106,5 @@ func RunTorchTuneWrapper(configFile string) (string, error) {
 	}
 
 	logger.Info("Workflow executed successfully")
-
 	return string(output), nil
 }
