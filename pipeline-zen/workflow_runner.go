@@ -91,7 +91,7 @@ func RunTorchTuneWrapper(configFile string) (string, error) {
 	}
 
 	// Build the bash command string
-	command := fmt.Sprintf("./scripts/runners/single-wf.sh torchtunewrapper --job_config_name %s --job_id %s --dataset_id %s --batch_size %s --shuffle %s --num_epochs %s --use_lora %s --use_qlora %s --lr %s --seed %s --num_gpus %s",
+	command := fmt.Sprintf("./scripts/runners/celery-wf.sh torchtunewrapper --job_config_name %s --job_id %s --dataset_id %s --batch_size %s --shuffle %s --num_epochs %s --use_lora %s --use_qlora %s --lr %s --seed %s --num_gpus %s",
 		config.JobConfigName, config.JobID, config.DatasetID, config.BatchSize, config.Shuffle, config.NumEpochs, config.UseLora, config.UseQlora, config.LearningRate, config.Seed, config.NumGpus)
 
 	logger.Info("Running command: ", command)
