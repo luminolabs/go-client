@@ -18,3 +18,4 @@ func InstallDeps() (string, error) {
 	logger.Info("Dependencies installed successfully")
 	return string(output), nil
 }
+
