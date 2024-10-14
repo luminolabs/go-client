@@ -1,7 +1,7 @@
 package pipeline_zen
 
 import (
-	"fmt"
+	"lumino/logger"
 	"os/exec"
 )
 
@@ -11,8 +11,11 @@ func InstallDeps() (string, error) {
 
 	output, err := cmd.CombinedOutput()
 	if err != nil {
-		return "", fmt.Errorf("Error installing dependencies: %v", err)
+		logger.Error("Error installing dependencies: ", err)
+		return "", err
 	}
 
+	logger.Info("Dependencies installed successfully")
 	return string(output), nil
 }
+
