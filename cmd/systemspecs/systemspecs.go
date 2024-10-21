@@ -19,7 +19,7 @@ type SystemSpecs struct {
 type GPUSpec struct {
 	Model      string `json:"model"`
 	Memory     string `json:"memory"`
-	someMemory string `json:"somememory"`
+	SomeMemory string `json:"somememory"`
 }
 
 type CPUSpec struct {
@@ -93,7 +93,7 @@ func getGPUSpec() ([]GPUSpec, error) {
 		gpuSpecs = append(gpuSpecs, GPUSpec{
 			Model:      name,
 			Memory:     fmt.Sprintf("%.2f MiB", float64(memory)/(1024*1024)),
-			someMemory: fmt.Sprintf("%.2f MiB", float64(someInt)/(1024*1024)),
+			SomeMemory: fmt.Sprintf("%.2f MiB", float64(someInt)/(1024*1024)),
 			// PwrLimit: fmt.Sprintf("%.2f W", float64(powerLimit)/1000),
 		})
 	}
