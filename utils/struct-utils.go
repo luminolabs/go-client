@@ -67,7 +67,7 @@ func (u UtilsStruct) GetUint32(flagSet *pflag.FlagSet, name string) (uint32, err
 }
 
 // GetLogFileName retrieves the log file name from the provided flag set.
-func (f FLagSetStruct) GetLogFileName(flagSet *pflag.FlagSet) (string, error) {
+func (f FlagSetStruct) GetLogFileName(flagSet *pflag.FlagSet) (string, error) {
 	return flagSet.GetString("logFile")
 }
 

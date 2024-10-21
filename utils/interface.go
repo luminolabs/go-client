@@ -153,7 +153,7 @@ type AccountsStruct struct{}
 type ABIStruct struct{}
 type BindingsStruct struct{}
 type RetryStruct struct{}
-type FLagSetStruct struct{}
+type FlagSetStruct struct{}
 
 // OptionPackageStruct
 type OptionsPackageStruct struct {
