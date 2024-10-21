@@ -83,8 +83,43 @@ func (_m *UtilsCmdInterface) Create(password string) (accounts.Account, error) {
 	return r0, r1
 }
 
+// CreateJob provides a mock function with given fields: client, config, account, jobDetailsJSON, jobFee
+func (_m *UtilsCmdInterface) CreateJob(client *ethclient.Client, config types.Configurations, account types.Account, jobDetailsJSON string, jobFee *big.Int) (common.Hash, error) {
+	ret := _m.Called(client, config, account, jobDetailsJSON, jobFee)
+
+	if len(ret) == 0 {
+		panic("no return value specified for CreateJob")
+	}
+
+	var r0 common.Hash
+	var r1 error
+	if rf, ok := ret.Get(0).(func(*ethclient.Client, types.Configurations, types.Account, string, *big.Int) (common.Hash, error)); ok {
+		return rf(client, config, account, jobDetailsJSON, jobFee)
+	}
+	if rf, ok := ret.Get(0).(func(*ethclient.Client, types.Configurations, types.Account, string, *big.Int) common.Hash); ok {
+		r0 = rf(client, config, account, jobDetailsJSON, jobFee)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(common.Hash)
+		}
+	}
+
+	if rf, ok := ret.Get(1).(func(*ethclient.Client, types.Configurations, types.Account, string, *big.Int) error); ok {
+		r1 = rf(client, config, account, jobDetailsJSON, jobFee)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
 // ExecuteCreate provides a mock function with given fields: flagSet
 func (_m *UtilsCmdInterface) ExecuteCreate(flagSet *pflag.FlagSet) {
+	_m.Called(flagSet)
+}
+
+// ExecuteCreateJob provides a mock function with given fields: flagSet
+func (_m *UtilsCmdInterface) ExecuteCreateJob(flagSet *pflag.FlagSet) {
 	_m.Called(flagSet)
 }
 
@@ -474,6 +509,11 @@ func (_m *UtilsCmdInterface) ImportAccount() (accounts.Account, error) {
 	}
 
 	return r0, r1
+}
+
+// RunExecuteJob provides a mock function with given fields: flagSet
+func (_m *UtilsCmdInterface) RunExecuteJob(flagSet *pflag.FlagSet) {
+	_m.Called(flagSet)
 }
 
 // SetConfig provides a mock function with given fields: flagSet
