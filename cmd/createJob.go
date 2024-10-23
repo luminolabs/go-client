@@ -155,7 +155,10 @@ func init() {
 	createJobCmd.Flags().StringVarP(&ConfigPath, "config", "c", "", "path to the job configuration file")
 	createJobCmd.Flags().StringVarP(&JobFee, "jobFee", "f", "", "job fee in wei")
 
-	createJobCmd.MarkFlagRequired("address")
-	createJobCmd.MarkFlagRequired("config")
-	createJobCmd.MarkFlagRequired("jobFee")
+	AddrErr := createJobCmd.MarkFlagRequired("address")
+	utils.CheckError("Address error: ", AddrErr)
+	configPath := createJobCmd.MarkFlagRequired("config")
+	utils.CheckError("Path error : ", configPath)
+	jobFee := createJobCmd.MarkFlagRequired("jobFee")
+	utils.CheckError("JobFee error : ", jobFee)
 }
