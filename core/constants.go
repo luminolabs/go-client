@@ -26,7 +26,7 @@ var DefaultRPCTimeout = 10
 var DefaultLogLevel = ""
 
 var NilHash = common.Hash{0x00}
-var BlockCompletionTimeout = 30
+var BlockCompletionTimeout = 60
 
 // EpochLength defines the duration of an epoch in seconds (20 minutes)
 var EpochLength int64 = 1200

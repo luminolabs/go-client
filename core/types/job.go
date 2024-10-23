@@ -21,7 +21,7 @@ type ExecuteJobInput struct {
 }
 
 // JobStatus represents the status of a job
-type JobStatus int
+type JobStatus uint8
 
 // Job statuses
 const (
