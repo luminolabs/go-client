@@ -594,6 +594,36 @@ func (_m *UtilsCmdInterface) Unstake(config types.Configurations, client *ethcli
 	return r0, r1
 }
 
+// UpdateJobStatus provides a mock function with given fields: client, config, account, jobId, status, buffer
+func (_m *UtilsCmdInterface) UpdateJobStatus(client *ethclient.Client, config types.Configurations, account types.Account, jobId *big.Int, status types.JobStatus, buffer uint8) (common.Hash, error) {
+	ret := _m.Called(client, config, account, jobId, status, buffer)
+
+	if len(ret) == 0 {
+		panic("no return value specified for UpdateJobStatus")
+	}
+
+	var r0 common.Hash
+	var r1 error
+	if rf, ok := ret.Get(0).(func(*ethclient.Client, types.Configurations, types.Account, *big.Int, types.JobStatus, uint8) (common.Hash, error)); ok {
+		return rf(client, config, account, jobId, status, buffer)
+	}
+	if rf, ok := ret.Get(0).(func(*ethclient.Client, types.Configurations, types.Account, *big.Int, types.JobStatus, uint8) common.Hash); ok {
+		r0 = rf(client, config, account, jobId, status, buffer)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(common.Hash)
+		}
+	}
+
+	if rf, ok := ret.Get(1).(func(*ethclient.Client, types.Configurations, types.Account, *big.Int, types.JobStatus, uint8) error); ok {
+		r1 = rf(client, config, account, jobId, status, buffer)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
 // Withdraw provides a mock function with given fields: client, txnOpts, stakerId
 func (_m *UtilsCmdInterface) Withdraw(client *ethclient.Client, txnOpts *bind.TransactOpts, stakerId uint32) (common.Hash, error) {
 	ret := _m.Called(client, txnOpts, stakerId)
