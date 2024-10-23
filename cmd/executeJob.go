@@ -2,15 +2,18 @@
 package cmd
 
 import (
+	"errors"
 	"lumino/core"
 	"lumino/core/types"
 	"lumino/logger"
 	pipeline_zen "lumino/pipeline-zen"
 	"lumino/pkg/bindings"
 	"lumino/utils"
+	"math/big"
 
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/ethclient"
+	"github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 	"github.com/spf13/pflag"
 )
@@ -50,13 +53,17 @@ func (u *UtilsStruct) RunExecuteJob(flagSet *pflag.FlagSet) {
 	protoUtils.AssignLogFile(flagSet)
 
 	log.Debug("Getting password...")
-	// password := protoUtils.AssignPassword(flagSet)
+	password := protoUtils.AssignPassword(flagSet)
 
-	jobId, err := flagSetUtils.GetUint16JobId(flagSet)
+	jobIdStr, err := flagSet.GetString("jobId")
 	utils.CheckError("Error in getting jobId: ", err)
 
-	// configPath, err := flagSet.GetString("config")
-	// utils.CheckError("Error in getting config path: ", err)
+	jobId, ok := new(big.Int).SetString(jobIdStr, 10)
+	if !ok {
+		log.Fatal("Invalid JobId format", errors.New("Failed to parse job ID string"))
+	}
+	configPath, err := flagSet.GetString("config")
+	utils.CheckError("Error in getting config path: ", err)
 
 	pipelinePath, err := flagSet.GetString("zen-path")
 	utils.CheckError("Error in getting pipeline path: ", err)
@@ -69,6 +76,80 @@ func (u *UtilsStruct) RunExecuteJob(flagSet *pflag.FlagSet) {
 	}
 	log.Info("Dependencies installed successfully")
 
+	// Hardcoded, to be changed in future
+	status := types.JobStatusQueued
+	buffer := 0
+
+	// Update job status to Queued
+	log.Info("Updating job status to Queued...")
+	jobUpdateTxn, err := cmdUtils.UpdateJobStatus(client, config, types.Account{
+		Address:  address,
+		Password: password,
+	}, jobId, status, uint8(buffer))
+	if err != nil {
+		log.WithError(err).Fatal("Failed to update job status to Queued")
+	}
+	log.WithField("txHash", jobUpdateTxn.Hex()).Info("Job status updated to Queued")
+
+	// Run the TorchTuneWrapper
+	log.Info("Running TorchTuneWrapper...")
+	go func() {
+		output, err := pipeline_zen.RunTorchTuneWrapper(configPath)
+		if err != nil {
+			log.WithError(err).Error("Error running TorchTuneWrapper")
+			cmdUtils.UpdateJobStatus(client, config, types.Account{
+				Address:  address,
+				Password: password,
+			}, jobId, types.JobStatusFailed, uint8(buffer))
+			return
+		}
+		log.Info("Updating job status to Running...")
+		runningTxnHash, err := cmdUtils.UpdateJobStatus(client, config, types.Account{
+			Address:  address,
+			Password: password,
+		}, jobId, types.JobStatusRunning, uint8(buffer))
+		log.WithField("txHash", runningTxnHash.Hex()).Info("Job status updated to Running")
+
+		log.Debug("TorchTuneWrapper output: ", output)
+		log.Info("Job execution initiated. Monitor logs for progress.")
+	}()
+
+	// Update job status to Running
+	completedJobUpdateTxn, err := cmdUtils.UpdateJobStatus(client, config, types.Account{
+		Address:  address,
+		Password: password,
+	}, jobId, types.JobStatusCompleted, uint8(buffer))
+	log.WithField("txHash", completedJobUpdateTxn.Hex()).Info("Job status updated to Running")
+
+}
+
+func (u *UtilsStruct) UpdateJobStatus(client *ethclient.Client, config types.Configurations, account types.Account, jobId *big.Int, status types.JobStatus, buffer uint8) (common.Hash, error) {
+	if client == nil {
+		log.Error("Client is nil")
+		return common.Hash{}, errors.New("client is nil")
+	}
+
+	if jobId == nil {
+		log.Error("JobId is nil")
+		return common.Hash{}, errors.New("jobId is nil")
+	}
+
+	log.WithFields(logrus.Fields{
+		"address": account.Address,
+		"jobId":   jobId.String(),
+		"status":  status,
+	}).Debug("Updating job status")
+
+	if jobsManagerUtils == nil {
+		log.Error("JobManagerUtils is nil")
+		return common.Hash{}, errors.New("jobManagerUtils is nil")
+	}
+
+	log.WithFields(logrus.Fields{
+		"jobId":  jobId.String(),
+		"status": status,
+	}).Debug("Executing updateJobStatus transaction")
+
 	txnArgs := types.TransactionOptions{
 		Client:          client,
 		AccountAddress:  account.Address,
@@ -77,66 +158,44 @@ func (u *UtilsStruct) RunExecuteJob(flagSet *pflag.FlagSet) {
 		Config:          config,
 		ContractAddress: core.JobManagerAddress,
 		MethodName:      "updateJobStatus",
-		Parameters:      []interface{}{jobId, status, buffer: 0},
+		Parameters:      []interface{}{jobId, uint8(status), buffer},
 		ABI:             bindings.JobManagerABI,
 	}
 
 	txnOpts := protoUtils.GetTransactionOpts(txnArgs)
 
-	// Update job status to Queued
-	log.Info("Updating job status to Queued...")
-	jobUpdateTxn, err = jobsManagerUtils.UpdateJobStatus(client, txnOpts, jobId, types.JobStatusQueued, 0)
-	utils.CheckError("Error updating job status to Queued: ", err)
+	txn, err := jobsManagerUtils.UpdateJobStatus(txnArgs.Client, txnOpts, jobId, uint8(status), buffer)
+	if err != nil {
+		log.WithError(err).WithFields(logrus.Fields{
+			"jobId":  jobId.String(),
+			"status": status,
+		}).Error("Failed to update job status")
+		return common.Hash{}, err
+	}
 
-	// TODO:
-	// add UpdateJob txns function
-	// add types for jobsStatus
-	// complete this and push it to a go-routine and stream logs from there
-	// to this thread
+	if txn == nil {
+		log.Error("Transaction is nil")
+		return common.Hash{}, errors.New("transaction is nil")
+	}
 
-	// // Run the TorchTuneWrapper
-	// log.Info("Running TorchTuneWrapper...")
-	// go func() {
-	// 	output, err := pipeline_zen.RunTorchTuneWrapper(configPath)
-	// 	if err != nil {
-	// 		log.WithError(err).Error("Error running TorchTuneWrapper")
-	// 		u.updateJobStatus(client, config, jobId, types.JobStatusFailed)
-	// 		return
-	// 	}
-	// 	log.Debug("TorchTuneWrapper output: ", output)
-	// 	u.updateJobStatus(client, config, jobId, types.JobStatusCompleted)
-	// }()
+	txnHash := transactionUtils.Hash(txn)
+	log.WithFields(logrus.Fields{
+		"txHash": txnHash.Hex(),
+		"jobId":  jobId.String(),
+		"status": status,
+	}).Info("Job status update transaction submitted")
 
-	// // Update job status to Running
-	// log.Info("Updating job status to Running...")
-	// err = u.updateJobStatus(client, config, jobId, types.JobStatusRunning)
-	// utils.CheckError("Error updating job status to Running: ", err)
+	err = protoUtils.WaitForBlockCompletion(txnArgs.Client, txnHash.Hex())
+	if err != nil {
+		log.WithError(err).WithFields(logrus.Fields{
+			"jobId":  jobId.String(),
+			"status": status,
+		}).Error("Failed to wait for block completion")
+		return common.Hash{}, err
+	}
 
-	log.Info("Job execution initiated. Monitor logs for progress.")
+	return txnHash, nil
 }
-
-// func (u *UtilsStruct) updateJobStatus(client *ethclient.Client, config types.Configurations, jobId uint16, status types.JobStatus) error {
-// 	txnArgs := types.TransactionOptions{
-// 		Client:          client,
-// 		AccountAddress:  config.Address,
-// 		Password:        config.Password,
-// 		ChainId:         core.ChainID,
-// 		Config:          config,
-// 		ContractAddress: core.JobManagerAddress,
-// 		MethodName:      "updateJobStatus",
-// 		Parameters:      []interface{}{jobId, uint8(status)},
-// 		ABI:             bindings.JobManagerABI,
-// 	}
-
-// 	txnOpts := protoUtils.GetTransactionOpts(txnArgs)
-// 	log.Debugf("Executing updateJobStatus transaction with jobId = %d, status = %d", jobId, status)
-// 	txn, err := jobManagerUtils.UpdateJobStatus(txnArgs.Client, txnOpts, jobId, uint8(status))
-// 	if err != nil {
-// 		return err
-// 	}
-// 	log.Info("Transaction Hash: ", transactionUtils.Hash(txn))
-// 	return protoUtils.WaitForBlockCompletion(txnArgs.Client, transactionUtils.Hash(txn).String())
-// }
 
 // This function allows the admin to update an existing job
 func (*UtilsStruct) ExecuteJob(client *ethclient.Client, config types.Configurations, jobId uint16) (common.Hash, error) {
@@ -169,14 +228,14 @@ func init() {
 	rootCmd.AddCommand(executeJobCmd)
 
 	var (
-		JobId      uint16
+		JobId      string
 		Account    string
 		Password   string
 		ConfigPath string
 		ZenPath    string
 	)
 
-	executeJobCmd.Flags().Uint16VarP(&JobId, "jobId", "", 0, "job id")
+	executeJobCmd.Flags().StringVarP(&JobId, "jobId", "", string(0), "job id")
 	executeJobCmd.Flags().StringVarP(&Account, "address", "a", "", "address of the compute provider")
 	executeJobCmd.Flags().StringVarP(&Password, "password", "", "", "password path of compute provider to protect the keystore")
 	executeJobCmd.Flags().StringVarP(&ConfigPath, "config", "c", "", "path to the job configuration file")
