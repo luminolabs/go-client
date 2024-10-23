@@ -7,6 +7,7 @@ import (
 	"os"
 	"time"
 
+	"lumino/core"
 	"lumino/core/types"
 	"lumino/path"
 	"lumino/pkg/bindings"
@@ -30,7 +31,7 @@ var utilsInterface = utils.UtilsInterface
 func InitializeUtils() {
 	utilsInterface = &utils.UtilsStruct{}
 	utils.UtilsInterface = &utils.UtilsStruct{}
-	utils.FlagSetInterface = &utils.FLagSetStruct{}
+	utils.FlagSetInterface = &utils.FlagSetStruct{}
 	utils.EthClient = &utils.EthClientStruct{}
 	utils.ClientInterface = &utils.ClientStruct{}
 	utils.Time = &utils.TimeStruct{}
@@ -122,6 +123,11 @@ func (FlagSetUtils FlagSetUtils) GetStringLogLevel(flagSet *pflag.FlagSet) (stri
 
 func (FlagSetUtils FlagSetUtils) GetInt64RPCTimeout(flagSet *pflag.FlagSet) (int64, error) {
 	return flagSet.GetInt64("rpcTimeout")
+}
+
+// This function returns the JobId in Uint16
+func (flagSetUtils FlagSetUtils) GetUint16JobId(flagSet *pflag.FlagSet) (uint16, error) {
+	return flagSet.GetUint16("jobId")
 }
 
 // This function returns Gas Limit in Float32
@@ -284,6 +290,23 @@ func (stakeManagerUtils StakeManagerUtils) Unstake(client *ethclient.Client, opt
 func (stakeManagerUtils StakeManagerUtils) Withdraw(client *ethclient.Client, opts *bind.TransactOpts, stakerId uint32) (*Types.Transaction, error) {
 	stakeManager := utilsInterface.GetStakeManager(client)
 	return ExecuteTransaction(stakeManager, "Withdraw", opts, stakerId)
+}
+
+func (jobManagerUtils *JobsManagerUtils) CreateJob(client *ethclient.Client, opts *bind.TransactOpts, jobDetailsJSON string) (*Types.Transaction, error) {
+	jobManager, err := bindings.NewJobManager(common.HexToAddress(core.JobManagerAddress), client)
+	if err != nil {
+		return nil, err
+	}
+	return jobManager.CreateJob(opts, jobDetailsJSON)
+}
+
+func (jobManagerUtils *JobsManagerUtils) UpdateJobStatus(client *ethclient.Client, opts *bind.TransactOpts, jobId *big.Int, status uint8, buffer uint8) (*Types.Transaction, error) {
+	jobManager, err := bindings.NewJobManager(common.HexToAddress(core.JobManagerAddress), client)
+	if err != nil {
+		return nil, err
+	}
+	// TODO: set Buffer from buffer config
+	return jobManager.UpdateJobStatus(opts, jobId, status, 0)
 }
 
 func (keystoreUtils KeystoreUtils) ImportECDSA(path string, priv *ecdsa.PrivateKey, passphrase string) (accounts.Account, error) {

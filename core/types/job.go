@@ -1,6 +1,8 @@
 package types
 
-import "time"
+import (
+	"time"
+)
 
 // Job represents a job in the Lumino network
 type Job struct {
@@ -13,14 +15,19 @@ type Job struct {
 	Details     string    // Additional details about the job
 }
 
+type ExecuteJobInput struct {
+	Address  string
+	Password string
+}
+
 // JobStatus represents the status of a job
 type JobStatus int
 
 // Job statuses
 const (
-	JobStatusCreated JobStatus = iota
-	JobStatusAssigned
-	JobStatusExecuting
+	JobStatusNew JobStatus = iota
+	JobStatusQueued
+	JobStatusRunning
 	JobStatusCompleted
 	JobStatusFailed
 )

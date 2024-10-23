@@ -16,6 +16,7 @@ contracts=(
   "StateManager stateManager.go"
   "StakeManager stakeManager.go"
   "BlockManager blockManager.go"
+  "JobManager jobManager.go"
 )
 
 for c in "${contracts[@]}"

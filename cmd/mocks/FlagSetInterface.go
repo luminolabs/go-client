@@ -544,6 +544,34 @@ func (_m *FlagSetInterface) GetStringValue(flagSet *pflag.FlagSet) (string, erro
 	return r0, r1
 }
 
+// GetUint16JobId provides a mock function with given fields: flagSet
+func (_m *FlagSetInterface) GetUint16JobId(flagSet *pflag.FlagSet) (uint16, error) {
+	ret := _m.Called(flagSet)
+
+	if len(ret) == 0 {
+		panic("no return value specified for GetUint16JobId")
+	}
+
+	var r0 uint16
+	var r1 error
+	if rf, ok := ret.Get(0).(func(*pflag.FlagSet) (uint16, error)); ok {
+		return rf(flagSet)
+	}
+	if rf, ok := ret.Get(0).(func(*pflag.FlagSet) uint16); ok {
+		r0 = rf(flagSet)
+	} else {
+		r0 = ret.Get(0).(uint16)
+	}
+
+	if rf, ok := ret.Get(1).(func(*pflag.FlagSet) error); ok {
+		r1 = rf(flagSet)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
 // NewFlagSetInterface creates a new instance of FlagSetInterface. It also registers a testing interface on the mock and a cleanup function to assert the mocks expectations.
 // The first argument is typically a *testing.T value.
 func NewFlagSetInterface(t interface {

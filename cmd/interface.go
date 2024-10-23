@@ -25,6 +25,7 @@ var protoUtils UtilsInterface
 var cmdUtils UtilsCmdInterface
 var stateManagerUtils StateManagerInterface
 var stakeManagerUtils StakeManagerInterface
+var jobsManagerUtils JobsManagerInterface
 var transactionUtils TransactionInterface
 var abiUtils AbiInterface
 var keystoreUtils KeystoreInterface
@@ -77,6 +78,7 @@ type FlagSetInterface interface {
 	GetStringAddress(flagSet *pflag.FlagSet) (string, error)
 	GetStringValue(flagSet *pflag.FlagSet) (string, error)
 	GetBoolWeiLumino(flagSet *pflag.FlagSet) (bool, error)
+	GetUint16JobId(flagSet *pflag.FlagSet) (uint16, error)
 }
 
 type StateManagerInterface interface {
@@ -87,6 +89,11 @@ type StakeManagerInterface interface {
 	Stake(client *ethclient.Client, opts *bind.TransactOpts, epoch uint32, amount *big.Int, machineSpecs string) (*Types.Transaction, error)
 	Unstake(client *ethclient.Client, opts *bind.TransactOpts, stakerId uint32, amount *big.Int) (*Types.Transaction, error)
 	Withdraw(client *ethclient.Client, opts *bind.TransactOpts, stakerId uint32) (*Types.Transaction, error)
+}
+
+type JobsManagerInterface interface {
+	CreateJob(client *ethclient.Client, opts *bind.TransactOpts, jobDetailsJSON string) (*Types.Transaction, error)
+	UpdateJobStatus(client *ethclient.Client, opts *bind.TransactOpts, jobId *big.Int, status uint8, buffer uint8) (*Types.Transaction, error)
 }
 
 type TransactionInterface interface {
@@ -119,6 +126,9 @@ type UtilsCmdInterface interface {
 	ExecuteWithdraw(flagSet *pflag.FlagSet)
 	HandleUnstakeLock(client *ethclient.Client, account types.Account, configurations types.Configurations, stakerId uint32) (common.Hash, error)
 	Withdraw(client *ethclient.Client, txnOpts *bind.TransactOpts, stakerId uint32) (common.Hash, error)
+	RunExecuteJob(flagSet *pflag.FlagSet)
+	ExecuteCreateJob(flagSet *pflag.FlagSet)
+	CreateJob(client *ethclient.Client, config types.Configurations, account types.Account, jobDetailsJSON string, jobFee *big.Int) (common.Hash, error)
 }
 
 type KeystoreInterface interface {
@@ -150,6 +160,7 @@ type FlagSetUtils struct{}
 type UtilsStruct struct{}
 type StateManagerUtils struct{}
 type StakeManagerUtils struct{}
+type JobsManagerUtils struct{}
 type TransactionUtils struct{}
 type KeystoreUtils struct{}
 type CryptoUtils struct{}
@@ -164,6 +175,7 @@ func InitializeInterfaces() {
 	cmdUtils = &UtilsStruct{}
 	stateManagerUtils = &StateManagerUtils{}
 	stakeManagerUtils = &StakeManagerUtils{}
+	jobsManagerUtils = &JobsManagerUtils{}
 	transactionUtils = TransactionUtils{}
 	keystoreUtils = KeystoreUtils{}
 	cryptoUtils = CryptoUtils{}
