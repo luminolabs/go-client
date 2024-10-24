@@ -1,13 +1,14 @@
 {
-  "job_config_name": "llm_llama3_1_8b",
-  "job_id": "llm_llama3_1_8b-experiment1",
+  "job_config_name": "llm_dummy",
+  "job_id": "-1",
   "dataset_id": "gs://lum-pipeline-zen-jobs-us/datasets/protoml/text2sql.jsonl",
   "batch_size": "2",
   "shuffle": "true",
   "num_epochs": "1",
   "use_lora": "true",
   "use_qlora": "false",
-  "lr": "3e-4",
+  "lr": "1e-2",
+  "user-id": "-1",
   "seed": "42",
   "num_gpus": "1"
 }
