@@ -109,7 +109,7 @@ func InstallDeps(pipelineZenPath string) error {
 }
 
 // RunTorchTuneWrapper runs the torchtunewrapper workflow with the provided configuration
-func RunTorchTuneWrapper(configFile string) (string, error) {
+func RunTorchTuneWrapper(pipelineZenPath string, configFile string) (string, error) {
 	// Read the config file
 	configData, err := os.ReadFile(configFile)
 	if err != nil {
@@ -131,22 +131,31 @@ func RunTorchTuneWrapper(configFile string) (string, error) {
 		return "", err
 	}
 
-	// Build the bash command string
-	command := fmt.Sprintf("./scripts/runners/celery-wf.sh torchtunewrapper --job_config_name %s --job_id %s --dataset_id %s --batch_size %s --shuffle %s --num_epochs %s --use_lora %s --use_qlora %s --lr %s --seed %s --num_gpus %s",
-		config.JobConfigName, config.JobID, config.DatasetID, config.BatchSize, config.Shuffle, config.NumEpochs, config.UseLora, config.UseQlora, config.LearningRate, config.Seed, config.NumGpus)
+	scriptPath := filepath.Join(pipelineZenPath, "scripts", "runners", "celery-wf.sh")
+	if _, err := os.Stat(scriptPath); os.IsNotExist(err) {
+		logger.Error("Script not found at path: ", scriptPath)
+		return "", fmt.Errorf("script not found")
+	}
+
+	// Build the bash command string without the 'cd' and pipe
+	// command := fmt.Sprintf("./scripts/runners/celery-wf.sh torchtunewrapper --job_config_name %s --job_id %s --dataset_id %s --batch_size %s --shuffle %s --num_epochs %s --use_lora %s --use_qlora %s --lr %s --seed %s --num_gpus %s",
+	// 	config.JobConfigName, config.JobID, config.DatasetID, config.BatchSize, config.Shuffle, config.NumEpochs, config.UseLora, config.UseQlora, config.LearningRate, config.Seed, config.NumGpus)
+	command := fmt.Sprintf("%s torchtunewrapper --job_config_name %s --job_id %s --dataset_id %s --batch_size %s --shuffle %s --num_epochs %s --use_lora %s --use_qlora %s --lr %s --seed %s --num_gpus %s",
+		scriptPath, config.JobConfigName, config.JobID, config.DatasetID, config.BatchSize, config.Shuffle, config.NumEpochs, config.UseLora, config.UseQlora, config.LearningRate, config.Seed, config.NumGpus)
 
 	logger.Info("Running command: ", command)
 
-	// Execute the command
+	// Set working directory to 'pipeline-zen' folder
 	cmd := exec.Command("bash", "-c", command)
-	cmd.Dir = filepath.Join(".", "pipeline-zen") // Set working directory to pipeline-zen folder
+	cmd.Dir = pipelineZenPath
 
+	// Execute the command
 	output, err := cmd.CombinedOutput()
 	if err != nil {
 		logger.Error("Error running torchtunewrapper workflow: ", err)
 		return "", err
 	}
 
-	logger.Info("Workflow executed successfully")
+	logger.Info("Command output: ", string(output))
 	return string(output), nil
 }
