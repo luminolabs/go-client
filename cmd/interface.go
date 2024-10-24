@@ -130,6 +130,7 @@ type UtilsCmdInterface interface {
 	ExecuteCreateJob(flagSet *pflag.FlagSet)
 	CreateJob(client *ethclient.Client, config types.Configurations, account types.Account, jobDetailsJSON string, jobFee *big.Int) (common.Hash, error)
 	UpdateJobStatus(client *ethclient.Client, config types.Configurations, account types.Account, jobId *big.Int, status types.JobStatus, buffer uint8) (common.Hash, error)
+	ExecuteAssignJob(flagSet *pflag.FlagSet)
 }
 
 type KeystoreInterface interface {

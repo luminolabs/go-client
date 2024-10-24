@@ -62,6 +62,7 @@ func (u *UtilsStruct) RunExecuteJob(flagSet *pflag.FlagSet) {
 	if !ok {
 		log.Fatal("Invalid JobId format", errors.New("Failed to parse job ID string"))
 	}
+
 	configPath, err := flagSet.GetString("config")
 	utils.CheckError("Error in getting config path: ", err)
 
