@@ -41,6 +41,10 @@ func (c *TorchTuneWrapperConfig) Validate() error {
 		missingFields = append(missingFields, "num_gpus")
 		logger.Error("Missing required field: num_gpus")
 	}
+	if c.UserId == "" {
+		missingFields = append(missingFields, "user_id")
+		logger.Error("Missing required field: user_id")
+	}
 
 	if len(missingFields) > 0 {
 		return fmt.Errorf("missing required fields: %v", missingFields)
