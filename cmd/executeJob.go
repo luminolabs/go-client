@@ -62,7 +62,6 @@ func (u *UtilsStruct) RunExecuteJob(flagSet *pflag.FlagSet) {
 	if !ok {
 		log.Fatal("Invalid JobId format", errors.New("Failed to parse job ID string"))
 	}
-
 	configPath, err := flagSet.GetString("config")
 	utils.CheckError("Error in getting config path: ", err)
 
@@ -95,7 +94,7 @@ func (u *UtilsStruct) RunExecuteJob(flagSet *pflag.FlagSet) {
 	// Run the TorchTuneWrapper
 	log.Info("Running TorchTuneWrapper...")
 	go func() {
-		output, err := pipeline_zen.RunTorchTuneWrapper(configPath)
+		output, err := pipeline_zen.RunTorchTuneWrapper(pipelinePath, configPath)
 		if err != nil {
 			log.WithError(err).Error("Error running TorchTuneWrapper")
 			cmdUtils.UpdateJobStatus(client, config, types.Account{
@@ -120,7 +119,7 @@ func (u *UtilsStruct) RunExecuteJob(flagSet *pflag.FlagSet) {
 		Address:  address,
 		Password: password,
 	}, jobId, types.JobStatusCompleted, uint8(buffer))
-	log.WithField("txHash", completedJobUpdateTxn.Hex()).Info("Job status updated to Running")
+	log.WithField("txHash", completedJobUpdateTxn.Hex()).Info("Job status updated to Completed")
 
 }
 
