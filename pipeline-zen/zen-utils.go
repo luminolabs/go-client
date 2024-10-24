@@ -25,6 +25,7 @@ type TorchTuneWrapperConfig struct {
 	LearningRate  string `json:"lr"`
 	Seed          string `json:"seed"`
 	NumGpus       string `json:"num_gpus"`
+	UserId        string `json:"user_id"`
 }
 
 // log is the package-level logger instance
@@ -140,8 +141,8 @@ func RunTorchTuneWrapper(pipelineZenPath string, configFile string) (string, err
 	// Build the bash command string without the 'cd' and pipe
 	// command := fmt.Sprintf("./scripts/runners/celery-wf.sh torchtunewrapper --job_config_name %s --job_id %s --dataset_id %s --batch_size %s --shuffle %s --num_epochs %s --use_lora %s --use_qlora %s --lr %s --seed %s --num_gpus %s",
 	// 	config.JobConfigName, config.JobID, config.DatasetID, config.BatchSize, config.Shuffle, config.NumEpochs, config.UseLora, config.UseQlora, config.LearningRate, config.Seed, config.NumGpus)
-	command := fmt.Sprintf("%s torchtunewrapper --job_config_name %s --job_id %s --dataset_id %s --batch_size %s --shuffle %s --num_epochs %s --use_lora %s --use_qlora %s --lr %s --seed %s --num_gpus %s",
-		scriptPath, config.JobConfigName, config.JobID, config.DatasetID, config.BatchSize, config.Shuffle, config.NumEpochs, config.UseLora, config.UseQlora, config.LearningRate, config.Seed, config.NumGpus)
+	command := fmt.Sprintf("%s torchtunewrapper --job_config_name %s --job_id %s --dataset_id %s --batch_size %s --shuffle %s --num_epochs %s --use_lora %s --use_qlora %s --lr %s --seed %s --num_gpus %s --user_id %s",
+		scriptPath, config.JobConfigName, config.JobID, config.DatasetID, config.BatchSize, config.Shuffle, config.NumEpochs, config.UseLora, config.UseQlora, config.LearningRate, config.Seed, config.NumGpus, config.UserId)
 
 	logger.Info("Running command: ", command)
 
