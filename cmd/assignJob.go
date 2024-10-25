@@ -19,11 +19,11 @@ import (
 
 var assignJobCmd = &cobra.Command{
 	Use:   "assignJob",
-	Short: "Assign a new job",
+	Short: "Assign a job to a compute provider",
 	Long: `[ADMIN ONLY] Assign a new job by providing a job Id and an assignee.
 
 Example:
-  ./lumino assignJob -a 0xC4481aa21AeAcAD3cCFe6252c6fe2f161A47A771 --assigneeAddress 0xC4481aa21AeAcAD3cCFe6252c6fe2f161A47A771 --jobId 1`,
+  ./lumino assignJob -a 0xC4481aa21AeAcAD3cCFe6252c6fe2f161A47A771 --assignee 0xC4481aa21AeAcAD3cCFe6252c6fe2f161A47A771 --jobId 1`,
 	Run: initialiseAssignJob,
 }
 
@@ -43,9 +43,6 @@ func (*UtilsStruct) ExecuteAssignJob(flagSet *pflag.FlagSet) {
 	address, err := flagSetUtils.GetStringAddress(flagSet)
 	utils.CheckError("Error in getting address: ", err)
 
-	assigneeAddress, err := flagSetUtils.GetStringAddress(flagSet)
-	utils.CheckError("Error in getting Assignee address: ", err)
-
 	logger.SetLoggerParameters(client, address)
 	log.Debug("Checking to assign log file...")
 	protoUtils.AssignLogFile(flagSet)
@@ -53,40 +50,76 @@ func (*UtilsStruct) ExecuteAssignJob(flagSet *pflag.FlagSet) {
 	log.Debug("Getting password...")
 	password := protoUtils.AssignPassword(flagSet)
 
+	assigneeAddress, err := flagSet.GetString("assignee")
+	utils.CheckError("Error in getting assignee address: ", err)
+
+	if !common.IsHexAddress(assigneeAddress) {
+		log.WithField("assignee", assigneeAddress).Fatal("Invalid assignee address format")
+	}
+
 	jobIdStr, err := flagSet.GetString("jobId")
-	utils.CheckError("Error in getting job Id: ", err)
+	utils.CheckError("Error in getting jobId: ", err)
 
 	jobId, ok := new(big.Int).SetString(jobIdStr, 10)
 	if !ok {
 		log.Fatal("Invalid JobId format", errors.New("Failed to parse job ID string"))
 	}
 
-	// Create the job
-	log.Info("Creating job...")
-	txnHash, err := cmdUtils.AssignJob(client, config, types.Account{
+	account := types.Account{
 		Address:  address,
 		Password: password,
-	}, string(jobDetailsJSON), jobFee)
-	utils.CheckError("Error creating job: ", err)
+	}
 
-	log.Info("Job created successfully. Transaction Hash: ", txnHash.Hex())
+	buffer := uint8(0)
+	// Assign the job
+	log.Info("Assigning job...")
+	txnHash, err := cmdUtils.AssignJob(client, config, account, assigneeAddress, jobId, buffer)
+	utils.CheckError("Error assigning job: ", err)
+
+	log.WithFields(logrus.Fields{
+		"txHash":   txnHash.Hex(),
+		"jobId":    jobId.String(),
+		"assignee": assigneeAddress,
+	}).Info("Job assigned successfully")
 }
 
-func (u *UtilsStruct) AssignJob(client *ethclient.Client, config types.Configurations, account types.Account, assigneeAddress common.Address, jobId *big.Int, buffer uint8) (common.Hash, error) {
+func (u *UtilsStruct) AssignJob(client *ethclient.Client, config types.Configurations, account types.Account, assigneeAddress string, jobId *big.Int, buffer uint8) (common.Hash, error) {
 	if client == nil {
 		log.Error("Client is nil")
 		return common.Hash{}, errors.New("client is nil")
 	}
+
+	if !common.IsHexAddress(assigneeAddress) {
+		log.WithField("assignee", assigneeAddress).Error("Invalid assignee address")
+		return common.Hash{}, errors.New("invalid assignee address")
+	}
+
 	if jobId == nil {
 		log.Error("JobId is nil")
 		return common.Hash{}, errors.New("jobId is nil")
 	}
 
 	log.WithFields(logrus.Fields{
-		"adminAddress":    account.Address,
-		"jobId":           jobId.String(),
-		"assigneeAddress": assigneeAddress.String(),
-	}).Debug("Creating job")
+		"owner":    account.Address,
+		"assignee": assigneeAddress,
+		"jobId":    jobId.String(),
+	}).Debug("Assigning job")
+
+	// TODO: Implement GetJobStatus and wait for the assignState
+	// status, err := jobsManagerUtils.GetJobStatus(client, jobId)
+	// if err != nil {
+	//     log.WithError(err).WithField("jobId", jobId.String()).Error("Failed to get job status")
+	//     return common.Hash{}, err
+	// }
+
+	// Check if job status allows assignment
+	// if status != types.JobStatusNew {
+	//     log.WithFields(logrus.Fields{
+	//         "jobId": jobId.String(),
+	//         "status": status,
+	//     }).Error("Job is not in assignable state")
+	//     return common.Hash{}, errors.New("job must be in NEW status to be assigned")
+	// }
 
 	txnArgs := types.TransactionOptions{
 		Client:          client,
@@ -95,10 +128,9 @@ func (u *UtilsStruct) AssignJob(client *ethclient.Client, config types.Configura
 		ChainId:         core.ChainID,
 		Config:          config,
 		ContractAddress: core.JobManagerAddress,
-		MethodName:      "createJob",
-		Parameters:      []interface{}{jobDetailsJSON},
+		MethodName:      "assignJob",
+		Parameters:      []interface{}{jobId, common.HexToAddress(assigneeAddress), buffer},
 		ABI:             bindings.JobManagerABI,
-		EtherValue:      jobFee,
 	}
 
 	if jobsManagerUtils == nil {
@@ -107,14 +139,18 @@ func (u *UtilsStruct) AssignJob(client *ethclient.Client, config types.Configura
 	}
 
 	log.WithFields(logrus.Fields{
-		"jobFee": jobFee.String(),
-	}).Debug("Executing createJob transaction")
+		"jobId":    jobId.String(),
+		"assignee": assigneeAddress,
+	}).Debug("Executing assignJob transaction")
 
 	txnOpts := protoUtils.GetTransactionOpts(txnArgs)
 
-	txn, err := jobsManagerUtils.CreateJob(txnArgs.Client, txnOpts, jobDetailsJSON)
+	txn, err := jobsManagerUtils.AssignJob(client, txnOpts, jobId, common.HexToAddress(assigneeAddress), buffer)
 	if err != nil {
-		log.WithError(err).Error("Failed to create job")
+		log.WithError(err).WithFields(logrus.Fields{
+			"jobId":    jobId.String(),
+			"assignee": assigneeAddress,
+		}).Error("Failed to assign job")
 		return common.Hash{}, err
 	}
 
@@ -124,11 +160,18 @@ func (u *UtilsStruct) AssignJob(client *ethclient.Client, config types.Configura
 	}
 
 	txnHash := transactionUtils.Hash(txn)
-	log.WithField("txHash", txnHash.Hex()).Info("Job creation transaction submitted")
+	log.WithFields(logrus.Fields{
+		"txHash":   txnHash.Hex(),
+		"jobId":    jobId.String(),
+		"assignee": assigneeAddress,
+	}).Info("Job assignment transaction submitted")
 
 	err = protoUtils.WaitForBlockCompletion(txnArgs.Client, txnHash.Hex())
 	if err != nil {
-		log.WithError(err).Error("Failed to wait for block completion")
+		log.WithError(err).WithFields(logrus.Fields{
+			"jobId":    jobId.String(),
+			"assignee": assigneeAddress,
+		}).Error("Failed to wait for block completion")
 		return common.Hash{}, err
 	}
 
@@ -136,24 +179,28 @@ func (u *UtilsStruct) AssignJob(client *ethclient.Client, config types.Configura
 }
 
 func init() {
-	rootCmd.AddCommand(createJobCmd)
+	rootCmd.AddCommand(assignJobCmd)
 
 	var (
-		Account    string
-		Password   string
-		ConfigPath string
-		JobFee     string
+		Account  string
+		Password string
+		Assignee string
+		JobId    string
 	)
 
-	createJobCmd.Flags().StringVarP(&Account, "address", "a", "", "address of the job creator")
-	createJobCmd.Flags().StringVarP(&Password, "password", "", "", "password path of job creator to protect the keystore")
-	createJobCmd.Flags().StringVarP(&ConfigPath, "config", "c", "", "path to the job configuration file")
-	createJobCmd.Flags().StringVarP(&JobFee, "jobFee", "f", "", "job fee in wei")
+	assignJobCmd.Flags().StringVarP(&Account, "address", "a", "", "address of the job owner")
+	assignJobCmd.Flags().StringVarP(&Password, "password", "", "", "password path of job owner")
+	assignJobCmd.Flags().StringVarP(&Assignee, "assignee", "", "", "address of the compute provider to assign")
+	assignJobCmd.Flags().StringVarP(&JobId, "jobId", "", "", "ID of the job to assign")
 
-	AddrErr := createJobCmd.MarkFlagRequired("address")
-	utils.CheckError("Address error: ", AddrErr)
-	configPath := createJobCmd.MarkFlagRequired("config")
-	utils.CheckError("Path error : ", configPath)
-	jobFee := createJobCmd.MarkFlagRequired("jobFee")
-	utils.CheckError("JobFee error : ", jobFee)
+	// Check errors when marking flags as required
+	if err := assignJobCmd.MarkFlagRequired("address"); err != nil {
+		log.WithError(err).Fatal("Error marking 'address' flag as required")
+	}
+	if err := assignJobCmd.MarkFlagRequired("assignee"); err != nil {
+		log.WithError(err).Fatal("Error marking 'assignee' flag as required")
+	}
+	if err := assignJobCmd.MarkFlagRequired("jobId"); err != nil {
+		log.WithError(err).Fatal("Error marking 'jobId' flag as required")
+	}
 }
