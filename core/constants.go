@@ -16,7 +16,7 @@ var MaxRetries uint = 8
 var DefaultRPCProvider = "https://eth-holesky.g.alchemy.com/v2/qbVOVZLKUYs3a8qDp59zmHGpY-VdpSlg"
 
 // DefaultBufferPercent is the default buffer percentage for state transitions
-var DefaultBufferPercent = 20
+var DefaultBufferPercent = 0
 
 var DefaultGasMultiplier = 1.0
 var DefaultGasPrice = 1
@@ -29,7 +29,7 @@ var NilHash = common.Hash{0x00}
 var BlockCompletionTimeout = 60
 
 // EpochLength defines the duration of an epoch in seconds (20 minutes)
-var EpochLength int64 = 1200
+var EpochLength int64 = 60
 
 // NumberOfStates defines the number of states in an epoch
 var NumberOfStates int64 = 3
