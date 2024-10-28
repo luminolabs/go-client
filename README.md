@@ -52,8 +52,19 @@ The Lumino Go Client is a command-line interface (CLI) application for interacti
    ```
    ./luminocli --help
    ```
+   
+## 3. Running with Docker on Linux
+First, build the Docker image:
+```
+./scripts/docker-build.sh
+```
 
-## 3. Project Structure
+Then, run the Lumino Client with Docker; for example, to stake 1 token:
+```
+./scripts/docker-run.sh ./lumino stake --address 0xC4481aa21AeAcAD3cCFe6252c6fe2f161A47A771 --value 1  --logLevel debug 
+```
+
+## 4. Project Structure
 
 ```
 luminoclient/
@@ -89,9 +100,9 @@ luminoclient/
 └── main.go              # Application entry point
 ```
 
-## 4. Core Components
+## 5. Core Components
 
-### 4.1 Command (cmd) Package
+### 5.1 Command (cmd) Package
 
 The `cmd` package is the heart of the CLI, implementing various commands using the Cobra library.
 
@@ -116,15 +127,15 @@ func init() {
 }
 ```
 
-### 4.2 Core Types
+### 5.2 Core Types
 
 The `core/types` package defines the main data structures used throughout the application. When working with these types, ensure you understand their relationships and how they map to the Lumino network concepts.
 
-### 4.3 Utility Functions
+### 5.3 Utility Functions
 
 The `utils` package contains helper functions for common operations. When adding new functionality, consider if it can be generalized and added to this package for reuse.
 
-## 5. Command Line Interface
+## 6. Command Line Interface
 
 The CLI is built using the Cobra library. Key points to remember:
 
@@ -133,7 +144,7 @@ The CLI is built using the Cobra library. Key points to remember:
 - Use flags for command options (defined using `cmd.Flags().StringP()` or similar methods)
 - Implement `Run` functions for each command to define its behavior
 
-## 6. Development Workflow
+## 7. Development Workflow
 
 1. **Feature Planning**: Discuss new features in the issue tracker before implementation.
 2. **Branch Creation**: Create a new branch for each feature or bug fix.
@@ -144,7 +155,7 @@ The CLI is built using the Cobra library. Key points to remember:
 7. **Code Review**: Address any feedback from the code review.
 8. **Merge**: Once approved, merge the pull request into the main branch.
 
-## 7. Testing
+## 8. Testing
 
 - Write unit tests for all new functionality
 - Use table-driven tests for testing multiple scenarios
@@ -175,7 +186,7 @@ func TestSomeFunction(t *testing.T) {
 }
 ```
 
-## 8. Common Patterns and Best Practices
+## 9. Common Patterns and Best Practices
 
 - Use interfaces for better testability and modularity (see `cmd/interface.go`)
 - Follow Go naming conventions (e.g., use MixedCaps or mixedCaps)
@@ -183,7 +194,7 @@ func TestSomeFunction(t *testing.T) {
 - Use context for managing timeouts and cancellations in long-running operations
 - Prefer composition over inheritance
 
-## 9. Troubleshooting
+## 10. Troubleshooting
 
 Common issues and their solutions:
 
