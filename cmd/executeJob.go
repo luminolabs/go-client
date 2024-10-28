@@ -10,6 +10,7 @@ import (
 	"lumino/pkg/bindings"
 	"lumino/utils"
 	"math/big"
+	"time"
 
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/ethclient"
@@ -24,7 +25,9 @@ var executeJobCmd = &cobra.Command{
 	Long: `A job consists of parameters and config for training and fine-tuning the model. The executeJob command can be used to execute an existing ML Job, using the ML-pipeline package.
 
 Example:
-  ./lumino executeJob -a 0xC4481aa21AeAcAD3cCFe6252c6fe2f161A47A771 --jobId 1 --config /path/to/config 
+  ./lumino executeJob -a 0xC4481aa21AeAcAD3cCFe6252c6fe2f161A47A771 --jobId 1 --config /path/to/config --pipeline-path /path/to/pipeline-zen  
+  [FOR ADMIN]
+  ./lumino executeJob -a 0xC4481aa21AeAcAD3cCFe6252c6fe2f161A47A771 --jobId 1 --config /path/to/config --pipeline-path /path/to/pipeline-zen  --isAdmin
 
 Note: 
   This command only works for the compute provider.
@@ -67,6 +70,31 @@ func (u *UtilsStruct) RunExecuteJob(flagSet *pflag.FlagSet) {
 
 	pipelinePath, err := flagSet.GetString("zen-path")
 	utils.CheckError("Error in getting pipeline path: ", err)
+
+	isAdmin, err := flagSet.GetBool("isAdmin")
+	utils.CheckError("Error in getting admin flag: ", err)
+
+	if isAdmin && address != "0xC4481aa21AeAcAD3cCFe6252c6fe2f161A47A771" {
+		log.Fatal("Only Admin can pass the isAdmin Flag")
+	}
+
+	opts := protoUtils.GetOptions()
+	stateManagerUtils.WaitForNextState(client, &opts, types.EpochStateAssign)
+
+	for {
+		currentEpoch, currentState, err := cmdUtils.GetEpochAndState(client)
+		if err != nil {
+			log.Error(err)
+		}
+		log.Infof("State: %s Epoch: %v", utils.UtilsInterface.GetStateName(currentState), currentEpoch)
+		time.Sleep(5 * time.Second)
+
+		switch currentState {
+		case int64(types.EpochStateAssign):
+
+		}
+
+	}
 
 	// Install dependencies with live logging
 	log.Info("Starting dependency installation...")
@@ -233,6 +261,7 @@ func init() {
 		Password   string
 		ConfigPath string
 		ZenPath    string
+		IsAdmin    bool
 	)
 
 	executeJobCmd.Flags().StringVarP(&JobId, "jobId", "", string(0), "job id")
@@ -240,6 +269,7 @@ func init() {
 	executeJobCmd.Flags().StringVarP(&Password, "password", "", "", "password path of compute provider to protect the keystore")
 	executeJobCmd.Flags().StringVarP(&ConfigPath, "config", "c", "", "path to the job configuration file")
 	executeJobCmd.Flags().StringVarP(&ZenPath, "zen-path", "z", "", "path to the pipeline-zen directory")
+	executeJobCmd.Flags().BoolVarP(&IsAdmin, "isAdmin", "", false, "whether the executor is an admin")
 
 	AddrErr := executeJobCmd.MarkFlagRequired("address")
 	utils.CheckError("Address error : ", AddrErr)

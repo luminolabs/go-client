@@ -21,6 +21,7 @@ import (
 	Types "github.com/ethereum/go-ethereum/core/types"
 	"github.com/ethereum/go-ethereum/crypto"
 	"github.com/ethereum/go-ethereum/ethclient"
+	"github.com/sirupsen/logrus"
 	"github.com/spf13/pflag"
 	"github.com/spf13/viper"
 )
@@ -316,6 +317,51 @@ func (jobManagerUtils *JobsManagerUtils) AssignJob(client *ethclient.Client, opt
 	}
 	// TODO: set Buffer from buffer config
 	return jobManager.AssignJob(opts, jobId, assignee, 0)
+}
+
+func (jobManagerUtils *JobsManagerUtils) GetActiveJobs(client *ethclient.Client, opts *bind.CallOpts) ([]*big.Int, error) {
+	jobManager, err := bindings.NewJobManager(common.HexToAddress(core.JobManagerAddress), client)
+	if err != nil {
+		return nil, err
+	}
+	return jobManager.GetActiveJobs(opts)
+}
+
+func (stateManagerUtils *StateManagerUtils) GetEpoch(client *ethclient.Client, opts *bind.CallOpts) (uint32, error) {
+	stateManager, err := bindings.NewStateManager(common.HexToAddress(core.StateManagerAddress), client)
+	if err != nil {
+		return 0, err
+	}
+	return stateManager.GetEpoch(opts)
+}
+
+func (stateManagerUtils *StateManagerUtils) GetState(client *ethclient.Client, opts *bind.CallOpts, buffer uint8) (uint8, error) {
+	stateManager, err := bindings.NewStateManager(common.HexToAddress(core.StateManagerAddress), client)
+	if err != nil {
+		return 0, err
+	}
+	return stateManager.GetState(opts, buffer)
+}
+
+func (stateManagerUtils *StateManagerUtils) WaitForNextState(client *ethclient.Client, opts *bind.CallOpts, targetState types.EpochState) error {
+	log.WithField("targetState", utils.UtilsInterface.GetStateName(int64(targetState))).Info("Waiting for next state")
+
+	for {
+		currentState, err := stateManagerUtils.GetState(client, opts, 0)
+		if err != nil {
+			return err
+		}
+		if currentState == uint8(targetState) {
+			log.WithField("state", utils.UtilsInterface.GetStateName(int64(targetState))).Info("Target state reached")
+			return nil
+		}
+		log.WithFields(logrus.Fields{
+			"currentState": currentState,
+			"targetState":  utils.UtilsInterface.GetStateName(int64(targetState)),
+		}).Debug("Waiting for state transition")
+
+		time.Sleep(2)
+	}
 }
 
 func (keystoreUtils KeystoreUtils) ImportECDSA(path string, priv *ecdsa.PrivateKey, passphrase string) (accounts.Account, error) {

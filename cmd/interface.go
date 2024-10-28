@@ -83,6 +83,9 @@ type FlagSetInterface interface {
 
 type StateManagerInterface interface {
 	NetworkInfo(client *ethclient.Client, opts *bind.CallOpts) (types.NetworkInfo, error)
+	GetEpoch(client *ethclient.Client, opts *bind.CallOpts) (uint32, error)
+	GetState(client *ethclient.Client, opts *bind.CallOpts, buffer uint8) (uint8, error)
+	WaitForNextState(client *ethclient.Client, opts *bind.CallOpts, targetState types.EpochState) error
 }
 
 type StakeManagerInterface interface {
