@@ -53,7 +53,7 @@ The Lumino Go Client is a command-line interface (CLI) application for interacti
    ./luminocli --help
    ```
    
-## 3. Running with Docker on Linux
+## 3. Running with Docker
 First, build the Docker image:
 ```
 ./scripts/docker-build.sh
