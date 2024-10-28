@@ -30,11 +30,6 @@ RUN pip install torch==2.4.1 transformers==4.44.2 datasets==3.0.0
 COPY pipeline-zen-src/lib-common/requirements.txt ./requirements-lib-common.txt
 RUN pip install -r requirements-lib-common.txt
 
-#COPY ao-src ao-src
-#RUN pip install --pre --upgrade torchao --index-url https://download.pytorch.org/whl/nightly/cpu
-#RUN cd ao-src && TORCHAO_NIGHTLY=1 python setup.py install
-#RUN pip install bitsandbytes==0.42.0 torchtune==0.2.1
-
 # Install python libraries needed by the workflow
 COPY pipeline-zen-src/lib-workflows/torchtunewrapper/requirements.txt ./requirements-workflow.txt
 RUN pip install -r requirements-workflow.txt

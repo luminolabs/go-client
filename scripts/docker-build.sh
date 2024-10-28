@@ -15,4 +15,4 @@ fi
 
 # Build the Docker image
 echo "Building the Docker image; tag: go-client:latest"
-docker buildx build . -t go-client:latest
+docker buildx build . -t go-client:latest --platform="linux/amd64"
