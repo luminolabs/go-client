@@ -136,9 +136,6 @@ func (*UtilsStruct) GetEpoch(client *ethclient.Client) (uint32, error) {
 	if client == nil {
 		return 0, fmt.Errorf("ethclient is nil")
 	}
-	if UtilsInterface != nil {
-		log.Info("checkpoint 2 in common.go", client)
-	}
 	latestHeader, err := UtilsInterface.GetLatestBlockWithRetry(client)
 	if err != nil {
 		log.Error("Error in fetching block: ", err)
