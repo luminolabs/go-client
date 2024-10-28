@@ -309,6 +309,15 @@ func (jobManagerUtils *JobsManagerUtils) UpdateJobStatus(client *ethclient.Clien
 	return jobManager.UpdateJobStatus(opts, jobId, status, 0)
 }
 
+func (jobManagerUtils *JobsManagerUtils) AssignJob(client *ethclient.Client, opts *bind.TransactOpts, jobId *big.Int, assignee common.Address, buffer uint8) (*Types.Transaction, error) {
+	jobManager, err := bindings.NewJobManager(common.HexToAddress(core.JobManagerAddress), client)
+	if err != nil {
+		return nil, err
+	}
+	// TODO: set Buffer from buffer config
+	return jobManager.AssignJob(opts, jobId, assignee, 0)
+}
+
 func (keystoreUtils KeystoreUtils) ImportECDSA(path string, priv *ecdsa.PrivateKey, passphrase string) (accounts.Account, error) {
 	ks := keystore.NewKeyStore(path, keystore.StandardScryptN, keystore.StandardScryptP)
 	return ks.ImportECDSA(priv, passphrase)

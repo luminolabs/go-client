@@ -94,6 +94,7 @@ type StakeManagerInterface interface {
 type JobsManagerInterface interface {
 	CreateJob(client *ethclient.Client, opts *bind.TransactOpts, jobDetailsJSON string) (*Types.Transaction, error)
 	UpdateJobStatus(client *ethclient.Client, opts *bind.TransactOpts, jobId *big.Int, status uint8, buffer uint8) (*Types.Transaction, error)
+	AssignJob(client *ethclient.Client, opts *bind.TransactOpts, jobId *big.Int, assignee common.Address, buffer uint8) (*Types.Transaction, error)
 }
 
 type TransactionInterface interface {
@@ -130,6 +131,8 @@ type UtilsCmdInterface interface {
 	ExecuteCreateJob(flagSet *pflag.FlagSet)
 	CreateJob(client *ethclient.Client, config types.Configurations, account types.Account, jobDetailsJSON string, jobFee *big.Int) (common.Hash, error)
 	UpdateJobStatus(client *ethclient.Client, config types.Configurations, account types.Account, jobId *big.Int, status types.JobStatus, buffer uint8) (common.Hash, error)
+	ExecuteAssignJob(flagSet *pflag.FlagSet)
+	AssignJob(client *ethclient.Client, config types.Configurations, account types.Account, assigneeAddress string, jobId *big.Int, buffer uint8) (common.Hash, error)
 }
 
 type KeystoreInterface interface {
