@@ -2,14 +2,17 @@
 package cmd
 
 import (
+	"context"
 	"errors"
 	"lumino/core"
 	"lumino/core/types"
 	"lumino/logger"
-	pipeline_zen "lumino/pipeline-zen"
 	"lumino/pkg/bindings"
 	"lumino/utils"
 	"math/big"
+	"os"
+	"os/signal"
+	"sync"
 	"time"
 
 	"github.com/ethereum/go-ethereum/common"
@@ -17,6 +20,11 @@ import (
 	"github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 	"github.com/spf13/pflag"
+)
+
+var (
+	executionState types.JobExecutionState
+	stateMutex     sync.RWMutex
 )
 
 var executeJobCmd = &cobra.Command{
@@ -41,7 +49,7 @@ func initialiseExecuteJob(cmd *cobra.Command, args []string) {
 }
 
 // This function sets the flag appropriately and executes the UpdateJob function
-func (u *UtilsStruct) RunExecuteJob(flagSet *pflag.FlagSet) {
+func (*UtilsStruct) RunExecuteJob(flagSet *pflag.FlagSet) {
 	config, err := cmdUtils.GetConfigData()
 	utils.CheckError("Error in getting config: ", err)
 	log.Debugf("RunExecuteJob: Config: %+v", config)
@@ -58,15 +66,15 @@ func (u *UtilsStruct) RunExecuteJob(flagSet *pflag.FlagSet) {
 	log.Debug("Getting password...")
 	password := protoUtils.AssignPassword(flagSet)
 
-	jobIdStr, err := flagSet.GetString("jobId")
-	utils.CheckError("Error in getting jobId: ", err)
+	// jobIdStr, err := flagSet.GetString("jobId")
+	// utils.CheckError("Error in getting jobId: ", err)
 
-	jobId, ok := new(big.Int).SetString(jobIdStr, 10)
-	if !ok {
-		log.Fatal("Invalid JobId format", errors.New("Failed to parse job ID string"))
-	}
-	configPath, err := flagSet.GetString("config")
-	utils.CheckError("Error in getting config path: ", err)
+	// jobId, ok := new(big.Int).SetString(jobIdStr, 10)
+	// if !ok {
+	// 	log.Fatal("Invalid JobId format", errors.New("Failed to parse job ID string"))
+	// }
+	// configPath, err := flagSet.GetString("config")
+	// utils.CheckError("Error in getting config path: ", err)
 
 	pipelinePath, err := flagSet.GetString("zen-path")
 	utils.CheckError("Error in getting pipeline path: ", err)
@@ -78,80 +86,126 @@ func (u *UtilsStruct) RunExecuteJob(flagSet *pflag.FlagSet) {
 		log.Fatal("Only Admin can pass the isAdmin Flag")
 	}
 
-	opts := protoUtils.GetOptions()
-	stateManagerUtils.WaitForNextState(client, &opts, types.EpochStateAssign)
-
-	for {
-		currentEpoch, currentState, err := cmdUtils.GetEpochAndState(client)
-		if err != nil {
-			log.Error(err)
-		}
-		log.Infof("State: %s Epoch: %v", utils.UtilsInterface.GetStateName(currentState), currentEpoch)
-		time.Sleep(5 * time.Second)
-
-		switch currentState {
-		case int64(types.EpochStateAssign):
-
-		}
-
-	}
-
-	// Install dependencies with live logging
-	log.Info("Starting dependency installation...")
-	err = pipeline_zen.InstallDeps(pipelinePath)
-	if err != nil {
-		log.WithError(err).Fatal("Failed to install dependencies")
-	}
-	log.Info("Dependencies installed successfully")
-
-	// Hardcoded, to be changed in future
-	status := types.JobStatusQueued
-	buffer := 0
-
-	// Update job status to Queued
-	log.Info("Updating job status to Queued...")
-	jobUpdateTxn, err := cmdUtils.UpdateJobStatus(client, config, types.Account{
+	account := types.Account{
 		Address:  address,
 		Password: password,
-	}, jobId, status, uint8(buffer))
-	if err != nil {
-		log.WithError(err).Fatal("Failed to update job status to Queued")
 	}
-	log.WithField("txHash", jobUpdateTxn.Hex()).Info("Job status updated to Queued")
 
-	// Run the TorchTuneWrapper
-	log.Info("Running TorchTuneWrapper...")
-	go func() {
-		output, err := pipeline_zen.RunTorchTuneWrapper(pipelinePath, configPath)
-		if err != nil {
-			log.WithError(err).Error("Error running TorchTuneWrapper")
-			cmdUtils.UpdateJobStatus(client, config, types.Account{
-				Address:  address,
-				Password: password,
-			}, jobId, types.JobStatusFailed, uint8(buffer))
-			return
-		}
-		log.Info("Updating job status to Running...")
-		runningTxnHash, err := cmdUtils.UpdateJobStatus(client, config, types.Account{
-			Address:  address,
-			Password: password,
-		}, jobId, types.JobStatusRunning, uint8(buffer))
-		log.WithField("txHash", runningTxnHash.Hex()).Info("Job status updated to Running")
+	// Initialize execution state
+	executionState = types.JobExecutionState{
+		IsJobRunning: false,
+		CurrentJob:   nil,
+	}
 
-		log.Debug("TorchTuneWrapper output: ", output)
-		log.Info("Job execution initiated. Monitor logs for progress.")
-	}()
+	// Handle graceful shutdown
+	ctx, cancel := context.WithCancel(context.Background())
+	defer cancel()
 
-	// Update job status to Running
-	completedJobUpdateTxn, err := cmdUtils.UpdateJobStatus(client, config, types.Account{
-		Address:  address,
-		Password: password,
-	}, jobId, types.JobStatusCompleted, uint8(buffer))
-	log.WithField("txHash", completedJobUpdateTxn.Hex()).Info("Job status updated to Completed")
+	handleGracefulShutdown(ctx, cancel)
 
+	// Start the main execution loop
+	if err := cmdUtils.ExecuteJob(ctx, client, config, account, isAdmin, pipelinePath); err != nil {
+		log.WithError(err).Fatal("Job execution failed")
+	}
 }
 
-func (u *UtilsStruct) UpdateJobStatus(client *ethclient.Client, config types.Configurations, account types.Account, jobId *big.Int, status types.JobStatus, buffer uint8) (common.Hash, error) {
+func handleGracefulShutdown(ctx context.Context, cancel context.CancelFunc) {
+	signalChan := make(chan os.Signal, 1)
+	signal.Notify(signalChan, os.Interrupt)
+
+	go func() {
+		select {
+		case <-signalChan:
+			log.Warn("Received interrupt signal. Starting graceful shutdown...")
+			stateMutex.RLock()
+			if executionState.CurrentJob != nil {
+				log.Info("Currently executing job will be marked as failed")
+				// Handle cleanup for current job
+			}
+			stateMutex.RUnlock()
+			log.Info("Press CTRL+C again to force terminate.")
+			cancel()
+		case <-ctx.Done():
+		}
+		<-signalChan
+		os.Exit(2)
+	}()
+}
+
+// 	opts := protoUtils.GetOptions()
+// 	stateManagerUtils.WaitForNextState(client, &opts, types.EpochStateAssign)
+
+// 	for {
+// 		currentEpoch, currentState, err := cmdUtils.GetEpochAndState(client)
+// 		if err != nil {
+// 			log.Error(err)
+// 		}
+// 		log.Infof("State: %s Epoch: %v", utils.UtilsInterface.GetStateName(currentState), currentEpoch)
+// 		time.Sleep(5 * time.Second)
+
+// 		switch currentState {
+// 		case int64(types.EpochStateAssign):
+
+// 		}
+
+// 	}
+
+// 	// Install dependencies with live logging
+// 	log.Info("Starting dependency installation...")
+// 	err = pipeline_zen.InstallDeps(pipelinePath)
+// 	if err != nil {
+// 		log.WithError(err).Fatal("Failed to install dependencies")
+// 	}
+// 	log.Info("Dependencies installed successfully")
+
+// 	// Hardcoded, to be changed in future
+// 	status := types.JobStatusQueued
+// 	buffer := 0
+
+// 	// Update job status to Queued
+// 	log.Info("Updating job status to Queued...")
+// 	jobUpdateTxn, err := cmdUtils.UpdateJobStatus(client, config, types.Account{
+// 		Address:  address,
+// 		Password: password,
+// 	}, jobId, status, uint8(buffer))
+// 	if err != nil {
+// 		log.WithError(err).Fatal("Failed to update job status to Queued")
+// 	}
+// 	log.WithField("txHash", jobUpdateTxn.Hex()).Info("Job status updated to Queued")
+
+// 	// Run the TorchTuneWrapper
+// 	log.Info("Running TorchTuneWrapper...")
+// 	go func() {
+// 		output, err := pipeline_zen.RunTorchTuneWrapper(pipelinePath, configPath)
+// 		if err != nil {
+// 			log.WithError(err).Error("Error running TorchTuneWrapper")
+// 			cmdUtils.UpdateJobStatus(client, config, types.Account{
+// 				Address:  address,
+// 				Password: password,
+// 			}, jobId, types.JobStatusFailed, uint8(buffer))
+// 			return
+// 		}
+// 		log.Info("Updating job status to Running...")
+// 		runningTxnHash, err := cmdUtils.UpdateJobStatus(client, config, types.Account{
+// 			Address:  address,
+// 			Password: password,
+// 		}, jobId, types.JobStatusRunning, uint8(buffer))
+// 		log.WithField("txHash", runningTxnHash.Hex()).Info("Job status updated to Running")
+
+// 		log.Debug("TorchTuneWrapper output: ", output)
+// 		log.Info("Job execution initiated. Monitor logs for progress.")
+// 	}()
+
+// 	// Update job status to Running
+// 	completedJobUpdateTxn, err := cmdUtils.UpdateJobStatus(client, config, types.Account{
+// 		Address:  address,
+// 		Password: password,
+// 	}, jobId, types.JobStatusCompleted, uint8(buffer))
+// 	log.WithField("txHash", completedJobUpdateTxn.Hex()).Info("Job status updated to Completed")
+
+// }
+
+func (*UtilsStruct) UpdateJobStatus(client *ethclient.Client, config types.Configurations, account types.Account, jobId *big.Int, status types.JobStatus, buffer uint8) (common.Hash, error) {
 	if client == nil {
 		log.Error("Client is nil")
 		return common.Hash{}, errors.New("client is nil")
@@ -226,30 +280,36 @@ func (u *UtilsStruct) UpdateJobStatus(client *ethclient.Client, config types.Con
 }
 
 // This function allows the admin to update an existing job
-func (*UtilsStruct) ExecuteJob(client *ethclient.Client, config types.Configurations, jobId uint16) (common.Hash, error) {
-	// _, err := cmdUtils.WaitIfCommitState(client, "update job")
-	// if err != nil {
-	// 	log.Error("Error in fetching state")
-	// 	return core.NilHash, err
-	// }
-	// txnArgs := protoUtils.GetTxnOpts(types.TransactionOptions{
-	// 	Client:          client,
-	// 	Password:        jobInput.Password,
-	// 	AccountAddress:  jobInput.Address,
-	// 	ChainId:         core.ChainId,
-	// 	Config:          config,
-	// 	ContractAddress: core.CollectionManagerAddress,
-	// 	MethodName:      "updateJob",
-	// 	Parameters:      []interface{}{jobId, jobInput.Weight, jobInput.Power, jobInput.SelectorType, jobInput.Selector, jobInput.Url},
-	// 	ABI:             bindings.CollectionManagerABI,
-	// })
-	// log.Debugf("Executing UpdateJob transaction with arguments jobId = %d, weight = %d, power = %d, selector type = %d, selector = %s, URL = %s", jobId, jobInput.Weight, jobInput.Power, jobInput.SelectorType, jobInput.Selector, jobInput.Url)
-	// txn, err := assetManagerUtils.UpdateJob(client, txnArgs, jobId, jobInput.Weight, jobInput.Power, jobInput.SelectorType, jobInput.Selector, jobInput.Url)
-	// if err != nil {
-	// 	return core.NilHash, err
-	// }
-	// return transactionUtils.Hash(txn), nil
-	return core.NilHash, nil
+func (*UtilsStruct) ExecuteJob(ctx context.Context, client *ethclient.Client, config types.Configurations, account types.Account, isAdmin bool, pipelinePath string) error {
+	ticker := time.NewTicker(time.Duration(core.StateCheckInterval) * time.Second)
+	defer ticker.Stop()
+
+	for {
+		select {
+		case <-ctx.Done():
+			return nil
+		case <-ticker.C:
+			epoch, state, err := cmdUtils.GetEpochAndState(client)
+			if err != nil {
+				log.WithError(err).Error("Failed to get current state and epoch")
+				continue
+			}
+
+			stateMutex.Lock()
+			executionState.CurrentState = types.EpochState(state)
+			executionState.CurrentEpoch = epoch
+			stateMutex.Unlock()
+
+			log.WithFields(logrus.Fields{
+				"state": utils.UtilsInterface.GetStateName(state),
+				"epoch": epoch,
+			}).Debug("Current network state")
+
+			if err := cmdUtils.HandleStateTransition(ctx, client, config, account, types.EpochState(state), epoch, isAdmin, pipelinePath); err != nil {
+				log.WithError(err).Error("Error handling state transition")
+			}
+		}
+	}
 }
 
 func init() {
