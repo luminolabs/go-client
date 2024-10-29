@@ -24,7 +24,7 @@ func (*UtilsStruct) GetStateName(stateNumber int64) string {
 	case 0:
 		stateName = "Assign"
 	case 1:
-		stateName = "Accept"
+		stateName = "Update"
 	case 2:
 		stateName = "Confirm"
 	default:

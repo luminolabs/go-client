@@ -103,6 +103,7 @@ type JobsManagerInterface interface {
 	GetActiveJobs(client *ethclient.Client, opts *bind.CallOpts) ([]*big.Int, error)
 	GetJobForStaker(client *ethclient.Client, opts *bind.CallOpts, stakerAddress common.Address) (*big.Int, error)
 	GetJobStatus(client *ethclient.Client, opts *bind.CallOpts, jobId *big.Int) (uint8, error)
+	GetJobDetails(client *ethclient.Client, opts *bind.CallOpts, jobId *big.Int) (types.JobContract, error)
 }
 
 type TransactionInterface interface {

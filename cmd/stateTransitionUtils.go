@@ -9,6 +9,7 @@ import (
 	"math/big"
 	"os"
 	"path/filepath"
+	"strings"
 	"time"
 
 	"github.com/ethereum/go-ethereum/common"
@@ -36,43 +37,66 @@ func (*UtilsStruct) HandleStateTransition(ctx context.Context, client *ethclient
 	}
 }
 
-func (u *UtilsStruct) HandleAssignState(ctx context.Context, client *ethclient.Client, config types.Configurations, account types.Account, epoch uint32) error {
+func (*UtilsStruct) HandleAssignState(ctx context.Context, client *ethclient.Client, config types.Configurations, account types.Account, epoch uint32) error {
 
+	log.WithFields(logrus.Fields{
+		"Current Task": "Executing Handle Assign State",
+	}).Info("In Assign State")
 	opts := protoUtils.GetOptions()
-	numStakers := stakeManagerUtils.GetNumStakers(client, opts)
+	config, err := cmdUtils.GetConfigData()
+	// TODO: to be replaced by activeStaker or a better mechanism
+	// numStakers, err := stakeManagerUtils.GetNumStakers(client, &opts)
+	// if err != nil {
+	// 	log.Error("Error in getting Num stakers: ", err)
+	// 	return fmt.Errorf("failed to get Number of stakers jobs: %w", err)
+	// }
+	log.Debug("Num stakers : ", 3)
+
+	activeStakers := [3]string{"0xab110dA2064AC0B44c08D71A3D8148BBB0C3aD1F", "0xC4481aa21AeAcAD3cCFe6252c6fe2f161A47A771", "0x68D12CaB6c4016A0daEeBA779205727dd6031a9a"}
+
 	// Get unassigned jobs and assign them
 	// TODO: to be moved to jobsManagerUtils in struct Utils in future
-	unassignedJobs, err := jobsManagerUtils.GetActiveJobs(client)
+	unassignedJobs, err := jobsManagerUtils.GetActiveJobs(client, &opts)
 	if err != nil {
 		return fmt.Errorf("failed to get unassigned jobs: %w", err)
 	}
+	if len(unassignedJobs) == 0 {
+		log.Info("No active jobs to be assigned")
+	} else {
+		log.Debug("ActiveUnassignedJobs : ", unassignedJobs)
+	}
 
+	// TODO: make assignJob accept array input
 	for _, jobId := range unassignedJobs {
 		// Pick a random staker
 		selectedStaker := activeStakers[rand.Intn(len(activeStakers))]
 
-		log.WithFields(logrus.Fields{
-			"jobId":  jobId.String(),
-			"staker": selectedStaker.Hex(),
-		}).Info("Assigning job")
+		if jobId.Cmp(big.NewInt(0)) == 1 {
 
-		txnHash, err := u.AssignJob(client, config, account, selectedStaker.Hex(), jobId)
-		if err != nil {
-			log.WithError(err).Error("Failed to assign job")
-			continue
+			log.WithFields(logrus.Fields{
+				"jobId":  jobId.String(),
+				"staker": selectedStaker,
+			}).Info("Assigning job")
+
+			txnHash, err := cmdUtils.AssignJob(client, config, account, selectedStaker, jobId, 0)
+			if err != nil {
+				log.WithError(err).Error("Failed to assign job")
+				continue
+			}
+
+			log.WithField("txHash", txnHash.Hex()).Info("Job assigned successfully")
 		}
-
-		log.WithField("txHash", txnHash.Hex()).Info("Job assigned successfully")
 	}
-
 	return nil
 }
 
-func (u *UtilsStruct) HandleUpdateState(ctx context.Context, client *ethclient.Client, config types.Configurations, account types.Account, epoch uint32, pipelinePath string) error {
+func (*UtilsStruct) HandleUpdateState(ctx context.Context, client *ethclient.Client, config types.Configurations, account types.Account, epoch uint32, pipelinePath string) error {
 	// Check if already running a job
 	stateMutex.RLock()
 	isJobRunning := executionState.IsJobRunning
 	stateMutex.RUnlock()
+
+	opts := protoUtils.GetOptions()
 
 	if isJobRunning {
 		log.Info("Already running a job")
@@ -80,7 +104,7 @@ func (u *UtilsStruct) HandleUpdateState(ctx context.Context, client *ethclient.C
 	}
 
 	// Get job assigned to this staker
-	jobId, err := jobsManagerUtils.GetJobForStaker(client, common.HexToAddress(account.Address))
+	jobId, err := jobsManagerUtils.GetJobForStaker(client, &opts, common.HexToAddress(account.Address))
 	if err != nil {
 		return fmt.Errorf("failed to get job for staker: %w", err)
 	}
@@ -91,97 +115,110 @@ func (u *UtilsStruct) HandleUpdateState(ctx context.Context, client *ethclient.C
 	}
 
 	// Get job status
-	status, err := jobsManagerUtils.GetJobStatus(client, jobId)
+	status, err := jobsManagerUtils.GetJobStatus(client, &opts, jobId)
 	if err != nil {
 		return fmt.Errorf("failed to get job status: %w", err)
 	}
 
-	if status != types.JobStatusAssigned {
+	if status != uint8(types.JobStatusQueued) {
 		log.WithFields(logrus.Fields{
 			"jobId":  jobId.String(),
-			"status": status.String(),
-		}).Debug("Job not in assigned state")
+			"status": status,
+		}).Debug("Job not Queued yet")
 		return nil
 	}
 
 	// Get job details
-	jobDetails, err := jobsManagerUtils.GetJobDetails(client, jobId)
+	jobDetails, err := jobsManagerUtils.GetJobDetails(client, &opts, jobId)
 	if err != nil {
 		return fmt.Errorf("failed to get job details: %w", err)
 	}
 
-	// Parse job configuration
-	var jobConfig types.JobConfig
-	if err := json.Unmarshal([]byte(jobDetails), &jobConfig); err != nil {
+	// Fix malformed JSON by ensuring all keys are properly quoted
+	cleanJSON := jobDetails.JobDetailsInJSON
+
+	// Remove surrounding quotes if present
+	cleanJSON = strings.Trim(cleanJSON, "\"")
+
+	// Add quotes to unquoted keys
+	cleanJSON = strings.Replace(cleanJSON, "job_config_name:", "\"job_config_name\":", 1)
+
+	log.WithField("cleanJSON", cleanJSON).Debug("Cleaned job config JSON")
+
+	// Parse job configuration from jobDetailsInJSON field
+	var jobConfig map[string]interface{}
+	if err := json.Unmarshal([]byte(cleanJSON), &jobConfig); err != nil {
 		return fmt.Errorf("failed to parse job config: %w", err)
 	}
 
-	// Update status to queued
-	txnHash, err := u.UpdateJobStatus(client, config, account, jobId, types.JobStatusQueued)
-	if err != nil {
-		return fmt.Errorf("failed to update job status to queued: %w", err)
+	// Create job directory in .lumino
+	jobDir := filepath.Join("/root/.lumino", jobId.String())
+	if err := os.MkdirAll(jobDir, 0755); err != nil {
+		return fmt.Errorf("failed to create job directory: %w", err)
 	}
-	log.WithField("txHash", txnHash.Hex()).Info("Job status updated to Queued")
+
+	// Write job config to file
+	configPath := filepath.Join(jobDir, "jobConfig.json")
+	configJson, err := json.MarshalIndent(jobConfig, "", "  ")
+	if err != nil {
+		return fmt.Errorf("failed to marshal job config: %w", err)
+	}
+
+	if err := os.WriteFile(configPath, configJson, 0644); err != nil {
+		return fmt.Errorf("failed to write job config: %w", err)
+	}
+
+	log.WithFields(logrus.Fields{
+		"jobId":      jobId.String(),
+		"configPath": configPath,
+	}).Debug("Job configuration written to file")
 
 	// Start job execution in goroutine
-	go u.executeJobProcess(ctx, client, config, account, jobId, jobConfig, pipelinePath)
-
-	return nil
-}
-
-func (u *UtilsStruct) executeJobProcess(ctx context.Context, client *ethclient.Client, config types.Configurations, account types.Account, jobId *big.Int, jobConfig types.JobConfig, pipelinePath string) {
 	// Update state
 	stateMutex.Lock()
 	executionState.CurrentJob = &types.JobExecution{
-		JobID:      jobId,
-		Status:     types.JobStatusRunning,
-		StartTime:  time.Now(),
-		Executor:   account.Address,
-		PipelineID: jobConfig.PipelineID,
+		JobID:     jobId,
+		Status:    types.JobStatusRunning,
+		StartTime: time.Now(),
+		Executor:  account.Address,
 	}
 	executionState.IsJobRunning = true
 	stateMutex.Unlock()
 
 	// Update status to running
-	txnHash, err := u.UpdateJobStatus(client, config, account, jobId, types.JobStatusRunning)
+	txnHash, err := cmdUtils.UpdateJobStatus(client, config, account, jobId, types.JobStatusRunning, 0)
 	if err != nil {
 		log.WithError(err).Error("Failed to update job status to running")
-		return
+		return fmt.Errorf("failed to update jobStatus: %w", err)
 	}
 	log.WithField("txHash", txnHash.Hex()).Info("Job status updated to Running")
 
-	// Write job config to file
-	configPath := filepath.Join(pipelinePath, fmt.Sprintf("job-%s.json", jobId.String()))
-	configJson, err := json.MarshalIndent(jobConfig, "", "  ")
-	if err != nil {
-		log.WithError(err).Error("Failed to marshal job config")
-		return
-	}
-
-	if err := os.WriteFile(configPath, configJson, 0644); err != nil {
-		log.WithError(err).Error("Failed to write job config")
-		return
-	}
-
 	// Install dependencies
-	if err := pipeline_zen.InstallDeps(pipelinePath); err != nil {
-		log.WithError(err).Error("Failed to install dependencies")
-		u.updateJobStatusToFailed(client, config, account, jobId)
-		return
-	}
+	// if err := pipeline_zen.InstallDeps(pipelinePath); err != nil {
+	// 	log.WithError(err).Error("Failed to install dependencies")
+	// 	cmdUtils.updateJobStatus(client, config, account, jobId)
+	// 	return nil
+	// }
 
-	// Execute job
-	output, err := pipeline_zen.RunTorchTuneWrapper(configPath)
+	// Execute job with the config from .lumino directory
+	output, err := pipeline_zen.RunTorchTuneWrapper(pipelinePath, configPath)
 	if err != nil {
 		log.WithError(err).Error("Job execution failed")
-		u.updateJobStatusToFailed(client, config, account, jobId)
-		return
+		cmdUtils.UpdateJobStatus(client, config, account, jobId, types.JobStatusFailed, 0)
+		return nil
 	}
 
-	log.WithField("output", output).Info("Job completed successfully")
+	log.WithFields(logrus.Fields{
+		"jobId":  jobId.String(),
+		"output": output,
+	}).Info("Job completed successfully")
+
+	// log.WithField("output", output).Info("Job completed successfully")
+
+	return nil
 }
 
-func (u *UtilsStruct) HandleConfirmState(ctx context.Context, client *ethclient.Client, config types.Configurations, account types.Account, epoch uint32) error {
+func (*UtilsStruct) HandleConfirmState(ctx context.Context, client *ethclient.Client, config types.Configurations, account types.Account, epoch uint32) error {
 	stateMutex.RLock()
 	currentJob := executionState.CurrentJob
 	isJobRunning := executionState.IsJobRunning
@@ -191,15 +228,17 @@ func (u *UtilsStruct) HandleConfirmState(ctx context.Context, client *ethclient.
 		return nil
 	}
 
+	opts := protoUtils.GetOptions()
+
 	jobId := currentJob.JobID
-	status, err := jobsManagerUtils.GetJobStatus(client, jobId)
+	status, err := jobsManagerUtils.GetJobStatus(client, &opts, jobId)
 	if err != nil {
 		return fmt.Errorf("failed to get job status: %w", err)
 	}
 
-	if status == types.JobStatusRunning && !isJobRunning {
+	if status == uint8(types.JobStatusRunning) && !isJobRunning {
 		// Job completed, update status
-		txnHash, err := u.UpdateJobStatus(client, config, account, jobId, types.JobStatusCompleted)
+		txnHash, err := cmdUtils.UpdateJobStatus(client, config, account, jobId, types.JobStatusCompleted, 0)
 		if err != nil {
 			return fmt.Errorf("failed to update job status to completed: %w", err)
 		}
@@ -213,18 +252,4 @@ func (u *UtilsStruct) HandleConfirmState(ctx context.Context, client *ethclient.
 	}
 
 	return nil
-}
-
-func (u *UtilsStruct) updateJobStatusToFailed(client *ethclient.Client, config types.Configurations, account types.Account, jobId *big.Int) {
-	txnHash, err := u.UpdateJobStatus(client, config, account, jobId, types.JobStatusFailed)
-	if err != nil {
-		log.WithError(err).Error("Failed to update job status to failed")
-		return
-	}
-	log.WithField("txHash", txnHash.Hex()).Info("Job status updated to Failed")
-
-	stateMutex.Lock()
-	executionState.CurrentJob = nil
-	executionState.IsJobRunning = false
-	stateMutex.Unlock()
 }

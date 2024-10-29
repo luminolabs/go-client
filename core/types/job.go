@@ -3,6 +3,8 @@ package types
 import (
 	"math/big"
 	"time"
+
+	"github.com/ethereum/go-ethereum/common"
 )
 
 // Job represents a job in the Lumino network
@@ -14,6 +16,21 @@ type Job struct {
 	CreatedAt   time.Time // Timestamp when the job was created
 	CompletedAt time.Time // Timestamp when the job was completed
 	Details     string    // Additional details about the job
+}
+
+type JobContract struct {
+	JobId                  *big.Int
+	Creator                common.Address
+	Assignee               common.Address
+	CreationEpoch          uint32
+	QueuedEpoch            uint32
+	ExecutionEpoch         uint32
+	ProofGenerationEpoch   uint32
+	ConclusionEpoch        uint32
+	CreationTimestamp      *big.Int
+	LastUpdatedAtTimestamp *big.Int
+	JobFee                 *big.Int
+	JobDetailsInJSON       string
 }
 
 type ExecuteJobInput struct {

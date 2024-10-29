@@ -334,6 +334,11 @@ func (jobManagerUtils *JobsManagerUtils) GetJobStatus(client *ethclient.Client, 
 	return jobManager.GetJobStatus(opts, jobId)
 }
 
+func (jobManagerUtils *JobsManagerUtils) GetJobDetails(client *ethclient.Client, opts *bind.CallOpts, jobId *big.Int) (types.JobContract, error) {
+	jobManager := utilsInterface.GetJobManager(client)
+	return jobManager.Jobs(opts, jobId)
+}
+
 func (stateManagerUtils *StateManagerUtils) GetEpoch(client *ethclient.Client, opts *bind.CallOpts) (uint32, error) {
 	stateManager := utilsInterface.GetStateManager(client)
 	return stateManager.GetEpoch(opts)

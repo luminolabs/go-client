@@ -316,27 +316,19 @@ func init() {
 	rootCmd.AddCommand(executeJobCmd)
 
 	var (
-		JobId      string
-		Account    string
-		Password   string
-		ConfigPath string
-		ZenPath    string
-		IsAdmin    bool
+		Account  string
+		Password string
+		ZenPath  string
+		IsAdmin  bool
 	)
 
-	executeJobCmd.Flags().StringVarP(&JobId, "jobId", "", string(0), "job id")
 	executeJobCmd.Flags().StringVarP(&Account, "address", "a", "", "address of the compute provider")
 	executeJobCmd.Flags().StringVarP(&Password, "password", "", "", "password path of compute provider to protect the keystore")
-	executeJobCmd.Flags().StringVarP(&ConfigPath, "config", "c", "", "path to the job configuration file")
 	executeJobCmd.Flags().StringVarP(&ZenPath, "zen-path", "z", "", "path to the pipeline-zen directory")
 	executeJobCmd.Flags().BoolVarP(&IsAdmin, "isAdmin", "", false, "whether the executor is an admin")
 
 	AddrErr := executeJobCmd.MarkFlagRequired("address")
 	utils.CheckError("Address error : ", AddrErr)
-	jobId := executeJobCmd.MarkFlagRequired("jobId")
-	utils.CheckError("JobId error : ", jobId)
-	configPath := executeJobCmd.MarkFlagRequired("config")
-	utils.CheckError("Path error : ", configPath)
 	zenPath := executeJobCmd.MarkFlagRequired("zen-path")
 	utils.CheckError("Pipeline Path error : ", zenPath)
 }

@@ -31,7 +31,7 @@ var BlockCompletionTimeout = 60
 var StateCheckInterval = 5
 
 // EpochLength defines the duration of an epoch in seconds (20 minutes)
-var EpochLength int64 = 60
+var EpochLength int64 = 540
 
 // NumberOfStates defines the number of states in an epoch
 var NumberOfStates int64 = 3
