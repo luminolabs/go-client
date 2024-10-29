@@ -52,7 +52,7 @@ func (*UtilsStruct) HandleAssignState(ctx context.Context, client *ethclient.Cli
 	// }
 	log.Debug("Num stakers : ", 3)
 
-	activeStakers := [3]string{"0xab110dA2064AC0B44c08D71A3D8148BBB0C3aD1F", "0xC4481aa21AeAcAD3cCFe6252c6fe2f161A47A771", "0x68D12CaB6c4016A0daEeBA779205727dd6031a9a"}
+	activeStakers := [1]string{"0xC4481aa21AeAcAD3cCFe6252c6fe2f161A47A771"}
 
 	// Get unassigned jobs and assign them
 	// TODO: to be moved to jobsManagerUtils in struct Utils in future
