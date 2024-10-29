@@ -148,7 +148,7 @@ func (*UtilsStruct) HandleUpdateState(ctx context.Context, client *ethclient.Cli
 	}
 
 	// Create job directory in .lumino
-	jobDir := filepath.Join("~/.lumino", jobId.String())
+	jobDir := filepath.Join("./.jobs", jobId.String())
 	if err := os.MkdirAll(jobDir, 0755); err != nil {
 		return fmt.Errorf("failed to create job directory: %w", err)
 	}
