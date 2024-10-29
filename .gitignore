@@ -26,6 +26,7 @@ build
 
 ./lumino
 lumino
+pipeline-zen-src
 
 # IDE-specific files
 .idea/
