@@ -9,7 +9,7 @@ import (
 	"math/big"
 	"os"
 	"path/filepath"
-	"strings"
+	"strconv"
 	"time"
 
 	"github.com/ethereum/go-ethereum/common"
@@ -134,32 +134,28 @@ func (*UtilsStruct) HandleUpdateState(ctx context.Context, client *ethclient.Cli
 		return fmt.Errorf("failed to get job details: %w", err)
 	}
 
-	// Fix malformed JSON by ensuring all keys are properly quoted
-	cleanJSON := jobDetails.JobDetailsInJSON
+	cleanJSON, err := strconv.Unquote(`"` + jobDetails.JobDetailsInJSON + `"`)
+	if err != nil {
+		log.Fatalf("Error unescaping JSON string: %v", err)
+	}
 
-	// Remove surrounding quotes if present
-	cleanJSON = strings.Trim(cleanJSON, "\"")
-
-	// Add quotes to unquoted keys
-	cleanJSON = strings.Replace(cleanJSON, "job_config_name:", "\"job_config_name\":", 1)
-
-	log.WithField("cleanJSON", cleanJSON).Debug("Cleaned job config JSON")
+	log.WithField("JobDetails in JSON", cleanJSON).Debug(" job config JSON")
 
 	// Parse job configuration from jobDetailsInJSON field
-	var jobConfig map[string]interface{}
-	if err := json.Unmarshal([]byte(cleanJSON), &jobConfig); err != nil {
+	var jobConfigMap map[string]interface{}
+	if err := json.Unmarshal([]byte(cleanJSON), &jobConfigMap); err != nil {
 		return fmt.Errorf("failed to parse job config: %w", err)
 	}
 
 	// Create job directory in .lumino
-	jobDir := filepath.Join("/root/.lumino", jobId.String())
+	jobDir := filepath.Join("~/.lumino", jobId.String())
 	if err := os.MkdirAll(jobDir, 0755); err != nil {
 		return fmt.Errorf("failed to create job directory: %w", err)
 	}
 
 	// Write job config to file
 	configPath := filepath.Join(jobDir, "jobConfig.json")
-	configJson, err := json.MarshalIndent(jobConfig, "", "  ")
+	configJson, err := json.MarshalIndent(jobConfigMap, "", "  ")
 	if err != nil {
 		return fmt.Errorf("failed to marshal job config: %w", err)
 	}
