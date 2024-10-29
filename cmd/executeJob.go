@@ -69,12 +69,12 @@ func (u *UtilsStruct) RunExecuteJob(flagSet *pflag.FlagSet) {
 	utils.CheckError("Error in getting pipeline path: ", err)
 
 	// Install dependencies with live logging
-	log.Info("Starting dependency installation...")
-	err = pipeline_zen.InstallDeps(pipelinePath)
-	if err != nil {
-		log.WithError(err).Fatal("Failed to install dependencies")
-	}
-	log.Info("Dependencies installed successfully")
+	//log.Info("Starting dependency installation...")
+	//err = pipeline_zen.InstallDeps(pipelinePath)
+	//if err != nil {
+	//	log.WithError(err).Fatal("Failed to install dependencies")
+	//}
+	//log.Info("Dependencies installed successfully")
 
 	// Hardcoded, to be changed in future
 	status := types.JobStatusQueued

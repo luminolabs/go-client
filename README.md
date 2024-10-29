@@ -4,13 +4,14 @@
 
 1. [Project Overview](#1-project-overview)
 2. [Getting Started](#2-getting-started)
-3. [Project Structure](#3-project-structure)
-4. [Core Components](#4-core-components)
-5. [Command Line Interface](#5-command-line-interface)
-6. [Development Workflow](#6-development-workflow)
-7. [Testing](#7-testing)
-8. [Common Patterns and Best Practices](#8-common-patterns-and-best-practices)
-9. [Troubleshooting](#9-troubleshooting)
+3. [Running with Docker](#3-running-with-docker)
+4. [Project Structure](#4-project-structure)
+5. [Core Components](#5-core-components)
+6. [Command Line Interface](#6-command-line-interface)
+7. [Development Workflow](#7-development-workflow)
+8. [Testing](#8-testing)
+9. [Common Patterns and Best Practices](#9-common-patterns-and-best-practices)
+10. [Troubleshooting](#10-troubleshooting)
 
 ## 1. Project Overview
 
@@ -54,9 +55,29 @@ The Lumino Go Client is a command-line interface (CLI) application for interacti
    ```
    
 ## 3. Running with Docker
-First, build the Docker image:
+First, create a `~/.lumino` directory with the following structure:
+```
+- ~/.lumino
+- ├── .env
+- └── pipeline-zen-jobs-gcp-key.json (get this from 1password: pipeline-zen-jobs-gcp-key.json)
+```
+
+Example of a `.env` file:
+```
+PZ_ENV=cpnode
+PZ_RESULTS_BUCKET_SUFFIX=us
+PZ_HUGGINGFACE_TOKEN=<get this from 1password: PZ_HUGGINGFACE_TOKEN>
+PZ_DEVICE=<`cpu` if running local, `cuda` if on GCP>
+```
+
+Build the Docker image:
 ```
 ./scripts/docker-build.sh
+```
+
+Import the CP Node's wallet (only needed once):
+```
+./scripts/docker-run.sh ./lumino import
 ```
 
 Then, run the Lumino Client with Docker; for example, to stake 1 token:
