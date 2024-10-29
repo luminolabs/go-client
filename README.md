@@ -59,30 +59,55 @@ First, create a `~/.lumino` directory with the following structure:
 ```
 - ~/.lumino
 - ├── .env
+- ├── config.json (temporary, till we can read from the chain)
 - └── pipeline-zen-jobs-gcp-key.json (get this from 1password: pipeline-zen-jobs-gcp-key.json)
 ```
 
 Example of a `.env` file:
-```
+```dotenv
 PZ_ENV=cpnode
 PZ_RESULTS_BUCKET_SUFFIX=us
 PZ_HUGGINGFACE_TOKEN=<get this from 1password: PZ_HUGGINGFACE_TOKEN>
 PZ_DEVICE=<`cpu` if running local, `cuda` if on GCP>
 ```
 
-Build the Docker image:
+Example of a `config.json` file (change parameters as needed):
+```json
+{
+  "job_config_name": "llm_dummy",
+  "job_id": "21",
+  "dataset_id": "gs://lum-pipeline-zen-jobs-us/datasets/6a8d8e6e-7160-4866-914d-6304eb736cfd/2024-09-22_04-02-48_text2sqljsonl",
+  "batch_size": "20",
+  "shuffle": "true",
+  "num_epochs": "1",
+  "use_lora": "true",
+  "use_qlora": "false",
+  "lr": "1e-2",
+  "override_env": "prod",
+  "seed": "42",
+  "num_gpus": "1",
+  "user_id": "0x4118CFD00dD5e8CED96e0ff8061F56F2d155e83B"
+}
 ```
+
+Build the Docker image:
+```bash
 ./scripts/docker-build.sh
 ```
 
 Import the CP Node's wallet (only needed once):
-```
+```bash
 ./scripts/docker-run.sh ./lumino import
 ```
 
 Then, run the Lumino Client with Docker; for example, to stake 1 token:
-```
+```bash
 ./scripts/docker-run.sh ./lumino stake --address 0xC4481aa21AeAcAD3cCFe6252c6fe2f161A47A771 --value 1  --logLevel debug 
+```
+
+Finally, run the pipeline-zen workflow with Docker:
+```bash
+./scripts/docker-run.sh ./lumino executeJob -a 0xC4481aa21AeAcAD3cCFe6252c6fe2f161A47A771 --config /root/.lumino/config.json --jobId 21 --zen-path /pipeline-zen-jobs --logLevel debug
 ```
 
 ## 4. Project Structure
