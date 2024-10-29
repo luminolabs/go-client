@@ -1,6 +1,7 @@
 package types
 
 import (
+	"math/big"
 	"time"
 )
 
@@ -31,3 +32,20 @@ const (
 	JobStatusCompleted
 	JobStatusFailed
 )
+
+type JobExecution struct {
+	JobID      *big.Int
+	Status     JobStatus
+	StartTime  time.Time
+	LastUpdate time.Time
+	Executor   string
+	PipelineID string
+}
+
+type JobExecutionState struct {
+	CurrentJob    *JobExecution
+	LastJobUpdate uint32
+	IsJobRunning  bool
+	CurrentEpoch  uint32
+	CurrentState  EpochState
+}

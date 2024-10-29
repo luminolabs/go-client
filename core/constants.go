@@ -28,6 +28,8 @@ var DefaultLogLevel = ""
 var NilHash = common.Hash{0x00}
 var BlockCompletionTimeout = 60
 
+var StateCheckInterval = 5
+
 // EpochLength defines the duration of an epoch in seconds (20 minutes)
 var EpochLength int64 = 60
 
