@@ -2,14 +2,10 @@ package cmd
 
 import (
 	"context"
-	"encoding/json"
 	"fmt"
 	"lumino/core/types"
 	pipeline_zen "lumino/pipeline-zen"
 	"math/big"
-	"os"
-	"path/filepath"
-	"strconv"
 	"time"
 
 	"github.com/ethereum/go-ethereum/common"
@@ -96,12 +92,11 @@ func (*UtilsStruct) HandleUpdateState(ctx context.Context, client *ethclient.Cli
 	isJobRunning := executionState.IsJobRunning
 	stateMutex.RUnlock()
 
-	opts := protoUtils.GetOptions()
+	log.WithFields(logrus.Fields{
+		"Current Task": "Executing Handle Update State",
+	}).Info("In Update State")
 
-	if isJobRunning {
-		log.Info("Already running a job")
-		return nil
-	}
+	opts := protoUtils.GetOptions()
 
 	// Get job assigned to this staker
 	jobId, err := jobsManagerUtils.GetJobForStaker(client, &opts, common.HexToAddress(account.Address))
@@ -120,6 +115,11 @@ func (*UtilsStruct) HandleUpdateState(ctx context.Context, client *ethclient.Cli
 		return fmt.Errorf("failed to get job status: %w", err)
 	}
 
+	if isJobRunning && status == uint8(types.JobStatusRunning) {
+		log.Info("Already running a job")
+		return nil
+	}
+
 	if status != uint8(types.JobStatusQueued) {
 		log.WithFields(logrus.Fields{
 			"jobId":  jobId.String(),
@@ -129,45 +129,45 @@ func (*UtilsStruct) HandleUpdateState(ctx context.Context, client *ethclient.Cli
 	}
 
 	// Get job details
-	jobDetails, err := jobsManagerUtils.GetJobDetails(client, &opts, jobId)
-	if err != nil {
-		return fmt.Errorf("failed to get job details: %w", err)
-	}
+	// jobDetails, err := jobsManagerUtils.GetJobDetails(client, &opts, jobId)
+	// if err != nil {
+	// 	return fmt.Errorf("failed to get job details: %w", err)
+	// }
 
-	cleanJSON, err := strconv.Unquote(`"` + jobDetails.JobDetailsInJSON + `"`)
-	if err != nil {
-		log.Fatalf("Error unescaping JSON string: %v", err)
-	}
+	// cleanJSON, err := strconv.Unquote(`"` + jobDetails.JobDetailsInJSON + `"`)
+	// if err != nil {
+	// 	log.Fatalf("Error unescaping JSON string: %v", err)
+	// }
 
-	log.WithField("JobDetails in JSON", cleanJSON).Debug(" job config JSON")
+	// log.WithField("JobDetails in JSON", cleanJSON).Debug(" job config JSON")
 
-	// Parse job configuration from jobDetailsInJSON field
-	var jobConfigMap map[string]interface{}
-	if err := json.Unmarshal([]byte(cleanJSON), &jobConfigMap); err != nil {
-		return fmt.Errorf("failed to parse job config: %w", err)
-	}
+	// // Parse job configuration from jobDetailsInJSON field
+	// var jobConfigMap map[string]interface{}
+	// if err := json.Unmarshal([]byte(cleanJSON), &jobConfigMap); err != nil {
+	// 	return fmt.Errorf("failed to parse job config: %w", err)
+	// }
 
-	// Create job directory in .lumino
-	jobDir := filepath.Join("./.jobs", jobId.String())
-	if err := os.MkdirAll(jobDir, 0755); err != nil {
-		return fmt.Errorf("failed to create job directory: %w", err)
-	}
+	// // Create job directory in .lumino
+	// jobDir := filepath.Join("./.jobs", jobId.String())
+	// if err := os.MkdirAll(jobDir, 0755); err != nil {
+	// 	return fmt.Errorf("failed to create job directory: %w", err)
+	// }
 
-	// Write job config to file
-	configPath := filepath.Join(jobDir, "jobConfig.json")
-	configJson, err := json.MarshalIndent(jobConfigMap, "", "  ")
-	if err != nil {
-		return fmt.Errorf("failed to marshal job config: %w", err)
-	}
+	// // Write job config to file
+	// configPath := filepath.Join(jobDir, "jobConfig.json")
+	// configJson, err := json.MarshalIndent(jobConfigMap, "", "  ")
+	// if err != nil {
+	// 	return fmt.Errorf("failed to marshal job config: %w", err)
+	// }
 
-	if err := os.WriteFile(configPath, configJson, 0644); err != nil {
-		return fmt.Errorf("failed to write job config: %w", err)
-	}
+	// if err := os.WriteFile(configPath, configJson, 0644); err != nil {
+	// 	return fmt.Errorf("failed to write job config: %w", err)
+	// }
 
-	log.WithFields(logrus.Fields{
-		"jobId":      jobId.String(),
-		"configPath": configPath,
-	}).Debug("Job configuration written to file")
+	// log.WithFields(logrus.Fields{
+	// 	"jobId":      jobId.String(),
+	// 	"configPath": configPath,
+	// }).Debug("Job configuration written to file")
 
 	// Start job execution in goroutine
 	// Update state
@@ -196,8 +196,10 @@ func (*UtilsStruct) HandleUpdateState(ctx context.Context, client *ethclient.Cli
 	// 	return nil
 	// }
 
+	configPathString := "/Users/shyampatel/.lumino/config.json"
+
 	// Execute job with the config from .lumino directory
-	output, err := pipeline_zen.RunTorchTuneWrapper(pipelinePath, configPath)
+	output, err := pipeline_zen.RunTorchTuneWrapper(pipelinePath, configPathString)
 	if err != nil {
 		log.WithError(err).Error("Job execution failed")
 		cmdUtils.UpdateJobStatus(client, config, account, jobId, types.JobStatusFailed, 0)
@@ -219,6 +221,10 @@ func (*UtilsStruct) HandleConfirmState(ctx context.Context, client *ethclient.Cl
 	currentJob := executionState.CurrentJob
 	isJobRunning := executionState.IsJobRunning
 	stateMutex.RUnlock()
+
+	log.WithFields(logrus.Fields{
+		"Current Task": "Executing Handle Confirm State",
+	}).Info("In Confirm State")
 
 	if currentJob == nil {
 		return nil
