@@ -286,7 +286,7 @@ func cleanJSONString(input string) string {
 	return input
 }
 
-func (*UtilsStruct) HandleConfirmState(ctx context.Context, client *ethclient.Client, config types.Configurations, account types.Account, epoch uint32, zenPath string) error {
+func (*UtilsStruct) HandleConfirmState(ctx context.Context, client *ethclient.Client, config types.Configurations, account types.Account, epoch uint32, pipelinePath string) error {
 	stateMutex.RLock()
 	currentJob := executionState.CurrentJob
 	currentStatus := executionState.CurrentJob.Status
@@ -303,6 +303,14 @@ func (*UtilsStruct) HandleConfirmState(ctx context.Context, client *ethclient.Cl
 	}
 
 	jobId := currentJob.JobID
+	opts := protoUtils.GetOptions()
+	// Get job details
+	jobDetails, err := jobsManagerUtils.GetJobDetails(client, &opts, jobId)
+	if err != nil {
+		return fmt.Errorf("failed to get job details: %w", err)
+	}
+	resultsPath := ".results/" + jobDetails.Creator.String() + currentJob.JobID.String()
+	zenPath := filepath.Join(pipelinePath, resultsPath)
 	startedFile := filepath.Join(zenPath, ".started")
 	finishedFile := filepath.Join(zenPath, ".finished")
 
