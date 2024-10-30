@@ -9,7 +9,6 @@ import (
 	"math/big"
 	"os"
 	"path/filepath"
-	"regexp"
 	"strings"
 	"time"
 
@@ -161,7 +160,7 @@ func (*UtilsStruct) HandleUpdateState(ctx context.Context, client *ethclient.Cli
 		NumEpochs:     getString(rawConfig, "num_epochs"),
 		UseLora:       getString(rawConfig, "use_lora"),
 		UseQlora:      getString(rawConfig, "use_qlora"),
-		LearningRate:  getString(rawConfig, "lr"),
+		LearningRate:  getString(rawConfig, "lr", "1e-2"),
 		OverrideEnv:   getString(rawConfig, "override_env", "prod"), // default to "prod"
 		Seed:          getString(rawConfig, "seed", "42"),           // default to "42"
 		NumGPUs:       getString(rawConfig, "num_gpus"),
@@ -235,7 +234,8 @@ func (*UtilsStruct) HandleUpdateState(ctx context.Context, client *ethclient.Cli
 			Status:   types.JobStatusFailed,
 			Executor: account.Address,
 		}
-		cmdUtils.UpdateJobStatus(client, config, account, jobId, types.JobStatusFailed, 0)
+		stateMutex.Unlock()
+		// cmdUtils.UpdateJobStatus(client, config, account, jobId, types.JobStatusFailed, 0)
 		return nil
 	}
 
@@ -274,30 +274,22 @@ func getString(m map[string]interface{}, key string, defaultValue ...string) str
 
 // cleanJSONString properly formats the JSON string
 func cleanJSONString(input string) string {
-	// First, remove any escaped characters
-	cleaned := strings.ReplaceAll(input, `\`, "")
+	// Handle the specific case of the unquoted job_config_name
+	input = strings.Replace(input, "job_config_name:", `"job_config_name":`, 1)
 
-	// Find all unquoted keys and quote them
-	re := regexp.MustCompile(`{?\s*([a-zA-Z_][a-zA-Z0-9_]*)\s*:`)
-	cleaned = re.ReplaceAllString(cleaned, `{"$1":`)
-
-	// Replace any remaining { with { if needed
-	cleaned = strings.ReplaceAll(cleaned, "{{", "{")
-
-	// Ensure the JSON has proper braces
-	if !strings.HasPrefix(cleaned, "{") {
-		cleaned = "{" + cleaned
-	}
-	if !strings.HasSuffix(cleaned, "}") {
-		cleaned = cleaned + "}"
+	// Remove any whitespace between the opening brace and first key
+	input = strings.TrimSpace(input)
+	if strings.HasPrefix(input, "{") {
+		input = "{" + strings.TrimSpace(input[1:])
 	}
 
-	return cleaned
+	return input
 }
 
 func (*UtilsStruct) HandleConfirmState(ctx context.Context, client *ethclient.Client, config types.Configurations, account types.Account, epoch uint32, zenPath string) error {
 	stateMutex.RLock()
 	currentJob := executionState.CurrentJob
+	currentStatus := executionState.CurrentJob.Status
 	// isJobRunning := executionState.IsJobRunning
 	stateMutex.RUnlock()
 
@@ -313,6 +305,10 @@ func (*UtilsStruct) HandleConfirmState(ctx context.Context, client *ethclient.Cl
 	jobId := currentJob.JobID
 	startedFile := filepath.Join(zenPath, ".started")
 	finishedFile := filepath.Join(zenPath, ".finished")
+
+	if currentStatus == types.JobStatusFailed {
+		cmdUtils.UpdateJobStatus(client, config, account, jobId, types.JobStatusFailed, 0)
+	}
 
 	// Check if .started file exists
 	startedExists := false
