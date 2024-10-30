@@ -317,7 +317,7 @@ func (*UtilsStruct) HandleConfirmState(ctx context.Context, client *ethclient.Cl
 	if err != nil {
 		return fmt.Errorf("failed to get job details: %w", err)
 	}
-	resultsPath := ".results/" + jobDetails.Creator.String() + currentJob.JobID.String()
+	resultsPath := ".results/" + jobDetails.Creator.String() + "/" + currentJob.JobID.String()
 	zenPath := filepath.Join(pipelinePath, resultsPath)
 	startedFile := filepath.Join(zenPath, ".started")
 	finishedFile := filepath.Join(zenPath, ".finished")
