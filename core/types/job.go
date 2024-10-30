@@ -33,6 +33,23 @@ type JobContract struct {
 	JobDetailsInJSON       string
 }
 
+// JobConfig represents the structure matching the desired output format
+type JobConfig struct {
+	JobConfigName string `json:"job_config_name"`
+	JobID         string `json:"job_id"`
+	DatasetID     string `json:"dataset_id"`
+	BatchSize     string `json:"batch_size"`
+	Shuffle       string `json:"shuffle"`
+	NumEpochs     string `json:"num_epochs"`
+	UseLora       string `json:"use_lora"`
+	UseQlora      string `json:"use_qlora"`
+	LearningRate  string `json:"lr"`
+	OverrideEnv   string `json:"override_env"`
+	Seed          string `json:"seed"`
+	NumGPUs       string `json:"num_gpus"`
+	UserID        string `json:"user_id"`
+}
+
 type ExecuteJobInput struct {
 	Address  string
 	Password string
