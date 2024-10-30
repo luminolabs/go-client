@@ -287,15 +287,15 @@ func cleanJSONString(input string) string {
 }
 
 func (*UtilsStruct) HandleConfirmState(ctx context.Context, client *ethclient.Client, config types.Configurations, account types.Account, epoch uint32, pipelinePath string) error {
-	stateMutex.RLock()
-	currentJob := executionState.CurrentJob
-	currentStatus := executionState.CurrentJob.Status
-	// isJobRunning := executionState.IsJobRunning
-	stateMutex.RUnlock()
 
 	log.WithFields(logrus.Fields{
 		"Current Task": "Executing Handle Confirm State",
 	}).Info("In Confirm State")
+
+	stateMutex.RLock()
+	currentJob := executionState.CurrentJob
+	// isJobRunning := executionState.IsJobRunning
+	stateMutex.RUnlock()
 
 	if currentJob == nil {
 		log.Debug("No current job found")
@@ -303,6 +303,14 @@ func (*UtilsStruct) HandleConfirmState(ctx context.Context, client *ethclient.Cl
 	}
 
 	jobId := currentJob.JobID
+	currentStatus := currentJob.Status
+
+	log.WithFields(logrus.Fields{
+		"jobId":  jobId.String(),
+		"status": currentStatus,
+		"epoch":  epoch,
+	}).Debug("Current job state")
+
 	opts := protoUtils.GetOptions()
 	// Get job details
 	jobDetails, err := jobsManagerUtils.GetJobDetails(client, &opts, jobId)
@@ -314,8 +322,28 @@ func (*UtilsStruct) HandleConfirmState(ctx context.Context, client *ethclient.Cl
 	startedFile := filepath.Join(zenPath, ".started")
 	finishedFile := filepath.Join(zenPath, ".finished")
 
+	log.WithFields(logrus.Fields{
+		"zenPath":      zenPath,
+		"startedFile":  startedFile,
+		"finishedFile": finishedFile,
+	}).Debug("Checking job status files")
+
+	// Handle failed status first
 	if currentStatus == types.JobStatusFailed {
-		cmdUtils.UpdateJobStatus(client, config, account, jobId, types.JobStatusFailed, 0)
+		log.WithField("jobId", jobId.String()).Info("Updating failed job status")
+		txnHash, err := cmdUtils.UpdateJobStatus(client, config, account, jobId, types.JobStatusFailed, 0)
+		if err != nil {
+			return fmt.Errorf("failed to update job status to failed: %w", err)
+		}
+		log.WithField("txHash", txnHash.Hex()).Info("Job status updated to Failed")
+
+		// Clear job state
+		stateMutex.Lock()
+		executionState.CurrentJob = nil
+		executionState.IsJobRunning = false
+		stateMutex.Unlock()
+
+		return nil
 	}
 
 	// Check if .started file exists
@@ -355,7 +383,7 @@ func (*UtilsStruct) HandleConfirmState(ctx context.Context, client *ethclient.Cl
 		}
 		log.WithField("txHash", txnHash.Hex()).Info("Job status updated to Completed")
 
-		// Clear current job
+		// Clear job state
 		stateMutex.Lock()
 		executionState.CurrentJob = nil
 		executionState.IsJobRunning = false
