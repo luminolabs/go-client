@@ -17,6 +17,62 @@ type StateManagerInterface struct {
 	mock.Mock
 }
 
+// GetEpoch provides a mock function with given fields: client, opts
+func (_m *StateManagerInterface) GetEpoch(client *ethclient.Client, opts *bind.CallOpts) (uint32, error) {
+	ret := _m.Called(client, opts)
+
+	if len(ret) == 0 {
+		panic("no return value specified for GetEpoch")
+	}
+
+	var r0 uint32
+	var r1 error
+	if rf, ok := ret.Get(0).(func(*ethclient.Client, *bind.CallOpts) (uint32, error)); ok {
+		return rf(client, opts)
+	}
+	if rf, ok := ret.Get(0).(func(*ethclient.Client, *bind.CallOpts) uint32); ok {
+		r0 = rf(client, opts)
+	} else {
+		r0 = ret.Get(0).(uint32)
+	}
+
+	if rf, ok := ret.Get(1).(func(*ethclient.Client, *bind.CallOpts) error); ok {
+		r1 = rf(client, opts)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
+// GetState provides a mock function with given fields: client, opts, buffer
+func (_m *StateManagerInterface) GetState(client *ethclient.Client, opts *bind.CallOpts, buffer uint8) (uint8, error) {
+	ret := _m.Called(client, opts, buffer)
+
+	if len(ret) == 0 {
+		panic("no return value specified for GetState")
+	}
+
+	var r0 uint8
+	var r1 error
+	if rf, ok := ret.Get(0).(func(*ethclient.Client, *bind.CallOpts, uint8) (uint8, error)); ok {
+		return rf(client, opts, buffer)
+	}
+	if rf, ok := ret.Get(0).(func(*ethclient.Client, *bind.CallOpts, uint8) uint8); ok {
+		r0 = rf(client, opts, buffer)
+	} else {
+		r0 = ret.Get(0).(uint8)
+	}
+
+	if rf, ok := ret.Get(1).(func(*ethclient.Client, *bind.CallOpts, uint8) error); ok {
+		r1 = rf(client, opts, buffer)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
 // NetworkInfo provides a mock function with given fields: client, opts
 func (_m *StateManagerInterface) NetworkInfo(client *ethclient.Client, opts *bind.CallOpts) (types.NetworkInfo, error) {
 	ret := _m.Called(client, opts)
@@ -43,6 +99,24 @@ func (_m *StateManagerInterface) NetworkInfo(client *ethclient.Client, opts *bin
 	}
 
 	return r0, r1
+}
+
+// WaitForNextState provides a mock function with given fields: client, opts, targetState
+func (_m *StateManagerInterface) WaitForNextState(client *ethclient.Client, opts *bind.CallOpts, targetState types.EpochState) error {
+	ret := _m.Called(client, opts, targetState)
+
+	if len(ret) == 0 {
+		panic("no return value specified for WaitForNextState")
+	}
+
+	var r0 error
+	if rf, ok := ret.Get(0).(func(*ethclient.Client, *bind.CallOpts, types.EpochState) error); ok {
+		r0 = rf(client, opts, targetState)
+	} else {
+		r0 = ret.Error(0)
+	}
+
+	return r0
 }
 
 // NewStateManagerInterface creates a new instance of StateManagerInterface. It also registers a testing interface on the mock and a cleanup function to assert the mocks expectations.
