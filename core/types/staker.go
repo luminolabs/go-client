@@ -2,6 +2,8 @@ package types
 
 import (
 	"math/big"
+
+	"github.com/ethereum/go-ethereum/common"
 )
 
 // Staker represents a staker in the Lumino network
@@ -10,6 +12,18 @@ type Staker struct {
 	StakeAmount *big.Int // Amount of tokens staked
 	EpochJoined uint64   // Epoch when the staker joined
 	IsSlashed   bool     // Whether the staker has been slashed
+}
+
+type StakerContract struct {
+	IsSlashed          bool
+	Address            common.Address
+	Id                 uint32
+	Age                uint32
+	EpochFirstStaked   uint32
+	EpochLastPenalized uint32
+	Stake              *big.Int
+	StakerReward       *big.Int
+	MachineSpecInJSON  string
 }
 
 // StakerStatus represents the status of a staker

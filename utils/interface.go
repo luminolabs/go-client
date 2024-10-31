@@ -48,6 +48,8 @@ type Utils interface {
 	GetOptions() bind.CallOpts                                               //
 	GetStateManager(client *ethclient.Client) *bindings.StateManager
 	GetStateManagerWithOpts(client *ethclient.Client) (*bindings.StateManager, bind.CallOpts)
+	GetJobManager(client *ethclient.Client) *bindings.JobManager
+	GetJobManagerWithOpts(client *ethclient.Client) (*bindings.JobManager, bind.CallOpts)
 	GetStakeManager(client *ethclient.Client) *bindings.StakeManager
 	GetStakeManagerWithOpts(client *ethclient.Client) (*bindings.StakeManager, bind.CallOpts)
 	GetBlockManager(client *ethclient.Client) *bindings.BlockManager
@@ -109,6 +111,7 @@ type BindingsUtils interface {
 	NewStateManager(address common.Address, client *ethclient.Client) (*bindings.StateManager, error)
 	NewBlockManager(address common.Address, client *ethclient.Client) (*bindings.BlockManager, error)
 	NewStakeManager(address common.Address, client *ethclient.Client) (*bindings.StakeManager, error)
+	NewJobManager(address common.Address, client *ethclient.Client) (*bindings.JobManager, error)
 }
 
 type TimeUtils interface {

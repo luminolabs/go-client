@@ -16,14 +16,17 @@ import (
 func (*UtilsStruct) GetEpochAndState(client *ethclient.Client) (uint32, int64, error) {
 	epoch, err := protoUtils.GetEpoch(client)
 	if err != nil {
+		log.Debug("error in epoch: ", err)
 		return 0, 0, err
 	}
 	bufferPercent, err := cmdUtils.GetBufferPercent()
 	if err != nil {
+		log.Debug("error in Buffer: ", err)
 		return 0, 0, err
 	}
 	state, err := protoUtils.GetDelayedState(client, bufferPercent)
 	if err != nil {
+		log.Debug("error in state: ", err)
 		return 0, 0, err
 	}
 	log.Debug("Epoch ", epoch)

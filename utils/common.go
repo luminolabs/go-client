@@ -24,7 +24,7 @@ func (*UtilsStruct) GetStateName(stateNumber int64) string {
 	case 0:
 		stateName = "Assign"
 	case 1:
-		stateName = "Accept"
+		stateName = "Update"
 	case 2:
 		stateName = "Confirm"
 	default:
@@ -135,9 +135,6 @@ func (*UtilsStruct) GetDelayedState(client *ethclient.Client, buffer int32) (int
 func (*UtilsStruct) GetEpoch(client *ethclient.Client) (uint32, error) {
 	if client == nil {
 		return 0, fmt.Errorf("ethclient is nil")
-	}
-	if UtilsInterface != nil {
-		log.Info("checkpoint 2 in common.go", client)
 	}
 	latestHeader, err := UtilsInterface.GetLatestBlockWithRetry(client)
 	if err != nil {

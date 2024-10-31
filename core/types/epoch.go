@@ -16,7 +16,7 @@ type EpochState int
 // Epoch states
 const (
 	EpochStateAssign EpochState = iota
-	EpochStateAccept
+	EpochStateUpdate
 	EpochStateConfirm
 	EpochStateBuffer
 )

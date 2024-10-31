@@ -221,6 +221,25 @@
   },
   {
     "type": "function",
+    "name": "getJobForStaker",
+    "inputs": [
+      {
+        "name": "_stakerAddress",
+        "type": "address",
+        "internalType": "address"
+      }
+    ],
+    "outputs": [
+      {
+        "name": "",
+        "type": "uint256",
+        "internalType": "uint256"
+      }
+    ],
+    "stateMutability": "view"
+  },
+  {
+    "type": "function",
     "name": "getJobStatus",
     "inputs": [
       {
@@ -589,6 +608,25 @@
         "type": "uint64",
         "indexed": false,
         "internalType": "uint64"
+      }
+    ],
+    "anonymous": false
+  },
+  {
+    "type": "event",
+    "name": "JobAssigned",
+    "inputs": [
+      {
+        "name": "jobId",
+        "type": "uint256",
+        "indexed": true,
+        "internalType": "uint256"
+      },
+      {
+        "name": "assigneeAddress",
+        "type": "address",
+        "indexed": true,
+        "internalType": "address"
       }
     ],
     "anonymous": false

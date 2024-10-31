@@ -1,7 +1,7 @@
 package core
 
-var StateManagerAddress = "0x0a2946DaECb5f2A693e3f814612eb0BC01dC5Fd5"
+var StateManagerAddress = "0x67e60E419284857A630A1b8Fa3C8Ff557fe676dF"
 var StakeManagerAddress = "0x3c24e5485a38173f79eb7ed20517dea4b6cbf5e5"
-var JobManagerAddress = "0xCA1281ddcB9553A483f4c6C25067Abfb5E3C61Cb"
+var JobManagerAddress = "0x05cCa7d092B529CFB0EF34C8AC2E25c081Dd2687"
 var VoteManagerAddress = ""
 var BlockManagerAddress = ""

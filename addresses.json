@@ -1,7 +1,7 @@
 {
-    "StateManager": "0x0a2946DaECb5f2A693e3f814612eb0BC01dC5Fd5",
+    "StateManager": "0x67e60E419284857A630A1b8Fa3C8Ff557fe676dF",
     "StakeManager": "0x3c24e5485a38173f79eb7ed20517dea4b6cbf5e5",
-    "JobManager": "0xCA1281ddcB9553A483f4c6C25067Abfb5E3C61Cb",
+    "JobManager": "0x05cCa7d092B529CFB0EF34C8AC2E25c081Dd2687",
     "VoteManager": "",
     "BlockManager": ""
 }

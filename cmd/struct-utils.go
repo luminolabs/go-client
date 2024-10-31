@@ -7,7 +7,6 @@ import (
 	"os"
 	"time"
 
-	"lumino/core"
 	"lumino/core/types"
 	"lumino/path"
 	"lumino/pkg/bindings"
@@ -21,6 +20,7 @@ import (
 	Types "github.com/ethereum/go-ethereum/core/types"
 	"github.com/ethereum/go-ethereum/crypto"
 	"github.com/ethereum/go-ethereum/ethclient"
+	"github.com/sirupsen/logrus"
 	"github.com/spf13/pflag"
 	"github.com/spf13/viper"
 )
@@ -292,30 +292,82 @@ func (stakeManagerUtils StakeManagerUtils) Withdraw(client *ethclient.Client, op
 	return ExecuteTransaction(stakeManager, "Withdraw", opts, stakerId)
 }
 
+func (stakeManagerUtils *StakeManagerUtils) GetNumStakers(client *ethclient.Client, opts *bind.CallOpts) (uint32, error) {
+	stakeManager := utilsInterface.GetStakeManager(client)
+	return stakeManager.GetNumStakers(opts)
+}
+
+func (stakeManagerUtils *StakeManagerUtils) GetStakerStructFromId(client *ethclient.Client, opts *bind.CallOpts, stakerId uint32) (types.StakerContract, error) {
+	stakeManager := utilsInterface.GetStakeManager(client)
+	return stakeManager.Stakers(opts, stakerId)
+}
+
 func (jobManagerUtils *JobsManagerUtils) CreateJob(client *ethclient.Client, opts *bind.TransactOpts, jobDetailsJSON string) (*Types.Transaction, error) {
-	jobManager, err := bindings.NewJobManager(common.HexToAddress(core.JobManagerAddress), client)
-	if err != nil {
-		return nil, err
-	}
+	jobManager := utilsInterface.GetJobManager(client)
 	return jobManager.CreateJob(opts, jobDetailsJSON)
 }
 
 func (jobManagerUtils *JobsManagerUtils) UpdateJobStatus(client *ethclient.Client, opts *bind.TransactOpts, jobId *big.Int, status uint8, buffer uint8) (*Types.Transaction, error) {
-	jobManager, err := bindings.NewJobManager(common.HexToAddress(core.JobManagerAddress), client)
-	if err != nil {
-		return nil, err
-	}
+	jobManager := utilsInterface.GetJobManager(client)
 	// TODO: set Buffer from buffer config
 	return jobManager.UpdateJobStatus(opts, jobId, status, 0)
 }
 
 func (jobManagerUtils *JobsManagerUtils) AssignJob(client *ethclient.Client, opts *bind.TransactOpts, jobId *big.Int, assignee common.Address, buffer uint8) (*Types.Transaction, error) {
-	jobManager, err := bindings.NewJobManager(common.HexToAddress(core.JobManagerAddress), client)
-	if err != nil {
-		return nil, err
-	}
+	jobManager := utilsInterface.GetJobManager(client)
 	// TODO: set Buffer from buffer config
 	return jobManager.AssignJob(opts, jobId, assignee, 0)
+}
+
+func (jobManagerUtils *JobsManagerUtils) GetActiveJobs(client *ethclient.Client, opts *bind.CallOpts) ([]*big.Int, error) {
+	jobManager := utilsInterface.GetJobManager(client)
+	return jobManager.GetActiveJobs(opts)
+}
+
+func (jobManagerUtils *JobsManagerUtils) GetJobForStaker(client *ethclient.Client, opts *bind.CallOpts, stakerAddress common.Address) (*big.Int, error) {
+	jobManager := utilsInterface.GetJobManager(client)
+	return jobManager.GetJobForStaker(opts, stakerAddress)
+}
+
+func (jobManagerUtils *JobsManagerUtils) GetJobStatus(client *ethclient.Client, opts *bind.CallOpts, jobId *big.Int) (uint8, error) {
+	jobManager := utilsInterface.GetJobManager(client)
+	return jobManager.GetJobStatus(opts, jobId)
+}
+
+func (jobManagerUtils *JobsManagerUtils) GetJobDetails(client *ethclient.Client, opts *bind.CallOpts, jobId *big.Int) (types.JobContract, error) {
+	jobManager := utilsInterface.GetJobManager(client)
+	return jobManager.Jobs(opts, jobId)
+}
+
+func (stateManagerUtils *StateManagerUtils) GetEpoch(client *ethclient.Client, opts *bind.CallOpts) (uint32, error) {
+	stateManager := utilsInterface.GetStateManager(client)
+	return stateManager.GetEpoch(opts)
+}
+
+func (stateManagerUtils *StateManagerUtils) GetState(client *ethclient.Client, opts *bind.CallOpts, buffer uint8) (uint8, error) {
+	stateManager := utilsInterface.GetStateManager(client)
+	return stateManager.GetState(opts, buffer)
+}
+
+func (stateManagerUtils *StateManagerUtils) WaitForNextState(client *ethclient.Client, opts *bind.CallOpts, targetState types.EpochState) error {
+	log.WithField("targetState", utils.UtilsInterface.GetStateName(int64(targetState))).Info("Waiting for next state")
+
+	for {
+		currentState, err := stateManagerUtils.GetState(client, opts, 0)
+		if err != nil {
+			return err
+		}
+		if currentState == uint8(targetState) {
+			log.WithField("state", utils.UtilsInterface.GetStateName(int64(targetState))).Info("Target state reached")
+			return nil
+		}
+		log.WithFields(logrus.Fields{
+			"currentState": currentState,
+			"targetState":  utils.UtilsInterface.GetStateName(int64(targetState)),
+		}).Debug("Waiting for state transition")
+
+		time.Sleep(2)
+	}
 }
 
 func (keystoreUtils KeystoreUtils) ImportECDSA(path string, priv *ecdsa.PrivateKey, passphrase string) (accounts.Account, error) {
