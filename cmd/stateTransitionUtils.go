@@ -22,7 +22,9 @@ func (*UtilsStruct) HandleStateTransition(ctx context.Context, client *ethclient
 	switch state {
 	case types.EpochStateAssign:
 		if !isAdmin {
-			log.Debug("Not an admin node, skipping assignment state")
+			log.WithFields(logrus.Fields{
+				"Current State": "Assign",
+			}).Info("Not an Admin Node, skipping Assign action")
 			return nil
 		}
 		return cmdUtils.HandleAssignState(ctx, client, config, account, epoch, isRandom)
@@ -40,8 +42,8 @@ func (*UtilsStruct) HandleStateTransition(ctx context.Context, client *ethclient
 func (*UtilsStruct) HandleAssignState(ctx context.Context, client *ethclient.Client, config types.Configurations, account types.Account, epoch uint32, isRandom bool) error {
 
 	log.WithFields(logrus.Fields{
-		"Current Task": "Executing Handle Assign State",
-	}).Info("In Assign State")
+		"Current State": "Assign",
+	}).Info("Admin Node: Executing Assign State Transition")
 	opts := protoUtils.GetOptions()
 	config, err := cmdUtils.GetConfigData()
 	// TODO: to be replaced by activeStaker or a better mechanism
@@ -102,8 +104,8 @@ func (*UtilsStruct) HandleUpdateState(ctx context.Context, client *ethclient.Cli
 	stateMutex.RUnlock()
 
 	log.WithFields(logrus.Fields{
-		"Current Task": "Executing Handle Update State",
-	}).Info("In Update State")
+		"Current State": "Update",
+	}).Info("Executing Update State Transition")
 
 	opts := protoUtils.GetOptions()
 
@@ -294,8 +296,8 @@ func cleanJSONString(input string) string {
 func (*UtilsStruct) HandleConfirmState(ctx context.Context, client *ethclient.Client, config types.Configurations, account types.Account, epoch uint32, pipelinePath string) error {
 
 	log.WithFields(logrus.Fields{
-		"Current Task": "Executing Handle Confirm State",
-	}).Info("In Confirm State")
+		"Current State": "Confirm",
+	}).Info("Executing Confirm State Transition")
 
 	stateMutex.RLock()
 	currentJob := executionState.CurrentJob
