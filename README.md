@@ -1,4 +1,4 @@
-# Go-node: Developer Documentation
+# Go-client: Developer Documentation
 
 ## Table of Contents
 
