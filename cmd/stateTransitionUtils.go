@@ -24,7 +24,7 @@ func (*UtilsStruct) HandleStateTransition(ctx context.Context, client *ethclient
 		if !isAdmin {
 			log.WithFields(logrus.Fields{
 				"Current State": "Assign",
-			}).Info("Not an Admin Node, skipping Assign action")
+			}).Info("Not an Admin Node: Skipping Assign Action")
 			return nil
 		}
 		return cmdUtils.HandleAssignState(ctx, client, config, account, epoch, isRandom)
