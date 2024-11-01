@@ -18,14 +18,14 @@ import (
 	"golang.org/x/exp/rand"
 )
 
-func (*UtilsStruct) HandleStateTransition(ctx context.Context, client *ethclient.Client, config types.Configurations, account types.Account, state types.EpochState, epoch uint32, isAdmin bool, pipelinePath string) error {
+func (*UtilsStruct) HandleStateTransition(ctx context.Context, client *ethclient.Client, config types.Configurations, account types.Account, state types.EpochState, epoch uint32, isAdmin bool, isRandom bool, pipelinePath string) error {
 	switch state {
 	case types.EpochStateAssign:
 		if !isAdmin {
 			log.Debug("Not an admin node, skipping assignment state")
 			return nil
 		}
-		return cmdUtils.HandleAssignState(ctx, client, config, account, epoch)
+		return cmdUtils.HandleAssignState(ctx, client, config, account, epoch, isRandom)
 	case types.EpochStateUpdate:
 		return cmdUtils.HandleUpdateState(ctx, client, config, account, epoch, pipelinePath)
 	case types.EpochStateConfirm:
@@ -37,7 +37,7 @@ func (*UtilsStruct) HandleStateTransition(ctx context.Context, client *ethclient
 	}
 }
 
-func (*UtilsStruct) HandleAssignState(ctx context.Context, client *ethclient.Client, config types.Configurations, account types.Account, epoch uint32) error {
+func (*UtilsStruct) HandleAssignState(ctx context.Context, client *ethclient.Client, config types.Configurations, account types.Account, epoch uint32, isRandom bool) error {
 
 	log.WithFields(logrus.Fields{
 		"Current Task": "Executing Handle Assign State",
@@ -52,7 +52,12 @@ func (*UtilsStruct) HandleAssignState(ctx context.Context, client *ethclient.Cli
 	// }
 	log.Debug("Num stakers : ", 3)
 
-	activeStakers := [1]string{"0xC4481aa21AeAcAD3cCFe6252c6fe2f161A47A771"}
+	var activeStakers [3]string
+	if isRandom {
+		activeStakers = [3]string{"0xC4481aa21AeAcAD3cCFe6252c6fe2f161A47A771", "0xab110dA2064AC0B44c08D71A3D8148BBB0C3aD1F", "0x68D12CaB6c4016A0daEeBA779205727dd6031a9a"}
+	} else {
+		activeStakers = [3]string{"0xC4481aa21AeAcAD3cCFe6252c6fe2f161A47A771", "0xC4481aa21AeAcAD3cCFe6252c6fe2f161A47A771", "0xC4481aa21AeAcAD3cCFe6252c6fe2f161A47A771"}
+	}
 
 	// Get unassigned jobs and assign them
 	// TODO: to be moved to jobsManagerUtils in struct Utils in future
