@@ -82,8 +82,14 @@ func (*UtilsStruct) RunExecuteJob(flagSet *pflag.FlagSet) {
 	isAdmin, err := flagSet.GetBool("isAdmin")
 	utils.CheckError("Error in getting admin flag: ", err)
 
+	isRandom, err := flagSet.GetBool("isRandom")
+	utils.CheckError("Error in getting random flag: ", err)
+
 	if isAdmin && address != "0xC4481aa21AeAcAD3cCFe6252c6fe2f161A47A771" {
 		log.Fatal("Only Admin can pass the isAdmin Flag")
+	}
+	if isRandom && address != "0xC4481aa21AeAcAD3cCFe6252c6fe2f161A47A771" {
+		log.Fatal("Only Admin can pass the isRandom Flag")
 	}
 
 	account := types.Account{
@@ -104,7 +110,7 @@ func (*UtilsStruct) RunExecuteJob(flagSet *pflag.FlagSet) {
 	handleGracefulShutdown(ctx, cancel)
 
 	// Start the main execution loop
-	if err := cmdUtils.ExecuteJob(ctx, client, config, account, isAdmin, pipelinePath); err != nil {
+	if err := cmdUtils.ExecuteJob(ctx, client, config, account, isAdmin, isRandom, pipelinePath); err != nil {
 		log.WithError(err).Fatal("Job execution failed")
 	}
 }
@@ -280,7 +286,7 @@ func (*UtilsStruct) UpdateJobStatus(client *ethclient.Client, config types.Confi
 }
 
 // This function allows the admin to update an existing job
-func (*UtilsStruct) ExecuteJob(ctx context.Context, client *ethclient.Client, config types.Configurations, account types.Account, isAdmin bool, pipelinePath string) error {
+func (*UtilsStruct) ExecuteJob(ctx context.Context, client *ethclient.Client, config types.Configurations, account types.Account, isAdmin bool, isRandom bool, pipelinePath string) error {
 	ticker := time.NewTicker(time.Duration(core.StateCheckInterval) * time.Second)
 	defer ticker.Stop()
 
@@ -305,7 +311,7 @@ func (*UtilsStruct) ExecuteJob(ctx context.Context, client *ethclient.Client, co
 				"epoch": epoch,
 			}).Debug("Current network state")
 
-			if err := cmdUtils.HandleStateTransition(ctx, client, config, account, types.EpochState(state), epoch, isAdmin, pipelinePath); err != nil {
+			if err := cmdUtils.HandleStateTransition(ctx, client, config, account, types.EpochState(state), epoch, isAdmin, isRandom, pipelinePath); err != nil {
 				log.WithError(err).Error("Error handling state transition")
 			}
 		}
@@ -320,12 +326,14 @@ func init() {
 		Password string
 		ZenPath  string
 		IsAdmin  bool
+		IsRandom bool
 	)
 
 	executeJobCmd.Flags().StringVarP(&Account, "address", "a", "", "address of the compute provider")
 	executeJobCmd.Flags().StringVarP(&Password, "password", "", "", "password path of compute provider to protect the keystore")
 	executeJobCmd.Flags().StringVarP(&ZenPath, "zen-path", "z", "", "path to the pipeline-zen directory")
 	executeJobCmd.Flags().BoolVarP(&IsAdmin, "isAdmin", "", false, "whether the executor is an admin")
+	executeJobCmd.Flags().BoolVarP(&IsRandom, "isRandom", "", false, "whether the job to be assigned in random manner or just to admin")
 
 	AddrErr := executeJobCmd.MarkFlagRequired("address")
 	utils.CheckError("Address error : ", AddrErr)
