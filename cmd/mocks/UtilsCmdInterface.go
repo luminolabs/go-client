@@ -165,17 +165,17 @@ func (_m *UtilsCmdInterface) ExecuteImport(flagSet *pflag.FlagSet) {
 	_m.Called(flagSet)
 }
 
-// ExecuteJob provides a mock function with given fields: ctx, client, config, account, isAdmin, pipelinePath
-func (_m *UtilsCmdInterface) ExecuteJob(ctx context.Context, client *ethclient.Client, config types.Configurations, account types.Account, isAdmin bool, pipelinePath string) error {
-	ret := _m.Called(ctx, client, config, account, isAdmin, pipelinePath)
+// ExecuteJob provides a mock function with given fields: ctx, client, config, account, isAdmin, isRandom, pipelinePath
+func (_m *UtilsCmdInterface) ExecuteJob(ctx context.Context, client *ethclient.Client, config types.Configurations, account types.Account, isAdmin bool, isRandom bool, pipelinePath string) error {
+	ret := _m.Called(ctx, client, config, account, isAdmin, isRandom, pipelinePath)
 
 	if len(ret) == 0 {
 		panic("no return value specified for ExecuteJob")
 	}
 
 	var r0 error
-	if rf, ok := ret.Get(0).(func(context.Context, *ethclient.Client, types.Configurations, types.Account, bool, string) error); ok {
-		r0 = rf(ctx, client, config, account, isAdmin, pipelinePath)
+	if rf, ok := ret.Get(0).(func(context.Context, *ethclient.Client, types.Configurations, types.Account, bool, bool, string) error); ok {
+		r0 = rf(ctx, client, config, account, isAdmin, isRandom, pipelinePath)
 	} else {
 		r0 = ret.Error(0)
 	}
@@ -508,17 +508,17 @@ func (_m *UtilsCmdInterface) GetWaitTime() (int32, error) {
 	return r0, r1
 }
 
-// HandleAssignState provides a mock function with given fields: ctx, client, config, account, epoch
-func (_m *UtilsCmdInterface) HandleAssignState(ctx context.Context, client *ethclient.Client, config types.Configurations, account types.Account, epoch uint32) error {
-	ret := _m.Called(ctx, client, config, account, epoch)
+// HandleAssignState provides a mock function with given fields: ctx, client, config, account, epoch, isRandom
+func (_m *UtilsCmdInterface) HandleAssignState(ctx context.Context, client *ethclient.Client, config types.Configurations, account types.Account, epoch uint32, isRandom bool) error {
+	ret := _m.Called(ctx, client, config, account, epoch, isRandom)
 
 	if len(ret) == 0 {
 		panic("no return value specified for HandleAssignState")
 	}
 
 	var r0 error
-	if rf, ok := ret.Get(0).(func(context.Context, *ethclient.Client, types.Configurations, types.Account, uint32) error); ok {
-		r0 = rf(ctx, client, config, account, epoch)
+	if rf, ok := ret.Get(0).(func(context.Context, *ethclient.Client, types.Configurations, types.Account, uint32, bool) error); ok {
+		r0 = rf(ctx, client, config, account, epoch, isRandom)
 	} else {
 		r0 = ret.Error(0)
 	}
@@ -544,17 +544,17 @@ func (_m *UtilsCmdInterface) HandleConfirmState(ctx context.Context, client *eth
 	return r0
 }
 
-// HandleStateTransition provides a mock function with given fields: ctx, client, config, account, state, epoch, isAdmin, pipelinePath
-func (_m *UtilsCmdInterface) HandleStateTransition(ctx context.Context, client *ethclient.Client, config types.Configurations, account types.Account, state types.EpochState, epoch uint32, isAdmin bool, pipelinePath string) error {
-	ret := _m.Called(ctx, client, config, account, state, epoch, isAdmin, pipelinePath)
+// HandleStateTransition provides a mock function with given fields: ctx, client, config, account, state, epoch, isAdmin, isRandom, pipelinePath
+func (_m *UtilsCmdInterface) HandleStateTransition(ctx context.Context, client *ethclient.Client, config types.Configurations, account types.Account, state types.EpochState, epoch uint32, isAdmin bool, isRandom bool, pipelinePath string) error {
+	ret := _m.Called(ctx, client, config, account, state, epoch, isAdmin, isRandom, pipelinePath)
 
 	if len(ret) == 0 {
 		panic("no return value specified for HandleStateTransition")
 	}
 
 	var r0 error
-	if rf, ok := ret.Get(0).(func(context.Context, *ethclient.Client, types.Configurations, types.Account, types.EpochState, uint32, bool, string) error); ok {
-		r0 = rf(ctx, client, config, account, state, epoch, isAdmin, pipelinePath)
+	if rf, ok := ret.Get(0).(func(context.Context, *ethclient.Client, types.Configurations, types.Account, types.EpochState, uint32, bool, bool, string) error); ok {
+		r0 = rf(ctx, client, config, account, state, epoch, isAdmin, isRandom, pipelinePath)
 	} else {
 		r0 = ret.Error(0)
 	}
