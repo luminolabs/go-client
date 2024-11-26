@@ -231,6 +231,9 @@ func (*UtilsStruct) HandleUpdateState(ctx context.Context, client *ethclient.Cli
 	// 	return nil
 	// }
 
+	// TODO: Put this in a go routine
+	// start the waitgroup and wait for it in the main thread
+	// read the files for the status of the job
 	// Execute job with the config from .lumino directory
 	output, err := pipeline_zen.RunTorchTuneWrapper(pipelinePath, configPath)
 	if err != nil {
