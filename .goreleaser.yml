@@ -17,16 +17,16 @@ release:
 universal_binaries:
   - replace: true
 
-brews:
-  -
-    name: lumino
-    homepage: https://github.com/luminolabs/go-client
-    tap:
-      owner: luminolabs
-      name: homebrew-go-client
-    commit_author:
-      name: kira
-      email: shyampkira@gmail.com
+# brews:
+#   -
+#     name: lumino
+#     homepage: https://github.com/luminolabs/go-client
+#     tap:
+#       owner: luminolabs
+#       name: homebrew-go-client
+#     commit_author:
+#       name: kira
+#       email: shyampkira@gmail.com
 
 checksum:
   name_template: 'checksums.txt'
