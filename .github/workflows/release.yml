@@ -1,6 +1,10 @@
 name: goreleaser
 
 on:
+  # TODO:
+  # - unit tests
+  # - coverages
+  # - lint
   push: # only when you push a change
     tags:
       - "*"
