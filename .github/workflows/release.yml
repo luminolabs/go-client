@@ -1,16 +1,23 @@
-name: goreleaser
+name: unit-tests
 
 on:
   # TODO:
   # - unit tests
   # - coverages
   # - lint
-  push: # only when you push a change
-    tags:
-      - "*"
+  # push: # only when you push a change
+  #   tags:
+  #     - "*"
   push:
     # Don't run this workflow on master branch,
     # we run a different workflow when merging on main
+    branches:
+      - '**'
+      - '!main'
+    # Run workflow only if these folders changed
+    paths: [ 'accounts/**', 'cmd/**', 'utils/**', 'pipeline-zen/**', 'logger/**', 'scripts/**', '.github/**' ]
+  workflow_call:
+  pull-requests:
     branches:
       - '**'
       - '!main'
@@ -23,7 +30,9 @@ permissions:
   contents: read
 
 jobs:
-  steps:
+  runs-on: ubuntu-latest
+  unit-tests:
+    steps:
       # Check out the repository code
       - name: Checkout Code
         uses: actions/checkout@v4
