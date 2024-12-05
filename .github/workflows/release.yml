@@ -54,7 +54,10 @@ jobs:
 
       # Install dependencies
       - name: Install Dependencies
-        run: go mod tidy
+        run: |
+          go mod tidy
+          go get -d github.com/ethereum/go-ethereum
+          go get -d github.com/ethereum/go-ethereum/cmd/abigen
 
       - name: Generate bindings
         run: ./scripts/generate-bindings.sh
