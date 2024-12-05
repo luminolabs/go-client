@@ -30,8 +30,9 @@ permissions:
   contents: read
 
 jobs:
-  runs-on: ubuntu-latest
   unit-tests:
+    runs-on: ubuntu-latest
+
     steps:
       # Check out the repository code
       - name: Checkout Code
