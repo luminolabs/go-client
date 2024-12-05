@@ -61,10 +61,10 @@ jobs:
 
       - name: Generate mocks
         run: |
-        mockery --all --dir=./accounts --output=./accounts/mocks --outpkg=mocks 
-        mockery --all --dir=./cmd --output=./cmd/mocks --outpkg=mocks 
-        mockery --all --dir=./path --output=./path/mocks --outpkg=mocks 
-        mockery --all --dir=./utils --output=./utils/mocks --outpkg=mocks 
+          mockery --all --dir=./accounts --output=./accounts/mocks --outpkg=mocks 
+          mockery --all --dir=./cmd --output=./cmd/mocks --outpkg=mocks 
+          mockery --all --dir=./path --output=./path/mocks --outpkg=mocks 
+          mockery --all --dir=./utils --output=./utils/mocks --outpkg=mocks 
 
       # Run unit tests
       - name: Run Unit Tests
