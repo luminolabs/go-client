@@ -57,7 +57,9 @@ jobs:
         run: |
           sudo add-apt-repository -y ppa:ethereum/ethereum
           sudo apt-get update
-          sudo apt-get install -y npm ethereum
+          sudo apt-get install -y ethereum
+          go get -u github.com/vektra/mockery/
+          go install github.com/vektra/mockery/cmd/mockery
           go mod tidy
 
       - name: Generate bindings
