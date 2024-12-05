@@ -55,9 +55,10 @@ jobs:
       # Install dependencies
       - name: Install Dependencies
         run: |
+          sudo add-apt-repository -y ppa:ethereum/ethereum
+          sudo apt-get update
+          sudo apt-get install -y npm ethereum
           go mod tidy
-          go get -d github.com/ethereum/go-ethereum
-          go get -d github.com/ethereum/go-ethereum/cmd/abigen
 
       - name: Generate bindings
         run: ./scripts/generate-bindings.sh
