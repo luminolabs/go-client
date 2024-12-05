@@ -16,7 +16,7 @@ on:
       - '!main'
     # Run workflow only if these folders changed
     paths: [ 'accounts/**', 'cmd/**', 'utils/**', 'pipeline-zen/**', 'logger/**', 'scripts/**', '.github/**' ]
-  pull-requests:
+  pull_request:
     branches:
       - '**'
       - '!main'
