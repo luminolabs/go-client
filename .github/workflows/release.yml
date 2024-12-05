@@ -16,14 +16,12 @@ on:
       - '!main'
     # Run workflow only if these folders changed
     paths: [ 'accounts/**', 'cmd/**', 'utils/**', 'pipeline-zen/**', 'logger/**', 'scripts/**', '.github/**' ]
-  workflow_call:
   pull-requests:
     branches:
       - '**'
       - '!main'
     # Run workflow only if these folders changed
     paths: [ 'accounts/**', 'cmd/**', 'utils/**', 'pipeline-zen/**', 'logger/**', 'scripts/**', '.github/**' ]
-  workflow_call:
 
 
 permissions:
@@ -32,7 +30,6 @@ permissions:
 jobs:
   unit-tests:
     runs-on: ubuntu-latest
-
     steps:
       # Check out the repository code
       - name: Checkout Code
