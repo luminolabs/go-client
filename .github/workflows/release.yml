@@ -8,14 +8,14 @@ on:
   # push: # only when you push a change
   #   tags:
   #     - "*"
-  push:
-    # Don't run this workflow on master branch,
-    # we run a different workflow when merging on main
-    branches:
-      - '**'
-      - '!main'
-    # Run workflow only if these folders changed
-    paths: [ 'accounts/**', 'cmd/**', 'utils/**', 'pipeline-zen/**', 'logger/**', 'scripts/**', '.github/**' ]
+  # push:
+  #   # Don't run this workflow on master branch,
+  #   # we run a different workflow when merging on main
+  #   branches:
+  #     - '**'
+  #     - '!main'
+  #   # Run workflow only if these folders changed
+  #   paths: [ 'accounts/**', 'cmd/**', 'utils/**', 'pipeline-zen/**', 'logger/**', 'scripts/**', '.github/**' ]
   pull_request:
     branches:
       - '**'
