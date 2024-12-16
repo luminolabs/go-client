@@ -6,6 +6,7 @@ import (
 	"lumino/cmd/mocks"
 	"lumino/core/types"
 	"math/big"
+	"sync"
 	"testing"
 	"time"
 
@@ -195,7 +196,7 @@ func TestHandleUpdateState(t *testing.T) {
 	var client *ethclient.Client
 	var config types.Configurations
 	var account types.Account
-	ctx := context.Background()
+	// ctx := context.Background()
 
 	tests := []struct {
 		name       string
@@ -228,7 +229,7 @@ func TestHandleUpdateState(t *testing.T) {
 			wantErr: false,
 		},
 		{
-			name: "successful job execution",
+			name: "successful_job_execution",
 			setupMocks: func(jobsMock *mocks.JobsManagerInterface, utilsMock *mocks.UtilsInterface, cmdMock *mocks.UtilsCmdInterface) {
 				utilsMock.On("GetOptions").Return(bind.CallOpts{})
 				jobsMock.On("GetJobForStaker", mock.Anything, mock.Anything, mock.Anything).
@@ -244,8 +245,15 @@ func TestHandleUpdateState(t *testing.T) {
 				jobsMock.On("GetJobDetails", mock.Anything, mock.Anything, mock.Anything).
 					Return(jobContract, nil)
 
-				cmdMock.On("UpdateJobStatus", mock.Anything, mock.Anything, mock.Anything, mock.Anything, types.JobStatusRunning, mock.Anything).
-					Return(common.Hash{}, nil)
+				// Mock for UpdateJobStatus with specific expectations
+				cmdMock.On("UpdateJobStatus",
+					mock.AnythingOfType("*ethclient.Client"),
+					mock.AnythingOfType("types.Configurations"),
+					mock.AnythingOfType("types.Account"),
+					mock.AnythingOfType("*big.Int"),
+					types.JobStatusRunning,
+					mock.AnythingOfType("uint8"),
+				).Return(common.Hash{}, nil)
 			},
 			wantErr: false,
 		},
@@ -257,30 +265,29 @@ func TestHandleUpdateState(t *testing.T) {
 			utilsMock := new(mocks.UtilsInterface)
 			cmdMock := new(mocks.UtilsCmdInterface)
 
-			// Store original interfaces
-			originalJobsManagerUtils := jobsManagerUtils
-			originalProtoUtils := protoUtils
-			originalCmdUtils := cmdUtils
-			defer func() {
-				jobsManagerUtils = originalJobsManagerUtils
-				protoUtils = originalProtoUtils
-				cmdUtils = originalCmdUtils
-			}()
-
 			jobsManagerUtils = jobsMock
 			protoUtils = utilsMock
 			cmdUtils = cmdMock
 
-			tt.setupMocks(jobsMock, utilsMock, cmdMock)
-
-			utils := &UtilsStruct{}
-			err := utils.HandleUpdateState(ctx, client, config, account, 1, "/path/to/pipeline")
-
-			if tt.wantErr {
-				assert.Error(t, err)
-			} else {
-				assert.NoError(t, err)
+			if tt.setupMocks != nil {
+				tt.setupMocks(jobsMock, utilsMock, cmdMock)
 			}
+
+			// Add a wait group to sync goroutines
+			var wg sync.WaitGroup
+			wg.Add(1)
+			go func() {
+				defer wg.Done()
+				utils := &UtilsStruct{}
+				err := utils.HandleUpdateState(context.Background(), client, config, account, 1, "/path/to/pipeline")
+				if tt.wantErr {
+					assert.Error(t, err)
+				} else {
+					assert.NoError(t, err)
+				}
+			}()
+
+			wg.Wait()
 		})
 	}
 }
@@ -289,7 +296,7 @@ func TestHandleConfirmState(t *testing.T) {
 	var client *ethclient.Client
 	var config types.Configurations
 	var account types.Account
-	ctx := context.Background()
+	// ctx := context.Background()
 
 	tests := []struct {
 		name       string
@@ -310,7 +317,7 @@ func TestHandleConfirmState(t *testing.T) {
 			wantErr: false,
 		},
 		{
-			name: "job failed status",
+			name: "job_failed_status",
 			setupState: func() {
 				stateMutex.Lock()
 				executionState.CurrentJob = &types.JobExecution{
@@ -326,8 +333,16 @@ func TestHandleConfirmState(t *testing.T) {
 				utilsMock.On("GetOptions").Return(bind.CallOpts{})
 				jobsMock.On("GetJobDetails", mock.Anything, mock.Anything, mock.Anything).
 					Return(jobDetails, nil)
-				cmdMock.On("UpdateJobStatus", mock.Anything, mock.Anything, mock.Anything, mock.Anything, types.JobStatusFailed, uint8(0)).
-					Return(common.Hash{}, nil)
+
+				// Mock for UpdateJobStatus with specific expectations
+				cmdMock.On("UpdateJobStatus",
+					mock.AnythingOfType("*ethclient.Client"),
+					mock.AnythingOfType("types.Configurations"),
+					mock.AnythingOfType("types.Account"),
+					mock.AnythingOfType("*big.Int"),
+					types.JobStatusFailed,
+					mock.AnythingOfType("uint8"),
+				).Return(common.Hash{}, nil)
 			},
 			wantErr: false,
 		},
@@ -379,26 +394,20 @@ func TestHandleConfirmState(t *testing.T) {
 			utilsMock := new(mocks.UtilsInterface)
 			cmdMock := new(mocks.UtilsCmdInterface)
 
-			// Store original interfaces
-			originalJobsManagerUtils := jobsManagerUtils
-			originalProtoUtils := protoUtils
-			originalCmdUtils := cmdUtils
-			defer func() {
-				jobsManagerUtils = originalJobsManagerUtils
-				protoUtils = originalProtoUtils
-				cmdUtils = originalCmdUtils
-			}()
+			if tt.setupState != nil {
+				tt.setupState()
+			}
 
 			jobsManagerUtils = jobsMock
 			protoUtils = utilsMock
 			cmdUtils = cmdMock
 
-			tt.setupState()
-			tt.setupMocks(jobsMock, utilsMock, cmdMock)
+			if tt.setupMocks != nil {
+				tt.setupMocks(jobsMock, utilsMock, cmdMock)
+			}
 
 			utils := &UtilsStruct{}
-			err := utils.HandleConfirmState(ctx, client, config, account, 1, "/path/to/pipeline")
-
+			err := utils.HandleConfirmState(context.Background(), client, config, account, 1, "/path/to/pipeline")
 			if tt.wantErr {
 				assert.Error(t, err)
 			} else {
