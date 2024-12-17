@@ -6,12 +6,14 @@ import (
 	"lumino/cmd/mocks"
 	"lumino/core/types"
 	"math/big"
+	"os"
 	"sync"
 	"testing"
 	"time"
 
 	"github.com/ethereum/go-ethereum/accounts/abi/bind"
 	"github.com/ethereum/go-ethereum/common"
+	ethTypes "github.com/ethereum/go-ethereum/core/types"
 	"github.com/ethereum/go-ethereum/ethclient"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
@@ -200,12 +202,12 @@ func TestHandleUpdateState(t *testing.T) {
 
 	tests := []struct {
 		name       string
-		setupMocks func(*mocks.JobsManagerInterface, *mocks.UtilsInterface, *mocks.UtilsCmdInterface)
+		setupMocks func(*mocks.JobsManagerInterface, *mocks.UtilsInterface, *mocks.UtilsCmdInterface, osMock *mocks.OSInterface)
 		wantErr    bool
 	}{
 		{
 			name: "no job assigned",
-			setupMocks: func(jobsMock *mocks.JobsManagerInterface, utilsMock *mocks.UtilsInterface, cmdMock *mocks.UtilsCmdInterface) {
+			setupMocks: func(jobsMock *mocks.JobsManagerInterface, utilsMock *mocks.UtilsInterface, cmdMock *mocks.UtilsCmdInterface, osMock *mocks.OSInterface) {
 				utilsMock.On("GetOptions").Return(bind.CallOpts{})
 				jobsMock.On("GetJobForStaker", mock.Anything, mock.Anything, mock.Anything).
 					Return(big.NewInt(0), nil)
@@ -214,7 +216,7 @@ func TestHandleUpdateState(t *testing.T) {
 		},
 		{
 			name: "job already running",
-			setupMocks: func(jobsMock *mocks.JobsManagerInterface, utilsMock *mocks.UtilsInterface, cmdMock *mocks.UtilsCmdInterface) {
+			setupMocks: func(jobsMock *mocks.JobsManagerInterface, utilsMock *mocks.UtilsInterface, cmdMock *mocks.UtilsCmdInterface, osMock *mocks.OSInterface) {
 				utilsMock.On("GetOptions").Return(bind.CallOpts{})
 				jobsMock.On("GetJobForStaker", mock.Anything, mock.Anything, mock.Anything).
 					Return(big.NewInt(1), nil)
@@ -230,7 +232,7 @@ func TestHandleUpdateState(t *testing.T) {
 		},
 		{
 			name: "successful_job_execution",
-			setupMocks: func(jobsMock *mocks.JobsManagerInterface, utilsMock *mocks.UtilsInterface, cmdMock *mocks.UtilsCmdInterface) {
+			setupMocks: func(jobsMock *mocks.JobsManagerInterface, utilsMock *mocks.UtilsInterface, cmdMock *mocks.UtilsCmdInterface, osMock *mocks.OSInterface) {
 				utilsMock.On("GetOptions").Return(bind.CallOpts{})
 				jobsMock.On("GetJobForStaker", mock.Anything, mock.Anything, mock.Anything).
 					Return(big.NewInt(1), nil)
@@ -254,6 +256,29 @@ func TestHandleUpdateState(t *testing.T) {
 					types.JobStatusRunning,
 					mock.AnythingOfType("uint8"),
 				).Return(common.Hash{}, nil)
+				osMock.On("MkdirAll", "./.jobs/1", os.FileMode(0755)).Return(nil)
+
+				// Mock file writing
+				osMock.On("WriteFile",
+					mock.AnythingOfType("string"),
+					mock.AnythingOfType("[]uint8"),
+					os.FileMode(0644),
+				).Return(nil)
+
+				// Mock transaction for status update
+				txnOpts := &bind.TransactOpts{}
+				utilsMock.On("GetTransactionOpts", mock.AnythingOfType("types.TransactionOptions")).Return(txnOpts)
+
+				dummyTx := &ethTypes.Transaction{}
+				jobsMock.On("UpdateJobStatus",
+					mock.AnythingOfType("*ethclient.Client"),
+					mock.AnythingOfType("*bind.TransactOpts"),
+					big.NewInt(1),
+					uint8(types.JobStatusRunning),
+					uint8(0),
+				).Return(dummyTx, nil)
+
+				utilsMock.On("WaitForBlockCompletion", mock.Anything, mock.Anything).Return(nil)
 			},
 			wantErr: false,
 		},
@@ -263,6 +288,7 @@ func TestHandleUpdateState(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			jobsMock := new(mocks.JobsManagerInterface)
 			utilsMock := new(mocks.UtilsInterface)
+			osMock := new(mocks.OSInterface)
 			cmdMock := new(mocks.UtilsCmdInterface)
 
 			jobsManagerUtils = jobsMock
