@@ -249,7 +249,7 @@ func TestUpdateJobStatus(t *testing.T) {
 		wantErr    bool
 	}{
 		{
-			name: "successful update",
+			name: "UpdateJobStatus should successfully update the job status",
 			setupMocks: func(jobsMock *mocks.JobsManagerInterface, utilsMock *mocks.UtilsInterface, txMock *mocks.TransactionInterface) {
 				txnOpts := &bind.TransactOpts{}
 				utilsMock.On("GetTransactionOpts", mock.Anything).Return(txnOpts)
@@ -268,7 +268,7 @@ func TestUpdateJobStatus(t *testing.T) {
 			wantErr: false,
 		},
 		{
-			name: "nil client error",
+			name: "UpdateJobStatus should fail when the Ethereum client is nil",
 			setupMocks: func(jobsMock *mocks.JobsManagerInterface, utilsMock *mocks.UtilsInterface, txMock *mocks.TransactionInterface) {
 				// No mocks needed as it should fail early
 			},
@@ -277,7 +277,7 @@ func TestUpdateJobStatus(t *testing.T) {
 			wantErr: true,
 		},
 		{
-			name: "update job status error",
+			name: "UpdateJobStatus should fail when the job status update encounters an error",
 			setupMocks: func(jobsMock *mocks.JobsManagerInterface, utilsMock *mocks.UtilsInterface, txMock *mocks.TransactionInterface) {
 				txnOpts := &bind.TransactOpts{}
 				utilsMock.On("GetTransactionOpts", mock.Anything).Return(txnOpts)
@@ -290,7 +290,7 @@ func TestUpdateJobStatus(t *testing.T) {
 			wantErr: true,
 		},
 		{
-			name: "wait for block completion error",
+			name: "UpdateJobStatus should fail when block completion fails",
 			setupMocks: func(jobsMock *mocks.JobsManagerInterface, utilsMock *mocks.UtilsInterface, txMock *mocks.TransactionInterface) {
 				txnOpts := &bind.TransactOpts{}
 				utilsMock.On("GetTransactionOpts", mock.Anything).Return(txnOpts)
