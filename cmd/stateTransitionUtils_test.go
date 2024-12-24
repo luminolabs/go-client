@@ -30,7 +30,7 @@ func TestHandleStateTransition(t *testing.T) {
 		wantErr    bool
 	}{
 		{
-			name:    "admin assign state",
+			name:    "admin node assign state transition is successful",
 			state:   types.EpochStateAssign,
 			isAdmin: true,
 			setupMocks: func(cmdMock *mocks.UtilsCmdInterface, stateMock *mocks.StateManagerInterface, utilsMock *mocks.UtilsInterface) {
@@ -40,7 +40,7 @@ func TestHandleStateTransition(t *testing.T) {
 			wantErr: false,
 		},
 		{
-			name:    "non-admin assign state",
+			name:    "non-admin node skips assign state without error",
 			state:   types.EpochStateAssign,
 			isAdmin: false,
 			setupMocks: func(cmdMock *mocks.UtilsCmdInterface, stateMock *mocks.StateManagerInterface, utilsMock *mocks.UtilsInterface) {
@@ -49,7 +49,7 @@ func TestHandleStateTransition(t *testing.T) {
 			wantErr: false,
 		},
 		{
-			name:  "update state",
+			name:  "state transition to update state with success",
 			state: types.EpochStateUpdate,
 			setupMocks: func(cmdMock *mocks.UtilsCmdInterface, stateMock *mocks.StateManagerInterface, utilsMock *mocks.UtilsInterface) {
 				cmdMock.On("HandleUpdateState", mock.Anything, mock.Anything, mock.Anything, mock.Anything, mock.Anything, mock.Anything).
@@ -58,7 +58,7 @@ func TestHandleStateTransition(t *testing.T) {
 			wantErr: false,
 		},
 		{
-			name:  "confirm state",
+			name:  "state transition to confirm state with success",
 			state: types.EpochStateConfirm,
 			setupMocks: func(cmdMock *mocks.UtilsCmdInterface, stateMock *mocks.StateManagerInterface, utilsMock *mocks.UtilsInterface) {
 				cmdMock.On("HandleConfirmState", mock.Anything, mock.Anything, mock.Anything, mock.Anything, mock.Anything, mock.Anything).
@@ -67,7 +67,7 @@ func TestHandleStateTransition(t *testing.T) {
 			wantErr: false,
 		},
 		{
-			name:  "default state",
+			name:  "between state transitions or default state",
 			state: types.EpochStateBuffer,
 			setupMocks: func(cmdMock *mocks.UtilsCmdInterface, stateMock *mocks.StateManagerInterface, utilsMock *mocks.UtilsInterface) {
 				utilsMock.On("GetOptions").Return(bind.CallOpts{})
@@ -124,7 +124,7 @@ func TestHandleAssignState(t *testing.T) {
 		wantErr    bool
 	}{
 		{
-			name: "no active jobs",
+			name: "No Active Jobs Found During Assignment",
 			setupMocks: func(cmdMock *mocks.UtilsCmdInterface, jobsMock *mocks.JobsManagerInterface, utilsMock *mocks.UtilsInterface) {
 				utilsMock.On("GetOptions").Return(bind.CallOpts{})
 				cmdMock.On("GetConfigData").Return(config, nil)
@@ -133,7 +133,7 @@ func TestHandleAssignState(t *testing.T) {
 			wantErr: false,
 		},
 		{
-			name: "active jobs available",
+			name: "Successfully Handles Active Jobs Assignment",
 			setupMocks: func(cmdMock *mocks.UtilsCmdInterface, jobsMock *mocks.JobsManagerInterface, utilsMock *mocks.UtilsInterface) {
 				utilsMock.On("GetOptions").Return(bind.CallOpts{})
 				cmdMock.On("GetConfigData").Return(config, nil)
@@ -146,7 +146,7 @@ func TestHandleAssignState(t *testing.T) {
 			wantErr: false,
 		},
 		{
-			name: "error getting active jobs",
+			name: "Error Occurs While Fetching Active Jobs",
 			setupMocks: func(cmdMock *mocks.UtilsCmdInterface, jobsMock *mocks.JobsManagerInterface, utilsMock *mocks.UtilsInterface) {
 				utilsMock.On("GetOptions").Return(bind.CallOpts{})
 				cmdMock.On("GetConfigData").Return(config, nil)
@@ -203,7 +203,7 @@ func TestHandleUpdateState(t *testing.T) {
 		wantErr    bool
 	}{
 		{
-			name: "no job assigned",
+			name: "when no job assigned is assigned to the node",
 			setupMocks: func(jobsMock *mocks.JobsManagerInterface, utilsMock *mocks.UtilsInterface, cmdMock *mocks.UtilsCmdInterface) {
 				utilsMock.On("GetOptions").Return(bind.CallOpts{})
 				jobsMock.On("GetJobForStaker", mock.Anything, mock.Anything, mock.Anything).
@@ -212,7 +212,7 @@ func TestHandleUpdateState(t *testing.T) {
 			wantErr: false,
 		},
 		{
-			name: "job already running",
+			name: "when the job is already running on a node",
 			setupMocks: func(jobsMock *mocks.JobsManagerInterface, utilsMock *mocks.UtilsInterface, cmdMock *mocks.UtilsCmdInterface) {
 				utilsMock.On("GetOptions").Return(bind.CallOpts{})
 				jobsMock.On("GetJobForStaker", mock.Anything, mock.Anything, mock.Anything).
@@ -228,7 +228,7 @@ func TestHandleUpdateState(t *testing.T) {
 			wantErr: false,
 		},
 		{
-			name: "successful job execution",
+			name: "when a job is executed successfully",
 			setupMocks: func(jobsMock *mocks.JobsManagerInterface, utilsMock *mocks.UtilsInterface, cmdMock *mocks.UtilsCmdInterface) {
 				utilsMock.On("GetOptions").Return(bind.CallOpts{})
 				jobsMock.On("GetJobForStaker", mock.Anything, mock.Anything, mock.Anything).
@@ -298,7 +298,7 @@ func TestHandleConfirmState(t *testing.T) {
 		wantErr    bool
 	}{
 		{
-			name: "no current job",
+			name: "No Current Job Found in Confirmation State",
 			setupState: func() {
 				stateMutex.Lock()
 				executionState.CurrentJob = nil
@@ -310,7 +310,7 @@ func TestHandleConfirmState(t *testing.T) {
 			wantErr: false,
 		},
 		{
-			name: "job failed status",
+			name: "Handles Job with Failed Status in Confirmation State",
 			setupState: func() {
 				stateMutex.Lock()
 				executionState.CurrentJob = &types.JobExecution{
@@ -332,7 +332,7 @@ func TestHandleConfirmState(t *testing.T) {
 			wantErr: false,
 		},
 		{
-			name: "job completed successfully",
+			name: "Successfully Handles Job Completion in Confirm State",
 			setupState: func() {
 				stateMutex.Lock()
 				executionState.CurrentJob = &types.JobExecution{
@@ -355,7 +355,7 @@ func TestHandleConfirmState(t *testing.T) {
 			wantErr: false,
 		},
 		{
-			name: "error getting job details",
+			name: "Error Occurs While Fetching Job Details in Confirmation State",
 			setupState: func() {
 				stateMutex.Lock()
 				executionState.CurrentJob = &types.JobExecution{
