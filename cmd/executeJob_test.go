@@ -362,7 +362,7 @@ func TestExecuteJob(t *testing.T) {
 		wantErr    bool
 	}{
 		{
-			name: "successful execution",
+			name: "ExecuteJob executes the job successfully",
 			setupMocks: func(cmdMock *mocks.UtilsCmdInterface) {
 				cmdMock.On("GetEpochAndState", mock.Anything).
 					Return(uint32(1), int64(0), nil).Once()
@@ -374,7 +374,7 @@ func TestExecuteJob(t *testing.T) {
 			wantErr: false,
 		},
 		{
-			name: "epoch error",
+			name: "ExecuteJob doesn't execute because of non-blocking epoch error",
 			setupMocks: func(cmdMock *mocks.UtilsCmdInterface) {
 				cmdMock.On("GetEpochAndState", mock.Anything).
 					Return(uint32(0), int64(0), errors.New("epoch error"))
