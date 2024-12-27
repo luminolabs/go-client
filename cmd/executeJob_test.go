@@ -42,7 +42,7 @@ func TestRunExecuteJob(t *testing.T) {
 		setupFlags    bool // Whether to set up flags in FlagSet
 	}{
 		{
-			name: "Test 1: When RunExecuteJob executes successfully",
+			name: "Test 1: RunExecuteJob should execute successfully when all parameters are valid",
 			args: args{
 				config:       types.Configurations{},
 				password:     "password",
@@ -55,7 +55,7 @@ func TestRunExecuteJob(t *testing.T) {
 			setupFlags:    true,
 		},
 		{
-			name: "Test 2: When there is an error in getting config",
+			name: "Test 2: RunExecuteJob should fail when there is an error in retrieving configuration",
 			args: args{
 				configErr:    errors.New("config error"),
 				password:     "password",
@@ -68,7 +68,7 @@ func TestRunExecuteJob(t *testing.T) {
 			setupFlags:    true,
 		},
 		{
-			name: "Test 3: When there is an error in getting address",
+			name: "Test 3: RunExecuteJob should fail when there is an error in retrieving the address",
 			args: args{
 				config:       types.Configurations{},
 				password:     "password",
@@ -81,7 +81,7 @@ func TestRunExecuteJob(t *testing.T) {
 			setupFlags:    true,
 		},
 		{
-			name: "Test 4: When there is an error in getting pipeline path",
+			name: "Test 4: RunExecuteJob should fail when the pipeline path is invalid",
 			args: args{
 				config:       types.Configurations{},
 				password:     "password",
@@ -95,7 +95,7 @@ func TestRunExecuteJob(t *testing.T) {
 			setupFlags:    false, // Don't set up flags to simulate flag error
 		},
 		{
-			name: "Test 5: When there is an error in getting isAdmin flag",
+			name: "Test 5: RunExecuteJob should fail when there is an error retrieving the isAdmin flag",
 			args: args{
 				config:       types.Configurations{},
 				password:     "password",
@@ -108,7 +108,7 @@ func TestRunExecuteJob(t *testing.T) {
 			setupFlags:    false, // Don't set up flags to simulate flag error
 		},
 		{
-			name: "Test 6: When there is an error in ExecuteJob",
+			name: "Test 6: RunExecuteJob should fail when ExecuteJob encounters an error",
 			args: args{
 				config:       types.Configurations{},
 				password:     "password",
@@ -122,7 +122,7 @@ func TestRunExecuteJob(t *testing.T) {
 			setupFlags:    true,
 		},
 		{
-			name: "Test 7: When non-admin tries to use admin flag",
+			name: "Test 7: RunExecuteJob should fail when a non-admin user attempts to use the admin flag",
 			args: args{
 				config:       types.Configurations{},
 				password:     "password",
@@ -249,7 +249,7 @@ func TestUpdateJobStatus(t *testing.T) {
 		wantErr    bool
 	}{
 		{
-			name: "successful update",
+			name: "UpdateJobStatus should successfully update the job status",
 			setupMocks: func(jobsMock *mocks.JobsManagerInterface, utilsMock *mocks.UtilsInterface, txMock *mocks.TransactionInterface) {
 				txnOpts := &bind.TransactOpts{}
 				utilsMock.On("GetTransactionOpts", mock.Anything).Return(txnOpts)
@@ -268,7 +268,7 @@ func TestUpdateJobStatus(t *testing.T) {
 			wantErr: false,
 		},
 		{
-			name: "nil client error",
+			name: "UpdateJobStatus should fail when the Ethereum client is nil",
 			setupMocks: func(jobsMock *mocks.JobsManagerInterface, utilsMock *mocks.UtilsInterface, txMock *mocks.TransactionInterface) {
 				// No mocks needed as it should fail early
 			},
@@ -277,7 +277,7 @@ func TestUpdateJobStatus(t *testing.T) {
 			wantErr: true,
 		},
 		{
-			name: "update job status error",
+			name: "UpdateJobStatus should fail when the job status update encounters an error",
 			setupMocks: func(jobsMock *mocks.JobsManagerInterface, utilsMock *mocks.UtilsInterface, txMock *mocks.TransactionInterface) {
 				txnOpts := &bind.TransactOpts{}
 				utilsMock.On("GetTransactionOpts", mock.Anything).Return(txnOpts)
@@ -290,7 +290,7 @@ func TestUpdateJobStatus(t *testing.T) {
 			wantErr: true,
 		},
 		{
-			name: "wait for block completion error",
+			name: "UpdateJobStatus should fail when block completion fails",
 			setupMocks: func(jobsMock *mocks.JobsManagerInterface, utilsMock *mocks.UtilsInterface, txMock *mocks.TransactionInterface) {
 				txnOpts := &bind.TransactOpts{}
 				utilsMock.On("GetTransactionOpts", mock.Anything).Return(txnOpts)
@@ -362,7 +362,7 @@ func TestExecuteJob(t *testing.T) {
 		wantErr    bool
 	}{
 		{
-			name: "successful execution",
+			name: "ExecuteJob executes the job successfully",
 			setupMocks: func(cmdMock *mocks.UtilsCmdInterface) {
 				cmdMock.On("GetEpochAndState", mock.Anything).
 					Return(uint32(1), int64(0), nil).Once()
@@ -374,7 +374,7 @@ func TestExecuteJob(t *testing.T) {
 			wantErr: false,
 		},
 		{
-			name: "epoch error",
+			name: "ExecuteJob doesn't execute because of non-blocking epoch error",
 			setupMocks: func(cmdMock *mocks.UtilsCmdInterface) {
 				cmdMock.On("GetEpochAndState", mock.Anything).
 					Return(uint32(0), int64(0), errors.New("epoch error"))
