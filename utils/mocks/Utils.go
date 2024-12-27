@@ -293,6 +293,56 @@ func (_m *Utils) GetGasPrice(client *ethclient.Client, config types.Configuratio
 	return r0
 }
 
+// GetJobManager provides a mock function with given fields: client
+func (_m *Utils) GetJobManager(client *ethclient.Client) *bindings.JobManager {
+	ret := _m.Called(client)
+
+	if len(ret) == 0 {
+		panic("no return value specified for GetJobManager")
+	}
+
+	var r0 *bindings.JobManager
+	if rf, ok := ret.Get(0).(func(*ethclient.Client) *bindings.JobManager); ok {
+		r0 = rf(client)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*bindings.JobManager)
+		}
+	}
+
+	return r0
+}
+
+// GetJobManagerWithOpts provides a mock function with given fields: client
+func (_m *Utils) GetJobManagerWithOpts(client *ethclient.Client) (*bindings.JobManager, bind.CallOpts) {
+	ret := _m.Called(client)
+
+	if len(ret) == 0 {
+		panic("no return value specified for GetJobManagerWithOpts")
+	}
+
+	var r0 *bindings.JobManager
+	var r1 bind.CallOpts
+	if rf, ok := ret.Get(0).(func(*ethclient.Client) (*bindings.JobManager, bind.CallOpts)); ok {
+		return rf(client)
+	}
+	if rf, ok := ret.Get(0).(func(*ethclient.Client) *bindings.JobManager); ok {
+		r0 = rf(client)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*bindings.JobManager)
+		}
+	}
+
+	if rf, ok := ret.Get(1).(func(*ethclient.Client) bind.CallOpts); ok {
+		r1 = rf(client)
+	} else {
+		r1 = ret.Get(1).(bind.CallOpts)
+	}
+
+	return r0, r1
+}
+
 // GetLatestBlockWithRetry provides a mock function with given fields: client
 func (_m *Utils) GetLatestBlockWithRetry(client *ethclient.Client) (*coretypes.Header, error) {
 	ret := _m.Called(client)
