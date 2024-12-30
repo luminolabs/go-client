@@ -50,6 +50,24 @@ func (_m *OSInterface) Mkdir(name string, perm fs.FileMode) error {
 	return r0
 }
 
+// MkdirAll provides a mock function with given fields: name, perm
+func (_m *OSInterface) MkdirAll(name string, perm fs.FileMode) error {
+	ret := _m.Called(name, perm)
+
+	if len(ret) == 0 {
+		panic("no return value specified for MkdirAll")
+	}
+
+	var r0 error
+	if rf, ok := ret.Get(0).(func(string, fs.FileMode) error); ok {
+		r0 = rf(name, perm)
+	} else {
+		r0 = ret.Error(0)
+	}
+
+	return r0
+}
+
 // Open provides a mock function with given fields: name
 func (_m *OSInterface) Open(name string) (*os.File, error) {
 	ret := _m.Called(name)
@@ -166,6 +184,24 @@ func (_m *OSInterface) UserHomeDir() (string, error) {
 	}
 
 	return r0, r1
+}
+
+// WriteFile provides a mock function with given fields: name, content, perm
+func (_m *OSInterface) WriteFile(name string, content []byte, perm fs.FileMode) error {
+	ret := _m.Called(name, content, perm)
+
+	if len(ret) == 0 {
+		panic("no return value specified for WriteFile")
+	}
+
+	var r0 error
+	if rf, ok := ret.Get(0).(func(string, []byte, fs.FileMode) error); ok {
+		r0 = rf(name, content, perm)
+	} else {
+		r0 = ret.Error(0)
+	}
+
+	return r0
 }
 
 // NewOSInterface creates a new instance of OSInterface. It also registers a testing interface on the mock and a cleanup function to assert the mocks expectations.

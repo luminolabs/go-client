@@ -5,9 +5,9 @@ import (
 	"encoding/json"
 	"fmt"
 	"lumino/core/types"
+	"lumino/path"
 	pipeline_zen "lumino/pipeline-zen"
 	"math/big"
-	"os"
 	"path/filepath"
 	"strings"
 	"time"
@@ -176,12 +176,12 @@ func (*UtilsStruct) HandleUpdateState(ctx context.Context, client *ethclient.Cli
 
 	// Create job directory in .lumino
 	jobDir := filepath.Join("./.jobs", jobId.String())
-	if err := os.MkdirAll(jobDir, 0755); err != nil {
+	if err := path.OSUtilsInterface.MkdirAll(jobDir, 0755); err != nil {
 		return fmt.Errorf("failed to create job directory: %w", err)
 	}
 
 	// Create job directory if it doesn't exist
-	if err := os.MkdirAll(jobDir, 0755); err != nil {
+	if err := path.OSUtilsInterface.MkdirAll(jobDir, 0755); err != nil {
 		return fmt.Errorf("failed to create job directory: %w", err)
 	}
 
@@ -195,7 +195,7 @@ func (*UtilsStruct) HandleUpdateState(ctx context.Context, client *ethclient.Cli
 
 	// Write to file
 	configPath := filepath.Join(jobDir, "config.json")
-	if err := os.WriteFile(configPath, configJson, 0644); err != nil {
+	if err := path.OSUtilsInterface.WriteFile(configPath, configJson, 0644); err != nil {
 		return fmt.Errorf("failed to write job config: %w", err)
 	}
 
@@ -350,13 +350,13 @@ func (*UtilsStruct) HandleConfirmState(ctx context.Context, client *ethclient.Cl
 
 	// Check if .started file exists
 	startedExists := false
-	if _, err := os.Stat(startedFile); err == nil {
+	if _, err := path.OSUtilsInterface.Stat(startedFile); err == nil {
 		startedExists = true
 	}
 
 	// Check if .finished file exists
 	finishedExists := false
-	if _, err := os.Stat(finishedFile); err == nil {
+	if _, err := path.OSUtilsInterface.Stat(finishedFile); err == nil {
 		finishedExists = true
 	}
 
