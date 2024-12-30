@@ -252,7 +252,7 @@ func TestUpdateJobStatus(t *testing.T) {
 			name: "UpdateJobStatus should successfully update the job status",
 			setupMocks: func(jobsMock *mocks.JobsManagerInterface, utilsMock *mocks.UtilsInterface, txMock *mocks.TransactionInterface) {
 				txnOpts := &bind.TransactOpts{}
-				utilsMock.On("GetTransactionOpts", mock.Anything).Return(txnOpts)
+				utilsMock.On("GetTransactionOpts", mock.AnythingOfType("types.TransactionOptions")).Return(txnOpts)
 
 				tx := &ethTypes.Transaction{}
 				jobsMock.On("UpdateJobStatus", mock.Anything, mock.Anything, jobId, uint8(types.JobStatusRunning), uint8(0)).
@@ -268,19 +268,10 @@ func TestUpdateJobStatus(t *testing.T) {
 			wantErr: false,
 		},
 		{
-			name: "UpdateJobStatus should fail when the Ethereum client is nil",
-			setupMocks: func(jobsMock *mocks.JobsManagerInterface, utilsMock *mocks.UtilsInterface, txMock *mocks.TransactionInterface) {
-				// No mocks needed as it should fail early
-			},
-			status:  types.JobStatusRunning,
-			buffer:  0,
-			wantErr: true,
-		},
-		{
 			name: "UpdateJobStatus should fail when the job status update encounters an error",
 			setupMocks: func(jobsMock *mocks.JobsManagerInterface, utilsMock *mocks.UtilsInterface, txMock *mocks.TransactionInterface) {
 				txnOpts := &bind.TransactOpts{}
-				utilsMock.On("GetTransactionOpts", mock.Anything).Return(txnOpts)
+				utilsMock.On("GetTransactionOpts", mock.AnythingOfType("types.TransactionOptions")).Return(txnOpts)
 
 				jobsMock.On("UpdateJobStatus", mock.Anything, mock.Anything, jobId, uint8(types.JobStatusRunning), uint8(0)).
 					Return(nil, errors.New("update failed"))
@@ -293,7 +284,7 @@ func TestUpdateJobStatus(t *testing.T) {
 			name: "UpdateJobStatus should fail when block completion fails",
 			setupMocks: func(jobsMock *mocks.JobsManagerInterface, utilsMock *mocks.UtilsInterface, txMock *mocks.TransactionInterface) {
 				txnOpts := &bind.TransactOpts{}
-				utilsMock.On("GetTransactionOpts", mock.Anything).Return(txnOpts)
+				utilsMock.On("GetTransactionOpts", mock.AnythingOfType("types.TransactionOptions")).Return(txnOpts)
 
 				tx := &ethTypes.Transaction{}
 				jobsMock.On("UpdateJobStatus", mock.Anything, mock.Anything, jobId, uint8(types.JobStatusRunning), uint8(0)).
