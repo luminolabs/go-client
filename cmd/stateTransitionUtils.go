@@ -204,52 +204,47 @@ func (*UtilsStruct) HandleUpdateState(ctx context.Context, client *ethclient.Cli
 		"configPath": configPath,
 	}).Debug("Job configuration written to file")
 
-	// Start job execution in goroutine
-	// Update state
-	stateMutex.Lock()
-	executionState.CurrentJob = &types.JobExecution{
-		JobID:     jobId,
-		Status:    types.JobStatusRunning,
-		StartTime: time.Now(),
-		Executor:  account.Address,
-	}
-	executionState.IsJobRunning = true
-	stateMutex.Unlock()
-
-	// Update status to running
-	txnHash, err := cmdUtils.UpdateJobStatus(client, config, account, jobId, types.JobStatusRunning, 0)
-	if err != nil {
-		log.WithError(err).Error("Failed to update job status to running")
-		return fmt.Errorf("failed to update jobStatus: %w", err)
-	}
-	log.WithField("txHash", txnHash.Hex()).Info("Job status updated to Running")
-
-	// Install dependencies
-	// if err := pipeline_zen.InstallDeps(pipelinePath); err != nil {
-	// 	log.WithError(err).Error("Failed to install dependencies")
-	// 	cmdUtils.updateJobStatus(client, config, account, jobId)
-	// 	return nil
-	// }
-
+	// TODO: Put this in a go routine
+	// start the waitgroup and wait for it in the main thread
+	// read the files for the status of the job
 	// Execute job with the config from .lumino directory
-	output, err := pipeline_zen.RunTorchTuneWrapper(pipelinePath, configPath)
-	if err != nil {
-		log.WithError(err).Error("Job execution failed")
+	// Start job execution in background
+	go func() {
+		// Update job status to Running
+		txnHash, err := cmdUtils.UpdateJobStatus(client, config, account, jobId, types.JobStatusRunning, 0)
+		if err != nil {
+			log.WithError(err).Error("Failed to update job status to running")
+			return
+		}
+		log.WithField("txHash", txnHash.Hex()).Info("Job status updated to Running")
+
+		// Execute job
+		output, err := pipeline_zen.RunTorchTuneWrapper(pipelinePath, configPath)
+		if err != nil {
+			log.WithError(err).Error("Job execution failed")
+			// Update status to Failed
+			if _, err := cmdUtils.UpdateJobStatus(client, config, account, jobId, types.JobStatusFailed, 0); err != nil {
+				log.WithError(err).Error("Failed to update job status to failed")
+			}
+			return
+		}
+
+		log.WithFields(logrus.Fields{
+			"jobId":  jobId.String(),
+			"output": output,
+		}).Info("Job started successfully")
+
+		// Update state
 		stateMutex.Lock()
 		executionState.CurrentJob = &types.JobExecution{
-			JobID:    jobId,
-			Status:   types.JobStatusFailed,
-			Executor: account.Address,
+			JobID:     jobId,
+			Status:    types.JobStatusRunning,
+			StartTime: time.Now(),
+			Executor:  account.Address,
 		}
+		executionState.IsJobRunning = true
 		stateMutex.Unlock()
-		// cmdUtils.UpdateJobStatus(client, config, account, jobId, types.JobStatusFailed, 0)
-		return nil
-	}
-
-	log.WithFields(logrus.Fields{
-		"jobId":  jobId.String(),
-		"output": output,
-	}).Info("Job is running successfully")
+	}()
 
 	return nil
 }
