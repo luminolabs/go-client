@@ -1,3 +1,4 @@
+// nolint
 // Package cmd provides all functions related to command line
 package cmd
 

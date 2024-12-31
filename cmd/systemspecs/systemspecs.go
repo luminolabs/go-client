@@ -61,7 +61,11 @@ func getGPUSpec() ([]GPUSpec, error) {
 	if err != nil {
 		return nil, fmt.Errorf("failed to initialize NVML: %v", err)
 	}
-	defer nvml.Shutdown()
+	defer func() {
+		if err := nvml.Shutdown(); err != nil {
+			log.Printf("Error shutting down NVML: %v\n", err)
+		}
+	}()
 
 	deviceCount, err := nvml.DeviceCount()
 	if err != nil {

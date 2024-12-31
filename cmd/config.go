@@ -17,6 +17,8 @@ type Config struct {
 
 // loadConfig loads the configuration from a file.
 // It returns a pointer to the Config struct and an error if loading fails.
+//
+//lint:ignore U1000
 func loadConfig(cfgFile string) (*Config, error) {
 	if cfgFile != "" {
 		viper.SetConfigFile(cfgFile)
@@ -43,6 +45,8 @@ func loadConfig(cfgFile string) (*Config, error) {
 
 // saveConfig saves the configuration to a file.
 // It takes a pointer to the Config struct and a file path, returning an error if saving fails.
+//
+//lint:ignore U1000
 func saveConfig(config *Config, filePath string) error {
 	file, err := os.Create(filePath)
 	if err != nil {

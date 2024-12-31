@@ -367,7 +367,7 @@ func (stateManagerUtils *StateManagerUtils) WaitForNextState(client *ethclient.C
 			"targetState":  utils.UtilsInterface.GetStateName(int64(targetState)),
 		}).Debug("Waiting for state transition")
 
-		time.Sleep(2)
+		time.Sleep(2 * time.Second)
 	}
 }
 
