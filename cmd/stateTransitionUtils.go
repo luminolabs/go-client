@@ -176,11 +176,6 @@ func (*UtilsStruct) HandleUpdateState(ctx context.Context, client *ethclient.Cli
 		return fmt.Errorf("failed to create job directory: %w", err)
 	}
 
-	// Create job directory if it doesn't exist
-	if err := path.OSUtilsInterface.MkdirAll(jobDir, 0755); err != nil {
-		return fmt.Errorf("failed to create job directory: %w", err)
-	}
-
 	// Marshal the config with proper indentation
 	configJson, err := json.MarshalIndent(jobConfig, "", "  ")
 	if err != nil {
