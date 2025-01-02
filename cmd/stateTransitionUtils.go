@@ -47,10 +47,7 @@ func (*UtilsStruct) HandleAssignState(ctx context.Context, client *ethclient.Cli
 	opts := protoUtils.GetOptions()
 	// TODO: to be replaced by activeStaker or a better mechanism
 	// numStakers, err := stakeManagerUtils.GetNumStakers(client, &opts)
-	// if err != nil {
-	// 	log.Error("Error in getting Num stakers: ", err)
-	// 	return fmt.Errorf("failed to get Number of stakers jobs: %w", err)
-	// }
+
 	log.Debug("Num stakers : ", 3)
 
 	var activeStakers [3]string
