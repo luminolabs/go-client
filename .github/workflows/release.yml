@@ -65,12 +65,11 @@ jobs:
 
       - name: Generate bindings
         run: ./scripts/generate-bindings.sh
-
-      - name: Generate mocks
+- name: Generate mocks
         run: |
-          mockery --all --dir=./accounts --output=./accounts/mocks --outpkg=mocks 
-          mockery --all --dir=./cmd --output=./cmd/mocks --outpkg=mocks 
-          mockery --all --dir=./path --output=./path/mocks --outpkg=mocks 
+          for dir in accounts cmd path utils; do
+            mockery --all --dir=./$dir --output=./$dir/mocks --outpkg=mocks
+          done
           mockery --all --dir=./utils --output=./utils/mocks --outpkg=mocks 
 
       # Run unit tests
