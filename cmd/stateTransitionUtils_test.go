@@ -5,7 +5,9 @@ import (
 	"errors"
 	"lumino/cmd/mocks"
 	"lumino/core/types"
+	"lumino/path"
 	"math/big"
+	"os"
 	"testing"
 	"time"
 
@@ -195,25 +197,25 @@ func TestHandleUpdateState(t *testing.T) {
 	var client *ethclient.Client
 	var config types.Configurations
 	var account types.Account
-	ctx := context.Background()
 
 	tests := []struct {
 		name       string
-		setupMocks func(*mocks.JobsManagerInterface, *mocks.UtilsInterface, *mocks.UtilsCmdInterface)
+		setupMocks func(jobsMock *mocks.JobsManagerInterface, utilsMock *mocks.UtilsInterface, cmdMock *mocks.UtilsCmdInterface, osMock *mocks.OSInterface) chan struct{}
 		wantErr    bool
 	}{
 		{
 			name: "when no job assigned is assigned to the node",
-			setupMocks: func(jobsMock *mocks.JobsManagerInterface, utilsMock *mocks.UtilsInterface, cmdMock *mocks.UtilsCmdInterface) {
+			setupMocks: func(jobsMock *mocks.JobsManagerInterface, utilsMock *mocks.UtilsInterface, cmdMock *mocks.UtilsCmdInterface, osMock *mocks.OSInterface) chan struct{} {
 				utilsMock.On("GetOptions").Return(bind.CallOpts{})
 				jobsMock.On("GetJobForStaker", mock.Anything, mock.Anything, mock.Anything).
 					Return(big.NewInt(0), nil)
+				return nil
 			},
 			wantErr: false,
 		},
 		{
 			name: "when the job is already running on a node",
-			setupMocks: func(jobsMock *mocks.JobsManagerInterface, utilsMock *mocks.UtilsInterface, cmdMock *mocks.UtilsCmdInterface) {
+			setupMocks: func(jobsMock *mocks.JobsManagerInterface, utilsMock *mocks.UtilsInterface, cmdMock *mocks.UtilsCmdInterface, osMock *mocks.OSInterface) chan struct{} {
 				utilsMock.On("GetOptions").Return(bind.CallOpts{})
 				jobsMock.On("GetJobForStaker", mock.Anything, mock.Anything, mock.Anything).
 					Return(big.NewInt(1), nil)
@@ -224,28 +226,75 @@ func TestHandleUpdateState(t *testing.T) {
 				stateMutex.Lock()
 				executionState.IsJobRunning = true
 				stateMutex.Unlock()
+				return nil
 			},
 			wantErr: false,
 		},
 		{
 			name: "when a job is executed successfully",
-			setupMocks: func(jobsMock *mocks.JobsManagerInterface, utilsMock *mocks.UtilsInterface, cmdMock *mocks.UtilsCmdInterface) {
+			setupMocks: func(jobsMock *mocks.JobsManagerInterface, utilsMock *mocks.UtilsInterface, cmdMock *mocks.UtilsCmdInterface, osMock *mocks.OSInterface) chan struct{} {
+				// Channel to coordinate test completion
+				done := make(chan struct{})
+
 				utilsMock.On("GetOptions").Return(bind.CallOpts{})
 				jobsMock.On("GetJobForStaker", mock.Anything, mock.Anything, mock.Anything).
 					Return(big.NewInt(1), nil)
 				jobsMock.On("GetJobStatus", mock.Anything, mock.Anything, mock.Anything).
 					Return(uint8(types.JobStatusQueued), nil)
 
+				// Mock job details with complete valid JSON
 				jobContract := types.JobContract{
-					JobId:            big.NewInt(1),
-					Creator:          common.HexToAddress("0x123"),
-					JobDetailsInJSON: `{"job_config_name":"test"}`,
+					JobId:   big.NewInt(1),
+					Creator: common.HexToAddress("0x123"),
+					JobDetailsInJSON: `{
+						"job_config_name": "test",
+						"dataset_id": "test_dataset",
+						"batch_size": "32",
+						"shuffle": "true",
+						"num_epochs": "1",
+						"use_lora": "true",
+						"use_qlora": "false",
+						"lr": "1e-2",
+						"override_env": "prod",
+						"seed": "42",
+						"num_gpus": "1"
+					}`,
 				}
 				jobsMock.On("GetJobDetails", mock.Anything, mock.Anything, mock.Anything).
 					Return(jobContract, nil)
 
-				cmdMock.On("UpdateJobStatus", mock.Anything, mock.Anything, mock.Anything, mock.Anything, types.JobStatusRunning, mock.Anything).
-					Return(common.Hash{}, nil)
+				// Mock directory creation
+				osMock.On("MkdirAll", ".jobs/1", os.FileMode(0755)).Return(nil)
+
+				// Mock file writing
+				osMock.On("WriteFile",
+					mock.AnythingOfType("string"),
+					mock.AnythingOfType("[]uint8"),
+					os.FileMode(0644),
+				).Return(nil)
+
+				// Mock UpdateJobStatus for both Running and Failed states
+				cmdMock.On("UpdateJobStatus",
+					mock.AnythingOfType("*ethclient.Client"),
+					mock.AnythingOfType("types.Configurations"),
+					mock.AnythingOfType("types.Account"),
+					big.NewInt(1),
+					types.JobStatusRunning,
+					uint8(0),
+				).Return(common.Hash{}, nil)
+
+				cmdMock.On("UpdateJobStatus",
+					mock.AnythingOfType("*ethclient.Client"),
+					mock.AnythingOfType("types.Configurations"),
+					mock.AnythingOfType("types.Account"),
+					big.NewInt(1),
+					types.JobStatusFailed,
+					uint8(0),
+				).Run(func(args mock.Arguments) {
+					close(done)
+				}).Return(common.Hash{}, nil)
+
+				return done
 			},
 			wantErr: false,
 		},
@@ -253,34 +302,84 @@ func TestHandleUpdateState(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
+			// Reset execution state before each test
+			stateMutex.Lock()
+			executionState = types.JobExecutionState{}
+			stateMutex.Unlock()
+
 			jobsMock := new(mocks.JobsManagerInterface)
 			utilsMock := new(mocks.UtilsInterface)
 			cmdMock := new(mocks.UtilsCmdInterface)
+			osMock := new(mocks.OSInterface)
 
-			// Store original interfaces
+			// Store original interfaces and restore after test
 			originalJobsManagerUtils := jobsManagerUtils
 			originalProtoUtils := protoUtils
 			originalCmdUtils := cmdUtils
+			originalPathOsUtils := path.OSUtilsInterface
 			defer func() {
 				jobsManagerUtils = originalJobsManagerUtils
 				protoUtils = originalProtoUtils
 				cmdUtils = originalCmdUtils
+				path.OSUtilsInterface = originalPathOsUtils
 			}()
 
 			jobsManagerUtils = jobsMock
 			protoUtils = utilsMock
 			cmdUtils = cmdMock
+			path.OSUtilsInterface = osMock
 
-			tt.setupMocks(jobsMock, utilsMock, cmdMock)
+			// Set up mocks and get coordination channel
+			done := tt.setupMocks(jobsMock, utilsMock, cmdMock, osMock)
 
-			utils := &UtilsStruct{}
-			err := utils.HandleUpdateState(ctx, client, config, account, 1, "/path/to/pipeline")
+			// Create context with timeout
+			ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+			defer cancel()
 
+			// Create a channel for the main function completion
+			mainDone := make(chan error)
+
+			// Run the main function
+			go func() {
+				utils := &UtilsStruct{}
+				err := utils.HandleUpdateState(ctx, client, config, account, 1, "/path/to/pipeline")
+				mainDone <- err
+			}()
+
+			// Wait for completion or timeout
+			var err error
+			if done != nil {
+				select {
+				case <-done:
+					// Wait for main function to complete
+					select {
+					case err = <-mainDone:
+					case <-time.After(time.Second):
+						t.Fatal("Timeout waiting for main function completion")
+					}
+				case <-ctx.Done():
+					t.Fatal("Test timed out")
+				}
+			} else {
+				select {
+				case err = <-mainDone:
+				case <-ctx.Done():
+					t.Fatal("Test timed out")
+				}
+			}
+
+			// Check error expectations
 			if tt.wantErr {
 				assert.Error(t, err)
 			} else {
 				assert.NoError(t, err)
 			}
+
+			// Verify all mock expectations
+			jobsMock.AssertExpectations(t)
+			utilsMock.AssertExpectations(t)
+			cmdMock.AssertExpectations(t)
+			osMock.AssertExpectations(t)
 		})
 	}
 }
@@ -289,7 +388,7 @@ func TestHandleConfirmState(t *testing.T) {
 	var client *ethclient.Client
 	var config types.Configurations
 	var account types.Account
-	ctx := context.Background()
+	// ctx := context.Background()
 
 	tests := []struct {
 		name       string
@@ -326,8 +425,16 @@ func TestHandleConfirmState(t *testing.T) {
 				utilsMock.On("GetOptions").Return(bind.CallOpts{})
 				jobsMock.On("GetJobDetails", mock.Anything, mock.Anything, mock.Anything).
 					Return(jobDetails, nil)
-				cmdMock.On("UpdateJobStatus", mock.Anything, mock.Anything, mock.Anything, mock.Anything, types.JobStatusFailed, uint8(0)).
-					Return(common.Hash{}, nil)
+
+				// Mock for UpdateJobStatus with specific expectations
+				cmdMock.On("UpdateJobStatus",
+					mock.AnythingOfType("*ethclient.Client"),
+					mock.AnythingOfType("types.Configurations"),
+					mock.AnythingOfType("types.Account"),
+					mock.AnythingOfType("*big.Int"),
+					types.JobStatusFailed,
+					mock.AnythingOfType("uint8"),
+				).Return(common.Hash{}, nil)
 			},
 			wantErr: false,
 		},
@@ -379,26 +486,20 @@ func TestHandleConfirmState(t *testing.T) {
 			utilsMock := new(mocks.UtilsInterface)
 			cmdMock := new(mocks.UtilsCmdInterface)
 
-			// Store original interfaces
-			originalJobsManagerUtils := jobsManagerUtils
-			originalProtoUtils := protoUtils
-			originalCmdUtils := cmdUtils
-			defer func() {
-				jobsManagerUtils = originalJobsManagerUtils
-				protoUtils = originalProtoUtils
-				cmdUtils = originalCmdUtils
-			}()
+			if tt.setupState != nil {
+				tt.setupState()
+			}
 
 			jobsManagerUtils = jobsMock
 			protoUtils = utilsMock
 			cmdUtils = cmdMock
 
-			tt.setupState()
-			tt.setupMocks(jobsMock, utilsMock, cmdMock)
+			if tt.setupMocks != nil {
+				tt.setupMocks(jobsMock, utilsMock, cmdMock)
+			}
 
 			utils := &UtilsStruct{}
-			err := utils.HandleConfirmState(ctx, client, config, account, 1, "/path/to/pipeline")
-
+			err := utils.HandleConfirmState(context.Background(), client, config, account, 1, "/path/to/pipeline")
 			if tt.wantErr {
 				assert.Error(t, err)
 			} else {
