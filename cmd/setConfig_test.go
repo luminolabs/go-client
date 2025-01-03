@@ -34,12 +34,6 @@ func TestSetConfig(t *testing.T) {
 		rpcTimeout            int64
 		rpcTimeoutErr         error
 		isFlagPassed          bool
-		port                  string
-		portErr               error
-		certFile              string
-		certFileErr           error
-		certKey               string
-		certKeyErr            error
 	}
 	tests := []struct {
 		name    string
@@ -250,16 +244,7 @@ func TestSetConfig(t *testing.T) {
 			wantErr: nil,
 		},
 		{
-			name: "Test 14: When exposeMetrics flag is passed",
-			args: args{
-				isFlagPassed: true,
-				port:         "",
-				configErr:    errors.New("config error"),
-			},
-			wantErr: errors.New("config error"),
-		},
-		{
-			name: "Test 16: When there is an error in getting RPC timeout",
+			name: "Test 14: When there is an error in getting RPC timeout",
 			args: args{
 				provider:           "http://127.0.0.1",
 				gasmultiplier:      2,
@@ -297,9 +282,6 @@ func TestSetConfig(t *testing.T) {
 			flagSetUtilsMock.On("GetStringLogLevel", flagSet).Return(tt.args.logLevel, tt.args.logLevelErr)
 			flagSetUtilsMock.On("GetFloat32GasLimit", flagSet).Return(tt.args.gasLimitMultiplier, tt.args.gasLimitMultiplierErr)
 			flagSetUtilsMock.On("GetInt64RPCTimeout", flagSet).Return(tt.args.rpcTimeout, tt.args.rpcTimeoutErr)
-			flagSetUtilsMock.On("GetStringExposeMetrics", flagSet).Return(tt.args.port, tt.args.portErr)
-			flagSetUtilsMock.On("GetStringCertFile", flagSet).Return(tt.args.certFile, tt.args.certFileErr)
-			flagSetUtilsMock.On("GetStringCertKey", flagSet).Return(tt.args.certKey, tt.args.certKeyErr)
 			utilsMock.On("IsFlagPassed", mock.Anything).Return(tt.args.isFlagPassed)
 			utilsMock.On("GetConfigFilePath").Return(tt.args.path, tt.args.pathErr)
 			viperMock.On("ViperWriteConfigAs", mock.AnythingOfType("string")).Return(tt.args.configErr)
