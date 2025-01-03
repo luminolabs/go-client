@@ -21,7 +21,7 @@ func TestExecuteCreateJob(t *testing.T) {
 	// Sample config path and job fee for tests
 	configPath := "/path/to/config.json"
 	jobFeeStr := "1000000000000000000" // 1 ETH in wei
-	// mockConfigContent := []byte(`{"name": "test job", "description": "test description"}`)
+	mockConfigContent := []byte(`{"name": "test job", "description": "test description"}`)
 
 	tests := []struct {
 		name          string
@@ -37,7 +37,6 @@ func TestExecuteCreateJob(t *testing.T) {
 				flagSet.String("jobFee", "", "")
 				flagSet.Set("config", configPath)
 				flagSet.Set("jobFee", jobFeeStr)
-				// flagSet = pflag.NewFlagSet("test", pflag.ContinueOnError)
 				flagSetMock.On("GetString", "config", flagSet).Return(configPath, nil)
 				flagSetMock.On("GetString", "jobFee", flagSet).Return(jobFeeStr, nil)
 
@@ -52,8 +51,12 @@ func TestExecuteCreateJob(t *testing.T) {
 
 				// Mock file read operation
 				mockConfigContent := []byte(`{"name": "test job", "description": "test description"}`)
-				utilsMock.On("ReadFile", configPath).Return(mockConfigContent, nil)
-				// utilsMock.On("CheckError", "Error reading job configuration file: ", mock.Anything).Return()
+
+				// Mock file read operation - Need to use OSUtils mock
+				osMock := new(mocks.OSInterface)
+				osUtils = osMock // Set the global variable
+				// mockConfigContent := []byte(`{"name": "test job", "description": "test description"}`)
+				osMock.On("ReadFile", configPath).Return(mockConfigContent, nil)
 
 				cmdMock.On("CreateJob",
 					mock.AnythingOfType("*ethclient.Client"),
@@ -107,6 +110,17 @@ func TestExecuteCreateJob(t *testing.T) {
 		{
 			name: "fails when job fee is invalid",
 			setupMocks: func(utilsMock *mocks.UtilsInterface, flagSetMock *mocks.FlagSetInterface, cmdMock *mocks.UtilsCmdInterface) {
+
+				// Create and set up flagset with invalid job fee
+				flagSet = pflag.NewFlagSet("test", pflag.ContinueOnError)
+				flagSet.String("config", "", "")  // Add config flag
+				flagSet.String("jobFee", "", "")  // Add jobFee flag
+				flagSet.Set("config", configPath) // Set config path
+				flagSet.Set("jobFee", "invalid")  // Set invalid job fee value
+				// Mock GetString responses from flagSet
+				flagSetMock.On("GetString", "config").Return(configPath, nil)
+				flagSetMock.On("GetString", "jobFee").Return("invalid", nil)
+
 				config := types.Configurations{Provider: "test-provider"}
 				cmdMock.On("GetConfigData").Return(config, nil)
 				utilsMock.On("ConnectToEthClient", mock.AnythingOfType("string")).Return(client)
@@ -123,8 +137,10 @@ func TestExecuteCreateJob(t *testing.T) {
 					mock.Anything,
 				).Return(common.Hash{}, nil)
 
-				flagSet = pflag.NewFlagSet("test", pflag.ContinueOnError)
-				flagSet.String("jobFee", "invalid", "")
+				osMock := new(mocks.OSInterface)
+				osUtils = osMock // Set the global variable
+				osMock.On("ReadFile", configPath).Return(mockConfigContent, nil)
+
 			},
 			expectedFatal: true,
 		},
@@ -138,6 +154,17 @@ func TestExecuteCreateJob(t *testing.T) {
 					Return("0xC4481aa21AeAcAD3cCFe6252c6fe2f161A47A771", nil)
 				utilsMock.On("AssignLogFile", mock.AnythingOfType("*pflag.FlagSet"))
 				utilsMock.On("AssignPassword", mock.AnythingOfType("*pflag.FlagSet")).Return("password")
+
+				// Create flagset with nonexistent path
+				flagSet = pflag.NewFlagSet("test", pflag.ContinueOnError)
+				flagSet.String("config", "/nonexistent/path.json", "")
+				flagSet.String("jobFee", jobFeeStr, "")
+
+				// Mock os operations with error for nonexistent file
+				osMock := new(mocks.OSInterface)
+				osUtils = osMock
+				osMock.On("ReadFile", "/nonexistent/path.json").Return(nil, errors.New("file not found"))
+
 				cmdMock.On("CreateJob",
 					mock.Anything,
 					mock.Anything,
@@ -145,10 +172,6 @@ func TestExecuteCreateJob(t *testing.T) {
 					mock.Anything,
 					mock.Anything,
 				).Return(common.Hash{}, nil)
-
-				flagSet = pflag.NewFlagSet("test", pflag.ContinueOnError)
-				flagSet.String("config", "/nonexistent/path.json", "")
-				flagSet.String("jobFee", jobFeeStr, "")
 			},
 			expectedFatal: true,
 		},

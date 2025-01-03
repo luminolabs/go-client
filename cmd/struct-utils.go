@@ -36,7 +36,6 @@ func InitializeUtils() {
 	utils.EthClient = &utils.EthClientStruct{}
 	utils.ClientInterface = &utils.ClientStruct{}
 	utils.Time = &utils.TimeStruct{}
-	utils.OS = &utils.OSStruct{}
 	utils.PathInterface = &utils.PathStruct{}
 	utils.AccountsInterface = &utils.AccountsStruct{}
 	utils.ABIInterface = &utils.ABIStruct{}
@@ -454,6 +453,10 @@ func (o OSUtils) OpenFile(name string, flag int, perm fs.FileMode) (*os.File, er
 // Open opens the named file for reading
 func (o OSUtils) Open(name string) (*os.File, error) {
 	return path.OSUtilsInterface.Open(name)
+}
+
+func (o OSUtils) ReadFile(pathName string) ([]byte, error) {
+	return path.OSUtilsInterface.ReadFile(pathName)
 }
 
 func (o OSUtils) WriteFile(name string, content []byte, perm fs.FileMode) error {

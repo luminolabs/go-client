@@ -181,6 +181,7 @@ type OSInterface interface {
 	MkdirAll(name string, perm fs.FileMode) error
 	OpenFile(name string, flag int, perm fs.FileMode) (*os.File, error)
 	Open(name string) (*os.File, error)
+	ReadFile(path string) ([]byte, error)
 	WriteFile(name string, content []byte, perm fs.FileMode) error
 }
 
