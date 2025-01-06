@@ -62,9 +62,7 @@ func InstallDeps(pipelineZenPath string) error {
 	// Create the command
 	cmd := exec.Command("bash", scriptPath)
 	cmd.Dir = pipelineZenPath
- cmd := exec.Command("bash", scriptPath)
- 	cmd.Dir = pipelineZenPath
- 	cmd.Env = os.Environ()
+	cmd.Env = os.Environ()
 
 	// Get pipes for stdout and stderr
 	stdout, err := cmd.StdoutPipe()
