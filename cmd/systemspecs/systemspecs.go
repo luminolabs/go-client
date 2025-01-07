@@ -1,3 +1,6 @@
+// Package systemspecs provides functionality to collect and report hardware specifications
+// of the compute node. This information is critical for job matching and execution
+// capabilities reporting in the Lumino network.
 package systemspecs
 
 import (
@@ -10,6 +13,9 @@ import (
 	"github.com/shirou/gopsutil/v3/mem"
 )
 
+// SystemSpecs represents the complete hardware specification of a compute node
+// including GPU, CPU, and memory information. This data is used during staking
+// to inform the network of node capabilities.
 type SystemSpecs struct {
 	GPU []GPUSpec `json:"gpu,omitempty"`
 	CPU *CPUSpec  `json:"cpu,omitempty"`
@@ -29,6 +35,12 @@ type CPUSpec struct {
 	Mhz            float64 `json:"mhz"`
 }
 
+// GetSystemSpecs Collects comprehensive system specifications for the compute node. This function:
+// 1. Gathers GPU information including model and memory
+// 2. Collects CPU specifications like cores and frequency
+// 3. Determines available system memory
+// 4. Formats data into JSON for blockchain storage
+// Returns error if spec collection fails for any component.
 func GetSystemSpecs() (string, error) {
 	specs := &SystemSpecs{}
 
@@ -56,6 +68,12 @@ func GetSystemSpecs() (string, error) {
 	return specs.ToJSON()
 }
 
+// getGPUSpec Retrieves detailed GPU specifications using NVML:
+// 1. Initializes NVIDIA Management Library
+// 2. Enumerates available GPU devices
+// 3. Collects memory, model, and capability information
+// 4. Handles cleanup of NVML resources
+// Returns error if GPU information cannot be retrieved.
 func getGPUSpec() ([]GPUSpec, error) {
 	err := nvml.Initialize()
 	if err != nil {
@@ -105,6 +123,11 @@ func getGPUSpec() ([]GPUSpec, error) {
 	return gpuSpecs, nil
 }
 
+// getCPUSpec Gathers CPU specifications including:
+// 1. Model name and architecture
+// 2. Core count and threads per core
+// 3. CPU frequency information
+// Returns error if CPU information is unavailable.
 func getCPUSpec() (*CPUSpec, error) {
 	cpuInfo, err := cpu.Info()
 	if err != nil {
@@ -131,6 +154,10 @@ func getCPUSpec() (*CPUSpec, error) {
 	return cpuSpec, nil
 }
 
+// getMemSpec Retrieves system memory information:
+// 1. Queries total available memory
+// 2. Converts to human-readable format (GiB)
+// Returns error if memory information cannot be accessed.
 func getMemSpec() (string, error) {
 	vmStat, err := mem.VirtualMemory()
 	if err != nil {
@@ -141,6 +168,8 @@ func getMemSpec() (string, error) {
 	return fmt.Sprintf("%.2f GiB", totalMemGB), nil
 }
 
+// Converts system specifications to JSON format for blockchain storage.
+// Ensures consistent formatting and handles conversion errors.
 func (s *SystemSpecs) ToJSON() (string, error) {
 	jsonData, err := json.Marshal(s)
 	if err != nil {
