@@ -27,7 +27,9 @@ func initialiseCreate(cmd *cobra.Command, args []string) {
 	cmdUtils.ExecuteCreate(cmd.Flags())
 }
 
-// This function sets the flags appropriately and executes the Create function
+// ExecuteCreate: Main entry point for the account creation process. Handles the flag parsing, sets up logging,
+// creates the account and reports the results. Takes flags as input, initializes necessary
+// components and executes the creation flow. Returns early with error if account creation fails.
 func (*UtilsStruct) ExecuteCreate(flagSet *pflag.FlagSet) {
 	log.Debug("Checking to assign log file...")
 	protoUtils.AssignLogFile(flagSet)
@@ -40,7 +42,9 @@ func (*UtilsStruct) ExecuteCreate(flagSet *pflag.FlagSet) {
 	log.Info("ExecuteCreate: Keystore Path: ", account.URL)
 }
 
-// This function is used to create the new account
+// Create: Creates a new account in the keystore with the given password. It returns the created account
+// and any error encountered in the process. The account is stored in the keystore directory
+// under ~/.lumino/keystore_files.
 func (*UtilsStruct) Create(password string) (accounts.Account, error) {
 	luminoPath, err := protoUtils.GetDefaultPath()
 	if err != nil {
@@ -53,6 +57,8 @@ func (*UtilsStruct) Create(password string) (accounts.Account, error) {
 	return account, nil
 }
 
+// Initializes the cobra command for account creation by configuring flags and help text.
+// Configures required flags for address and password.
 func init() {
 	rootCmd.AddCommand(createCmd)
 

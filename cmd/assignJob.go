@@ -32,7 +32,13 @@ func initialiseAssignJob(cmd *cobra.Command, args []string) {
 	cmdUtils.ExecuteAssignJob(cmd.Flags())
 }
 
-// This function sets the flags appropriately and executes the CreateJob function
+// ExecuteAssignJob is the main entry point for the job assignment process.
+// It manages the workflow of job assignment:
+// 1. Loads and validates configuration
+// 2. Sets up blockchain connection and logging
+// 3. Validates assignee address and job ID
+// 4. Executes the job assignment
+// Returns early if any validation step fails.
 func (*UtilsStruct) ExecuteAssignJob(flagSet *pflag.FlagSet) {
 	config, err := cmdUtils.GetConfigData()
 	utils.CheckError("Error in getting config: ", err)
@@ -83,6 +89,11 @@ func (*UtilsStruct) ExecuteAssignJob(flagSet *pflag.FlagSet) {
 	}).Info("Job assigned successfully")
 }
 
+// AssignJob assigns an existing job to a compute provider in the network. This function:
+// 1. Validates the job and assignee addresses
+// 2. Constructs and submits the assignment transaction
+// 3. Monitors transaction confirmation
+// Returns the transaction hash once the assignment is confirmed.
 func (u *UtilsStruct) AssignJob(client *ethclient.Client, config types.Configurations, account types.Account, assigneeAddress string, jobId *big.Int, buffer uint8) (common.Hash, error) {
 	if client == nil {
 		log.Error("Client is nil")
@@ -178,6 +189,8 @@ func (u *UtilsStruct) AssignJob(client *ethclient.Client, config types.Configura
 	return txnHash, nil
 }
 
+// Configures the job assignment command including required flags for account address,
+// assignee address and job ID. Sets up help text and usage information.
 func init() {
 	rootCmd.AddCommand(assignJobCmd)
 

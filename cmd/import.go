@@ -27,7 +27,9 @@ func initialiseImport(cmd *cobra.Command, args []string) {
 	cmdUtils.ExecuteImport(cmd.Flags())
 }
 
-// This function sets the flags appropriately and executes the ImportAccount function
+// ExecuteImport manages the account import workflow from the command line interface.
+// Handles logging setup, executes the import process, and displays results.
+// Returns early if import fails or if validation checks don't pass.
 func (*UtilsStruct) ExecuteImport(flagSet *pflag.FlagSet) {
 	log.Debug("Checking to assign log file...")
 	protoUtils.AssignLogFile(flagSet)
@@ -38,7 +40,13 @@ func (*UtilsStruct) ExecuteImport(flagSet *pflag.FlagSet) {
 	log.Info("ExecuteImport: Keystore Path: ", account.URL)
 }
 
-// This function is used to import existing accounts into
+// Import Account imports an existing account using its private key
+// into the local .lumino keystore.
+// This function:
+// 1. Prompts for and validates the private key
+// 2. Creates secure keystore storage
+// 3. Imports and encrypts the account
+// Returns the imported account information or error if import fails.
 func (*UtilsStruct) ImportAccount() (accounts.Account, error) {
 	log.Info("Enter the private key for the account that you want to import")
 	privateKey := protoUtils.PrivateKeyPrompt()
@@ -76,6 +84,8 @@ func (*UtilsStruct) ImportAccount() (accounts.Account, error) {
 	return account, nil
 }
 
+// Initializes the account import command by setting up command line flags
+// and configuring the command's help text and usage information.
 func init() {
 	rootCmd.AddCommand(importCmd)
 

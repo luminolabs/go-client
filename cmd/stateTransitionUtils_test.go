@@ -193,6 +193,12 @@ func TestHandleAssignState(t *testing.T) {
 	}
 }
 
+// Tests job state updates covering:
+// 1. No assigned job scenario
+// 2. Already running job cases
+// 3. Successful state transitions
+// 4. Job status update failures
+// Validates state transition handling and error cases.
 func TestHandleUpdateState(t *testing.T) {
 	var client *ethclient.Client
 	var config types.Configurations
@@ -384,6 +390,12 @@ func TestHandleUpdateState(t *testing.T) {
 	}
 }
 
+// Tests job confirmation state handling with:
+// 1. No current job scenario
+// 2. Failed job status
+// 3. Successful completion cases
+// 4. State update error handling
+// Verifies proper state management and updates.
 func TestHandleConfirmState(t *testing.T) {
 	var client *ethclient.Client
 	var config types.Configurations

@@ -21,6 +21,13 @@ import (
 	"github.com/stretchr/testify/mock"
 )
 
+// Tests stake command execution workflow covering:
+// 1. Successful staking process
+// 2. Configuration errors
+// 3. Balance check failures
+// 4. Machine spec collection errors
+// 5. Transaction monitoring
+// Validates complete staking process flow.
 func TestExecuteStake(t *testing.T) {
 	var flagSet *pflag.FlagSet
 	var client *ethclient.Client
@@ -195,6 +202,11 @@ func TestExecuteStake(t *testing.T) {
 	}
 }
 
+// Tests the token staking process with various scenarios:
+// 1. Successful staking with valid parameters
+// 2. State transition failures
+// 3. Transaction submission errors
+// Verifies stake transaction creation and confirmation.
 func TestStakeTokens(t *testing.T) {
 
 	privateKey, _ := ecdsa.GenerateKey(elliptic.P256(), rand.Reader)

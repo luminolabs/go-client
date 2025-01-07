@@ -19,6 +19,12 @@ import (
 	"github.com/stretchr/testify/mock"
 )
 
+// Tests unstaking functionality with comprehensive scenarios:
+// 1. Successful unstake with valid parameters
+// 2. Lock status verification
+// 3. Existing lock handling
+// 4. Transaction failures
+// Verifies unstake process and validations.
 func TestUnstake(t *testing.T) {
 	privateKey, _ := ecdsa.GenerateKey(elliptic.P256(), rand.Reader)
 	txnOpts, _ := bind.NewKeyedTransactorWithChainID(privateKey, big.NewInt(1))
@@ -140,6 +146,13 @@ func TestUnstake(t *testing.T) {
 	}
 }
 
+// Tests unstake command execution covering:
+// 1. Successful unstake workflow
+// 2. Configuration validation
+// 3. Account verification
+// 4. Lock checking
+// 5. Transaction handling
+// Validates end-to-end unstake process.
 func TestExecuteUnstake(t *testing.T) {
 
 	var client *ethclient.Client

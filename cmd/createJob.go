@@ -33,7 +33,12 @@ func initialiseCreateJob(cmd *cobra.Command, args []string) {
 	cmdUtils.ExecuteCreateJob(cmd.Flags())
 }
 
-// This function sets the flags appropriately and executes the CreateJob function
+// ExecuteCreateJob Orchestrates the job creation process by handling flag parsing,
+// config validation, and blockchain setup. This function:
+// 1. Validates configuration and connects to the blockchain
+// 2. Reads and parses the job configuration file
+// 3. Submits the job creation transaction
+// Returns early if any validation fails or if transaction submission fails.
 func (*UtilsStruct) ExecuteCreateJob(flagSet *pflag.FlagSet) {
 	config, err := cmdUtils.GetConfigData()
 	utils.CheckError("Error in getting config: ", err)
@@ -77,6 +82,10 @@ func (*UtilsStruct) ExecuteCreateJob(flagSet *pflag.FlagSet) {
 	log.Info("Job created successfully. Transaction Hash: ", txnHash.Hex())
 }
 
+// CreateJob creates a new job in the Lumino network with the provided job details and fee. This function handles
+// the blockchain interaction for job creation including transaction submission and monitoring.
+// It validates all inputs, constructs and submits the transaction, and waits for confirmation.
+// Returns the transaction hash and any errors encountered.
 func (u *UtilsStruct) CreateJob(client *ethclient.Client, config types.Configurations, account types.Account, jobDetailsJSON string, jobFee *big.Int) (common.Hash, error) {
 	if client == nil {
 		log.Error("Client is nil")
@@ -139,6 +148,8 @@ func (u *UtilsStruct) CreateJob(client *ethclient.Client, config types.Configura
 	return txnHash, nil
 }
 
+// Sets up the command line interface for job creation by configuring required flags and help text.
+// Ensures critical parameters like address, config file path and job fee are marked as required.
 func init() {
 	rootCmd.AddCommand(createJobCmd)
 
