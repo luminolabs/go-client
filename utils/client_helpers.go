@@ -12,7 +12,9 @@ import (
 	"github.com/ethereum/go-ethereum/ethclient"
 )
 
-// GetNonceAtWithRetry retrieves the nonce for an account with retry logic.
+// GetNonceAtWithRetry retrieves the current nonce for an account with built-in retry mechanism.
+// Implements exponential backoff to handle temporary network issues.
+// Returns the account nonce or an error if maximum retries are exhausted.
 func (*UtilsStruct) GetNonceAtWithRetry(client *ethclient.Client, accountAddress common.Address) (uint64, error) {
 	var (
 		nonce uint64
@@ -33,7 +35,9 @@ func (*UtilsStruct) GetNonceAtWithRetry(client *ethclient.Client, accountAddress
 	return nonce, nil
 }
 
-// GetLatestBlockWithRetry fetches the latest block header with retry logic.
+// GetLatestBlockWithRetry fetches the latest block header with retry capability.
+// Important for maintaining chain synchronization despite network instability.
+// Returns the latest header or an error after maximum retry attempts.
 func (*UtilsStruct) GetLatestBlockWithRetry(client *ethclient.Client) (*types.Header, error) {
 	var (
 		latestHeader *types.Header
@@ -54,7 +58,8 @@ func (*UtilsStruct) GetLatestBlockWithRetry(client *ethclient.Client) (*types.He
 	return latestHeader, nil
 }
 
-// SuggestGasPriceWithRetry retrieves the suggested gas price with retry logic.
+// SuggestGasPriceWithRetry gets the recommended gas price with retry logic.
+// Used to ensure reliable gas price estimation for transaction processing.
 func (o *UtilsStruct) SuggestGasPriceWithRetry(client *ethclient.Client) (*big.Int, error) {
 	var (
 		gasPrice *big.Int
@@ -75,7 +80,8 @@ func (o *UtilsStruct) SuggestGasPriceWithRetry(client *ethclient.Client) (*big.I
 	return gasPrice, nil
 }
 
-// EstimateGasWithRetry estimates the gas required for a transaction with retry logic.
+// EstimateGasWithRetry calculates required gas for a transaction with retry mechanism.
+// Handles temporary network issues during gas estimation.
 func (*UtilsStruct) EstimateGasWithRetry(client *ethclient.Client, message ethereum.CallMsg) (uint64, error) {
 	var (
 		gasLimit uint64
@@ -96,7 +102,8 @@ func (*UtilsStruct) EstimateGasWithRetry(client *ethclient.Client, message ether
 	return gasLimit, nil
 }
 
-// FilterLogsWithRetry retrieves logs based on the given query with retry logic.
+// FilterLogsWithRetry retrieves event logs matching the query with retry capability.
+// Essential for reliable event monitoring and processing.
 func (*UtilsStruct) FilterLogsWithRetry(client *ethclient.Client, query ethereum.FilterQuery) ([]types.Log, error) {
 	var (
 		logs []types.Log
@@ -117,7 +124,8 @@ func (*UtilsStruct) FilterLogsWithRetry(client *ethclient.Client, query ethereum
 	return logs, nil
 }
 
-// BalanceAtWithRetry retrieves the balance of an account with retry logic.
+// BalanceAtWithRetry fetches account balance with retry mechanism.
+// Ensures reliable balance checking despite network instability.
 func (*UtilsStruct) BalanceAtWithRetry(client *ethclient.Client, account common.Address) (*big.Int, error) {
 	var (
 		balance *big.Int

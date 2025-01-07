@@ -16,8 +16,9 @@ import (
 	"github.com/spf13/pflag"
 )
 
-// GetStateName converts a state number to its corresponding string representation.
-// It returns the name of the state as a string.
+// GetStateName converts numeric state values to their string representation.
+// Maps state numbers to human-readable state names: 0=Assign, 1=Update, 2=Confirm, default=Buffer.
+// Used for logging and debugging purposes.
 func (*UtilsStruct) GetStateName(stateNumber int64) string {
 	var stateName string
 	switch stateNumber {
@@ -33,6 +34,8 @@ func (*UtilsStruct) GetStateName(stateNumber int64) string {
 	return stateName
 }
 
+// FetchBalance retrieves the current balance of an Ethereum address in Wei.
+// Performs a direct balance query against the blockchain state.
 func (*UtilsStruct) FetchBalance(ctx context.Context, client *ethclient.Client, address common.Address) (*big.Int, error) {
 	// Get the balance of the address in Wei (smallest unit of Ether)
 	balance, err := client.BalanceAt(ctx, address, nil)
@@ -42,6 +45,9 @@ func (*UtilsStruct) FetchBalance(ctx context.Context, client *ethclient.Client, 
 	return balance, nil
 }
 
+// WaitForBlockCompletion monitors transaction mining status until completion or timeout.
+// Polls the network periodically to check if the transaction is mined.
+// Returns error if transaction fails or timeout occurs.
 func (*UtilsStruct) WaitForBlockCompletion(client *ethclient.Client, hashToRead string) error {
 	timeout := core.BlockCompletionTimeout
 	for start := time.Now(); time.Since(start) < time.Duration(timeout)*time.Second; {
@@ -61,6 +67,8 @@ func (*UtilsStruct) WaitForBlockCompletion(client *ethclient.Client, hashToRead 
 	return errors.New("timeout passed for transaction mining")
 }
 
+// CheckTransactionReceipt verifies transaction status from its receipt.
+// Returns: 1 for success, 0 for failure, -1 if receipt not found.
 func (*UtilsStruct) CheckTransactionReceipt(client *ethclient.Client, _txHash string) int {
 	txHash := common.HexToHash(_txHash)
 	tx, err := ClientInterface.TransactionReceipt(client, context.Background(), txHash)
@@ -98,8 +106,9 @@ func CheckError(msg string, err error) {
 	}
 }
 
-// ConnectToEthClient establishes a connection to an Ethereum client using the provided provider URL.
-// It returns an ethclient.Client instance or logs a fatal error if connection fails.
+// ConnectToEthClient establishes connection to an Ethereum client endpoint.
+// Creates a new client instance and verifies connectivity.
+// Terminates with fatal error if connection fails.
 func (*UtilsStruct) ConnectToEthClient(provider string) *ethclient.Client {
 	client, err := EthClient.Dial(provider)
 	if err != nil {
@@ -145,6 +154,8 @@ func (*UtilsStruct) GetEpoch(client *ethclient.Client) (uint32, error) {
 	return uint32(epoch), nil
 }
 
+// AssignLogFile configures logging output file if specified in flags.
+// Sets up file-based logging when logFile flag is provided.
 func (*UtilsStruct) AssignLogFile(flagSet *pflag.FlagSet) {
 	if UtilsInterface.IsFlagPassed("logFile") {
 		fileName, err := FlagSetInterface.GetLogFileName(flagSet)
@@ -158,6 +169,8 @@ func (*UtilsStruct) AssignLogFile(flagSet *pflag.FlagSet) {
 	}
 }
 
+// IsFlagPassed checks if a specific command line flag was provided.
+// Searches through command arguments for the specified flag.
 func (*UtilsStruct) IsFlagPassed(name string) bool {
 	found := false
 	for _, arg := range os.Args {
@@ -168,6 +181,8 @@ func (*UtilsStruct) IsFlagPassed(name string) bool {
 	return found
 }
 
+// AssignStakerId retrieves staker ID either from flags or through contract lookup.
+// Prioritizes stakerId flag if provided, otherwise queries the contract.
 func (*UtilsStruct) AssignStakerId(flagSet *pflag.FlagSet, client *ethclient.Client, address string) (uint32, error) {
 	if UtilsInterface.IsFlagPassed("stakerId") {
 		return UtilsInterface.GetUint32(flagSet, "stakerId")
