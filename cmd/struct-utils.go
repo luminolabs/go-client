@@ -1,3 +1,6 @@
+// struct-utils.go provides concrete implementations of the interface
+// contracts defined in interface.go. It contains the core utility
+// implementations used throughout the system.
 package cmd
 
 import (
@@ -28,7 +31,9 @@ import (
 
 var utilsInterface = utils.UtilsInterface
 
-// This function initializes the utils
+// Initializes all utility structures and their dependencies.
+// Sets up the complete utility layer with all required
+// implementations and connections.
 func InitializeUtils() {
 	utilsInterface = &utils.UtilsStruct{}
 	utils.UtilsInterface = &utils.UtilsStruct{}
@@ -46,6 +51,9 @@ func InitializeUtils() {
 	utils.RetryInterface = &utils.RetryStruct{}
 }
 
+// ExecuteTransaction executes blockchain transactions with timeout handling.
+// Manages transaction submission, monitoring, and result validation.
+// Returns transaction result or error if execution fails.
 func ExecuteTransaction(interfaceName interface{}, methodName string, args ...interface{}) (*Types.Transaction, error) {
 	returnedValues := utils.InvokeFunctionWithTimeout(interfaceName, methodName, args...)
 	returnedError := utils.CheckIfAnyError(returnedValues)

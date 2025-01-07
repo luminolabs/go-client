@@ -18,6 +18,13 @@ import (
 	"golang.org/x/exp/rand"
 )
 
+// HandleStateTransition manages state transitions in the network based on current state and conditions.
+// This critical function orchestrates state changes by:
+// 1. Handling different state types (Assign, Update, Confirm)
+// 2. Validating state transition requirements
+// 3. Executing appropriate state-specific handlers
+// 4. Managing admin-only operations
+// Returns error if state transition fails or conditions aren't met.
 func (*UtilsStruct) HandleStateTransition(ctx context.Context, client *ethclient.Client, config types.Configurations, account types.Account, state types.EpochState, epoch uint32, isAdmin bool, isRandom bool, pipelinePath string) error {
 	switch state {
 	case types.EpochStateAssign:
@@ -39,6 +46,12 @@ func (*UtilsStruct) HandleStateTransition(ctx context.Context, client *ethclient
 	}
 }
 
+// HandleAssignState processes job assignment state transitions. This function:
+// 1. Verifies the current epoch and network state
+// 2. Retrieves and validates active jobs
+// 3. Manages random job assignment if enabled
+// 4. Executes job assignments with proper validation
+// Returns error if assignment process fails.
 func (*UtilsStruct) HandleAssignState(ctx context.Context, client *ethclient.Client, config types.Configurations, account types.Account, epoch uint32, isRandom bool) error {
 
 	log.WithFields(logrus.Fields{
@@ -93,6 +106,12 @@ func (*UtilsStruct) HandleAssignState(ctx context.Context, client *ethclient.Cli
 	return nil
 }
 
+// HandleUpdateState manages job update state processing including:
+// 1. Checking current job status and running state
+// 2. Validating job assignment to staker
+// 3. Processing job status updates
+// 4. Managing job execution state
+// Returns error if update process fails.
 func (*UtilsStruct) HandleUpdateState(ctx context.Context, client *ethclient.Client, config types.Configurations, account types.Account, epoch uint32, pipelinePath string) error {
 	// Check if already running a job
 	stateMutex.RLock()
@@ -279,6 +298,12 @@ func cleanJSONString(input string) string {
 	return input
 }
 
+// HandleConfirmState processes job confirmation state transitions by:
+// 1. Validating current job execution state
+// 2. Checking job completion status
+// 3. Managing successful/failed job states
+// 4. Updating on-chain status
+// Returns error if confirmation process fails.
 func (*UtilsStruct) HandleConfirmState(ctx context.Context, client *ethclient.Client, config types.Configurations, account types.Account, epoch uint32, pipelinePath string) error {
 
 	log.WithFields(logrus.Fields{

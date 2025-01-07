@@ -1,3 +1,6 @@
+// root.go implements the root command for the Lumino CLI.
+// It handles configuration initialization, command registration,
+// and global flag setup for all subcommands.
 package cmd
 
 import (
@@ -28,7 +31,9 @@ var (
 // log is the package-level logger instance
 var log = logger.NewLogger()
 
-// rootCmd represents the base command when called without any subcommands
+// Root command for the Lumino CLI. Represents the base command
+// when called without any subcommands. Handles version information
+// and global help documentation.
 var rootCmd = &cobra.Command{
 	Version: core.VersionWithMeta,
 	Use:     "luminocli",
@@ -52,7 +57,12 @@ func Execute() {
 	}
 }
 
-// init initializes the root command by setting up persistent flags
+// Initializes the root command by:
+// 1. Setting up global flags
+// 2. Configuring default values
+// 3. Setting up configuration file handling
+// 4. Initializing logging
+// Must be called before any subcommands are executed.
 func init() {
 	cobra.OnInitialize(initConfig)
 
@@ -68,6 +78,12 @@ func init() {
 	rootCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
 }
 
+// Handles configuration initialization including:
+// 1. Locating configuration file
+// 2. Loading and parsing configuration
+// 3. Setting up environment variables
+// 4. Initializing logging levels
+// Called automatically during startup.
 func initConfig() {
 	fmt.Println("Entering initConfig")
 
@@ -105,6 +121,9 @@ func initConfig() {
 	fmt.Println("setLogLevel completed")
 }
 
+// Configures logging settings based on configuration.
+// Updates log levels and outputs detailed configuration
+// information in debug mode.
 func setLogLevel() {
 	fmt.Println("Entering setLogLevel")
 

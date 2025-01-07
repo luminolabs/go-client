@@ -18,6 +18,13 @@ import (
 	"github.com/stretchr/testify/mock"
 )
 
+// Tests the state transition orchestration with multiple scenarios:
+// 1. Admin node assign state transitions
+// 2. Non-admin node permission handling
+// 3. Update state processing
+// 4. Confirm state handling
+// 5. Default state behavior
+// Each test verifies proper state management and error handling.
 func TestHandleStateTransition(t *testing.T) {
 	var client *ethclient.Client
 	var config types.Configurations
@@ -114,6 +121,12 @@ func TestHandleStateTransition(t *testing.T) {
 	}
 }
 
+// Tests job assignment state handling with cases:
+// 1. No active jobs scenario
+// 2. Successful job assignment
+// 3. Active job retrieval failures
+// 4. Random assignment validation
+// Verifies proper assignment logic and error conditions.
 func TestHandleAssignState(t *testing.T) {
 	var client *ethclient.Client
 	var config types.Configurations
