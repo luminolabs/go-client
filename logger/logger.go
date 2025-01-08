@@ -1,3 +1,5 @@
+// Package logger implements structured logging functionality for the Lumino client,
+// providing consistent log formatting, rotation, and level-based filtering.
 package logger
 
 import (
@@ -15,7 +17,9 @@ import (
 	"gopkg.in/natefinch/lumberjack.v2"
 )
 
-// StandardLogger wraps the logrus Logger
+// StandardLogger wraps logrus.Logger to provide additional functionality
+// specific to Lumino's logging needs. Implements log rotation and
+// structured logging with consistent formatting.
 type StandardLogger struct {
 	*logrus.Logger
 }
@@ -31,7 +35,10 @@ var (
 	Client      *ethclient.Client
 )
 
-// init initializes the logger
+// init initializes the default logger configuration.
+// Sets up output streams, log formatting, and captures basic system
+// information for logging context. Must be called before any logging
+// operations.
 func init() {
 	standardLogger.SetOutput(os.Stdout)
 	standardLogger.SetLevel(logrus.InfoLevel)
@@ -52,7 +59,11 @@ func init() {
 	}).Info()
 }
 
-// InitializeLogger sets up the logger with file rotation if a filename is provided
+// InitializeLogger configures the logging system with file rotation support.
+// Sets up log file paths, rotation policies, and output formatting.
+// Supports both file and console logging with different formatters.
+// Parameters:
+// - fileName: Optional log file name. If empty, logs to stderr only.
 func InitializeLogger(fileName string) {
 	if fileName != "" {
 		logFilePath, err := path.PathUtilsInterface.GetLogFilePath(fileName)
@@ -77,12 +88,15 @@ func InitializeLogger(fileName string) {
 	}
 }
 
-// NewLogger returns a new instance of StandardLogger
+// NewLogger returns a new instance of StandardLogger initialized
+// with the default configuration.
 func NewLogger() *StandardLogger {
 	return standardLogger
 }
 
-// SetLogLevel sets the log level based on the provided string
+// SetLoggerParameters configures global logging parameters.
+// Sets up the blockchain client and account address for logging context.
+// Starts a goroutine to track the latest block number for logging.
 func SetLogLevel(level string) {
 	switch level {
 	case "debug":

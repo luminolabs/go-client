@@ -11,8 +11,12 @@ import (
 	"github.com/spf13/pflag"
 )
 
-// GetEpochAndState retrieves the current epoch and state from the Ethereum client.
+// GetEpochAndState retrieves the current epoch and state from the blockchain.
 // It returns the epoch as uint32, state as int64, and an error if retrieval fails.
+// This critical function:
+// 1. Gets current epoch from the network
+// 2. Retrieves network state with buffer consideration
+// 3. Validates both values for consistency
 func (*UtilsStruct) GetEpochAndState(client *ethclient.Client) (uint32, int64, error) {
 	epoch, err := protoUtils.GetEpoch(client)
 	if err != nil {
@@ -34,7 +38,9 @@ func (*UtilsStruct) GetEpochAndState(client *ethclient.Client) (uint32, int64, e
 	return epoch, state, nil
 }
 
-// This function assignes amount in wei
+// AssignAmountInWei processes and validates amount specification from command flags.
+// Handles both normal and wei denominations, performs value validation
+// and returns the final amount in wei. Returns error for invalid amounts.
 func (*UtilsStruct) AssignAmountInWei(flagSet *pflag.FlagSet) (*big.Int, error) {
 	amount, err := flagSetUtils.GetStringValue(flagSet)
 	if err != nil {

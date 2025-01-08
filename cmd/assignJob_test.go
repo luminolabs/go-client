@@ -15,6 +15,12 @@ import (
 	"github.com/stretchr/testify/mock"
 )
 
+// Tests job assignment command execution covering:
+// 1. Successful assignment workflow
+// 2. Configuration errors
+// 3. Invalid address handling
+// 4. Invalid job ID scenarios
+// Verifies proper validation and error handling throughout the process.
 func TestExecuteAssignJob(t *testing.T) {
 	var flagSet *pflag.FlagSet
 	var client *ethclient.Client
@@ -155,6 +161,12 @@ func TestExecuteAssignJob(t *testing.T) {
 	}
 }
 
+// Tests the job assignment core functionality including:
+// 1. Successful assignment with valid parameters
+// 2. Nil client handling
+// 3. Invalid assignee address cases
+// 4. Transaction failure scenarios
+// Validates proper transaction handling and error responses.
 func TestAssignJob(t *testing.T) {
 	client := &ethclient.Client{}
 	config := types.Configurations{

@@ -15,6 +15,8 @@ import (
 	"github.com/ethereum/go-ethereum/ethclient"
 )
 
+// GetOptions creates standard call options for contract interactions.
+// Sets up default blockchain call parameters with empty block number.
 func (*UtilsStruct) GetOptions() bind.CallOpts {
 	block, _ := new(big.Int).SetString("", 10)
 	return bind.CallOpts{
@@ -24,6 +26,11 @@ func (*UtilsStruct) GetOptions() bind.CallOpts {
 	}
 }
 
+// GetTransactionOpts prepares transaction options for contract interactions.
+// Configures critical transaction parameters including:
+// - Private key and account details
+// - Gas price and limits
+// - Nonce management
 func (*UtilsStruct) GetTransactionOpts(transactionData types.TransactionOptions) *bind.TransactOpts {
 	log.Debug("Getting transaction options...")
 	defaultPath, err := PathInterface.GetDefaultPath()
@@ -62,6 +69,9 @@ func (*UtilsStruct) GetTransactionOpts(transactionData types.TransactionOptions)
 	return txnOpts
 }
 
+// GetGasPrice determines optimal gas price based on network conditions.
+// Considers both configured gas price and network-suggested price.
+// Applies multiplication factor for competitive pricing.
 func (*UtilsStruct) GetGasPrice(client *ethclient.Client, config types.Configurations) *big.Int {
 	var gas *big.Int
 	if config.GasPrice != 0 {
@@ -85,6 +95,9 @@ func (*UtilsStruct) GetGasPrice(client *ethclient.Client, config types.Configura
 	return gasPrice
 }
 
+// GetGasLimit calculates appropriate gas limit for transactions.
+// Estimates gas consumption based on contract method and parameters.
+// Applies safety multiplier to prevent out-of-gas errors.
 func (*UtilsStruct) GetGasLimit(transactionData types.TransactionOptions, txnOpts *bind.TransactOpts) (uint64, error) {
 	if transactionData.MethodName == "" {
 		return 0, nil
@@ -115,6 +128,9 @@ func (*UtilsStruct) GetGasLimit(transactionData types.TransactionOptions, txnOpt
 	return UtilsInterface.IncreaseGasLimitValue(transactionData.Client, gasLimit, transactionData.Config.GasLimitMultiplier)
 }
 
+// IncreaseGasLimitValue applies a multiplier to estimated gas limit.
+// Ensures gas limit stays within block gas limit bounds.
+// Critical for reliable transaction execution.
 func (*UtilsStruct) IncreaseGasLimitValue(client *ethclient.Client, gasLimit uint64, gasLimitMultiplier float32) (uint64, error) {
 	if gasLimit == 0 || gasLimitMultiplier <= 0 {
 		return gasLimit, nil

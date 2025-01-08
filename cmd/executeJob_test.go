@@ -17,6 +17,11 @@ import (
 	"github.com/stretchr/testify/mock"
 )
 
+// Tests the job execution process with scenarios:
+// 1. Successful execution flow
+// 2. State transition handling
+// 3. Error propagation in execution loop
+// Verifies proper job lifecycle management.
 func TestRunExecuteJob(t *testing.T) {
 	var client *ethclient.Client
 
@@ -230,6 +235,14 @@ func TestRunExecuteJob(t *testing.T) {
 	}
 }
 
+// Tests job state update logic including:
+// 1. State update for unassigned node
+// 2. Running job state management
+// 3. Job queuing status validation
+// 4. Job execution status progression
+// 5. Failed execution handling
+// 6. Config file handling and validation
+// Verifies correct state machine transitions and data persistence.
 func TestUpdateJobStatus(t *testing.T) {
 	client := &ethclient.Client{}
 	config := types.Configurations{
@@ -341,6 +354,12 @@ func TestUpdateJobStatus(t *testing.T) {
 	}
 }
 
+// Tests core job execution lifecycle handling:
+// 1. Normal execution through complete job cycle
+// 2. Context cancellation handling - validates cleanup
+// 3. State transition error handling
+// 4. Epoch boundary handling during execution
+// 5. Graceful shutdown during execution
 func TestExecuteJob(t *testing.T) {
 	var client *ethclient.Client
 	var config types.Configurations

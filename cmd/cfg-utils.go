@@ -9,8 +9,8 @@ import (
 	"github.com/spf13/viper"
 )
 
-// GetBufferPercent retrieves the buffer percent value from flags or config.
-// It returns the buffer percent as an int32 and an error if retrieval fails.
+// GetBufferPercent retrieves buffer percentage from configuration or flags. If not explicitly set,
+// uses the default value from core configuration. Returns error if retrieval fails.
 func (*UtilsStruct) GetBufferPercent() (int32, error) {
 	bufferPercent, err := flagSetUtils.GetRootInt32Buffer()
 	if err != nil {
@@ -27,6 +27,11 @@ func (*UtilsStruct) GetBufferPercent() (int32, error) {
 	return bufferPercent, nil
 }
 
+// GetConfigData assembles complete configuration data by:
+// 1. Gathering all configuration parameters
+// 2. Applying default values where needed
+// 3. Validating configuration consistency
+// Returns full configuration object or error if validation fails.
 func (*UtilsStruct) GetConfigData() (types.Configurations, error) {
 	config := types.Configurations{
 		Provider:           "",
@@ -84,7 +89,9 @@ func (*UtilsStruct) GetConfigData() (types.Configurations, error) {
 	return config, nil
 }
 
-// This function returns the provider
+// GetRPCProvider retrieves RPC provider URL from configuration or flags.
+// Validates URL format and warns if non-secure URL is used.
+// Falls back to default provider if none specified.
 func (*UtilsStruct) GetRPCProvider() (string, error) {
 	provider, err := flagSetUtils.GetRootStringProvider()
 	if err != nil {
@@ -104,7 +111,8 @@ func (*UtilsStruct) GetRPCProvider() (string, error) {
 	return provider, nil
 }
 
-// This function returns the multiplier
+// GetMultiplier gets gas multiplier value from configuration or flags.
+// Uses default if not specified. Returns error if value is invalid.
 func (*UtilsStruct) GetMultiplier() (float32, error) {
 	gasMultiplier, err := flagSetUtils.GetRootFloat32GasMultiplier()
 	if err != nil {
@@ -138,7 +146,8 @@ func (*UtilsStruct) GetWaitTime() (int32, error) {
 	return waitTime, nil
 }
 
-// This function returns the gas price
+// GetGasPrice retrieves gas price setting from configuration or flags.
+// Applies default if not set. Validates price is within acceptable range.
 func (*UtilsStruct) GetGasPrice() (int32, error) {
 	gasPrice, err := flagSetUtils.GetRootInt32GasPrice()
 	if err != nil {
@@ -156,7 +165,8 @@ func (*UtilsStruct) GetGasPrice() (int32, error) {
 	return gasPrice, nil
 }
 
-// This function returns the log level
+// GetLogLevel gets logging level from configuration or flags.
+// Uses default level if not specified. Validates level is supported.
 func (*UtilsStruct) GetLogLevel() (string, error) {
 	logLevel, err := flagSetUtils.GetRootStringLogLevel()
 	if err != nil {
@@ -173,7 +183,8 @@ func (*UtilsStruct) GetLogLevel() (string, error) {
 	return logLevel, nil
 }
 
-// This function returns the gas limit
+// GetGasLimit retrieves gas limit multiplier from configuration or flags.
+// Applies default if not specified. Validates limit is within safe range.
 func (*UtilsStruct) GetGasLimit() (float32, error) {
 	gasLimit, err := flagSetUtils.GetRootFloat32GasLimit()
 	if err != nil {

@@ -9,6 +9,14 @@ import (
 	"github.com/stretchr/testify/mock"
 )
 
+// Tests configuration setting functionality with extensive scenarios:
+// 1. Successful config updates with all parameters
+// 2. Default value handling
+// 3. Individual parameter update cases
+// 4. Invalid parameter value handling
+// 5. Configuration file write errors
+// 6. RPC timeout configuration
+// Each test validates proper config updates and error handling.
 func TestSetConfig(t *testing.T) {
 
 	var flagSet *pflag.FlagSet

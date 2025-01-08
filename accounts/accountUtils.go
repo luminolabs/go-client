@@ -1,4 +1,5 @@
-// Package account provides all account related functions
+// Package accounts provides the core account management functionality
+// including account creation, key management, and signing operations
 package accounts
 
 import (
@@ -13,6 +14,9 @@ import (
 
 //go:generate mockery --name AccountInterface --output ./mocks/ --case=underscore
 
+// AccountInterface defines the contract for account management operations.
+// Implementations must provide methods for account creation, key management,
+// and cryptographic signing functions.
 var AccountUtilsInterface AccountInterface
 
 type AccountInterface interface {
@@ -27,32 +31,41 @@ type AccountInterface interface {
 	ReadFile(filename string) ([]byte, error)
 }
 
+// Accounts returns all Ethereum accounts found in the specified keystore directory.
+// Creates a new keystore with standard scrypt parameters and returns all accounts.
 type AccountUtils struct{}
 
-// This function returns all the accounts in form of array
+// Accounts returns all Ethereum accounts found in the specified keystore directory.
+// Creates a new keystore with standard scrypt parameters and returns all accounts.
 func (accountUtils AccountUtils) Accounts(path string) []accounts.Account {
 	ks := keystore.NewKeyStore(path, keystore.StandardScryptN, keystore.StandardScryptP)
 	return ks.Accounts()
 }
 
-// This function takes path and pass phrase as input and returns the new account
+// NewAccount creates a new Ethereum account in the specified keystore directory.
+// Uses standard scrypt parameters for key derivation and returns the new account
+// along with any error that occurred during creation.
 func (accountUtils AccountUtils) NewAccount(path string, passphrase string) (accounts.Account, error) {
 	ks := keystore.NewKeyStore(path, keystore.StandardScryptN, keystore.StandardScryptP)
 	accounts.NewManager(&accounts.Config{InsecureUnlockAllowed: false}, ks)
 	return ks.NewAccount(passphrase)
 }
 
-// This function takes json bytes array and password as input and returns the decrypted key
+// DecryptKey decrypts an encrypted keystore JSON file using the provided password.
+// Returns the decrypted keystore key or an error if decryption fails.
 func (accountUtils AccountUtils) DecryptKey(jsonBytes []byte, password string) (*keystore.Key, error) {
 	return keystore.DecryptKey(jsonBytes, password)
 }
 
-// This function takes hash in form of byte array and private key as input and returns signature as byte array
+// Sign generates a cryptographic signature for the provided digest hash using the
+// specified private key. Returns the signature as a byte array or an error if
+// signing fails.
 func (accountUtils AccountUtils) Sign(digestHash []byte, prv *ecdsa.PrivateKey) (sig []byte, err error) {
 	return crypto.Sign(digestHash, prv)
 }
 
-// This function takes name of the file as input and returns the file data as byte array
+// ReadFile reads and returns the contents of a file at the specified path.
+// Returns the file contents as a byte array or an error if reading fails.
 func (accountUtils AccountUtils) ReadFile(filename string) ([]byte, error) {
 	return os.ReadFile(filename)
 }

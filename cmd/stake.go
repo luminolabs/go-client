@@ -34,6 +34,13 @@ func initializeStake(cmd *cobra.Command, args []string) {
 	cmdUtils.ExecuteStake(cmd.Flags())
 }
 
+// ExecuteStake manages the staking workflow from user input to transaction submission.
+// This function orchestrates the entire staking process:
+// 1. Validates configuration and connects to network
+// 2. Checks account balance against stake amount
+// 3. Collects and validates machine specifications
+// 4. Executes the staking transaction
+// Returns early if validation fails or if transaction encounters errors.
 func (*UtilsStruct) ExecuteStake(flagSet *pflag.FlagSet) {
 	config, err := cmdUtils.GetConfigData()
 	utils.CheckError("Error in getting config: ", err)
@@ -101,7 +108,12 @@ func (*UtilsStruct) ExecuteStake(flagSet *pflag.FlagSet) {
 	utils.CheckError("Error in WaitForBlockCompletion for stake: ", err)
 }
 
-// This function allows the user to stake tokens in the lumino network and returns the hash
+// StakeTokens stakes tokens in the Lumino network for a compute provider. This function:
+// 1. Validates the staking amount and account balance
+// 2. Retrieves current epoch and network state
+// 3. Submits staking transaction with machine specifications
+// 4. Monitors transaction confirmation
+// Returns transaction hash upon successful staking.
 func (*UtilsStruct) StakeTokens(txnArgs types.TransactionOptions, machineSpecs string) (common.Hash, error) {
 	epoch, err := protoUtils.GetEpoch(txnArgs.Client)
 	if err != nil {
@@ -124,6 +136,8 @@ func (*UtilsStruct) StakeTokens(txnArgs types.TransactionOptions, machineSpecs s
 	return transactionUtils.Hash(tx), nil
 }
 
+// Initializes the staking command with required flags for address, stake value
+// and optional flags for password and wei denomination specification.
 func init() {
 	rootCmd.AddCommand(stakeCmd)
 

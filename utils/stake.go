@@ -12,10 +12,15 @@ import (
 	"github.com/ethereum/go-ethereum/ethclient"
 )
 
+// GetStakeManagerWithOpts retrieves StakeManager contract with custom call options.
+// Returns both contract instance and configured call options.
 func (*UtilsStruct) GetStakeManagerWithOpts(client *ethclient.Client) (*bindings.StakeManager, bind.CallOpts) {
 	return UtilsInterface.GetStakeManager(client), UtilsInterface.GetOptions()
 }
 
+// GetStakerId retrieves staker ID from contract with retry mechanism.
+// Maps Ethereum address to corresponding staker identifier.
+// Essential for validator operations and stake management.
 func (*UtilsStruct) GetStakerId(client *ethclient.Client, address string) (uint32, error) {
 	var (
 		stakerId  uint32
@@ -36,6 +41,9 @@ func (*UtilsStruct) GetStakerId(client *ethclient.Client, address string) (uint3
 	return stakerId, nil
 }
 
+// GetStaker fetches complete staker information from contract.
+// Retrieves staker details including stake amount, status, and history.
+// Implements retry logic for reliable data fetching.
 func (*UtilsStruct) GetStaker(client *ethclient.Client, stakerId uint32) (bindings.StructsStaker, error) {
 	var (
 		staker    bindings.StructsStaker
@@ -56,6 +64,9 @@ func (*UtilsStruct) GetStaker(client *ethclient.Client, stakerId uint32) (bindin
 	return staker, nil
 }
 
+// GetLock retrieves lock information for a given address.
+// Fetches details about staked tokens and unlock timeframes.
+// Uses retry mechanism to handle potential network issues.
 func (*UtilsStruct) GetLock(client *ethclient.Client, address string) (types.Locks, error) {
 	var (
 		locks   types.Locks

@@ -11,6 +11,12 @@ import (
 	"github.com/stretchr/testify/mock"
 )
 
+// Tests epoch and state retrieval functionality with scenarios:
+// 1. Successful retrieval with valid data
+// 2. Epoch retrieval failures
+// 3. Buffer percentage errors
+// 4. State retrieval failures
+// Each test verifies proper error handling and data validation.
 func TestGetEpochAndState(t *testing.T) {
 	var client *ethclient.Client
 
@@ -116,3 +122,9 @@ func TestGetEpochAndState(t *testing.T) {
 }
 
 // TODO: Add TestAssignAmountInWei
+// Tests amount processing and validation with cases:
+// 1. Valid amount specification
+// 2. Wei denomination handling
+// 3. Invalid amount formats
+// 4. Edge cases in value conversion
+// Verifies proper validation and conversion of amounts.

@@ -20,6 +20,11 @@ import (
 	"github.com/stretchr/testify/mock"
 )
 
+// Tests withdrawal functionality including:
+// 1. Successful withdrawal process
+// 2. Transaction creation and monitoring
+// 3. Error handling in withdrawal
+// Verifies proper withdrawal execution.
 func TestExecuteWithdraw(t *testing.T) {
 	var client *ethclient.Client
 	var flagSet *pflag.FlagSet
@@ -125,6 +130,12 @@ func TestExecuteWithdraw(t *testing.T) {
 	}
 }
 
+// Tests unstake lock handling with scenarios:
+// 1. Valid withdrawal conditions
+// 2. Lock period validation
+// 3. Epoch verification
+// 4. Transaction failure cases
+// Validates lock handling and withdrawal conditions.
 func TestHandleUnstakeLock(t *testing.T) {
 	privateKey, _ := ecdsa.GenerateKey(elliptic.P256(), rand.Reader)
 	txnOpts, _ := bind.NewKeyedTransactorWithChainID(privateKey, big.NewInt(1))
@@ -233,6 +244,12 @@ func TestHandleUnstakeLock(t *testing.T) {
 	}
 }
 
+// Tests withdraw command execution covering:
+// 1. Successful withdrawal workflow
+// 2. Configuration validation
+// 3. Lock status checking
+// 4. Transaction processing
+// Verifies complete withdrawal process.
 func TestWithdraw(t *testing.T) {
 	var (
 		client   *ethclient.Client
