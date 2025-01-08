@@ -30,7 +30,12 @@ func initializeWithdraw(cmd *cobra.Command, args []string) {
 	cmdUtils.ExecuteWithdraw(cmd.Flags())
 }
 
-// This function sets the flag appropriately and executes the Withdraw function
+// ExecuteWithdraw orchestrates the withdrawal execution process. This function:
+// 1. Validates configuration and network connection
+// 2. Verifies staker ID and account
+// 3. Checks unstake lock status
+// 4. Processes withdrawal transaction
+// Returns early if any validation fails.
 func (*UtilsStruct) ExecuteWithdraw(flagSet *pflag.FlagSet) {
 	config, err := cmdUtils.GetConfigData()
 	utils.CheckError("Error in getting config: ", err)
@@ -69,7 +74,13 @@ func (*UtilsStruct) ExecuteWithdraw(flagSet *pflag.FlagSet) {
 	}
 }
 
-// This function handles the Unstake lock
+// HandleUnstakeLock manages the unstake lock verification and withdrawal process.
+// This critical function:
+// 1. Retrieves and validates unstake lock status
+// 2. Checks if lock period has elapsed
+// 3. Verifies current epoch against unlock time
+// 4. Initiates withdrawal if conditions are met
+// Returns error if withdrawal conditions are not satisfied.
 func (*UtilsStruct) HandleUnstakeLock(client *ethclient.Client, account types.Account, configurations types.Configurations, stakerId uint32) (common.Hash, error) {
 	// _, err := cmdUtils.WaitForAppropriateState(client, "initiateWithdraw", 0, 1, 4)
 	// if err != nil {
@@ -114,7 +125,12 @@ func (*UtilsStruct) HandleUnstakeLock(client *ethclient.Client, account types.Ac
 	return core.NilHash, errors.New("unstakeLock period not over yet! Please try after some time")
 }
 
-// This function withdraws your proto once withdraw lock has passed
+// Withdraw processes the withdrawal of unstaked tokens after the lock period.
+// This function:
+// 1. Verifies withdrawal eligibility
+// 2. Constructs withdrawal transaction
+// 3. Submits and monitors transaction
+// Returns transaction hash upon successful withdrawal.
 func (*UtilsStruct) Withdraw(client *ethclient.Client, txnOpts *bind.TransactOpts, stakerId uint32) (common.Hash, error) {
 	log.Info("Unlocking funds...")
 
@@ -130,6 +146,8 @@ func (*UtilsStruct) Withdraw(client *ethclient.Client, txnOpts *bind.TransactOpt
 	return transactionUtils.Hash(txn), nil
 }
 
+// Configures the withdrawal command with required flags for address
+// and optional flags for password and stake ID.
 func init() {
 	rootCmd.AddCommand(withdrawCmd)
 	var (

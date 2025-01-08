@@ -17,7 +17,7 @@ var setConfig = &cobra.Command{
 Setting the gas multiplier value enables the CLI to multiply the gas with that value for all the transactions
 
 Example:
-  ./lumino setConfig --provider https://infura/v3/matic --gasmultiplier 1.5 --buffer 20 --wait 70 --gasprice 1 --logLevel debug --gasLimit 5
+  ./lumino setConfig --provider https://holesky.drpc.org --gasmultiplier 1.5 --buffer 20 --wait 70 --gasprice 1 --logLevel debug --gasLimit 5
 `,
 	Run: func(cmd *cobra.Command, args []string) {
 		err := cmdUtils.SetConfig(cmd.Flags())
@@ -25,7 +25,11 @@ Example:
 	},
 }
 
-// This function returns the error if there is any and sets the config
+// SetConfig updates the Lumino node configuration with provided parameters. This function:
+// 1. Validates all input configuration values
+// 2. Updates the configuration file with new values
+// 3. Handles defaults for unspecified parameters
+// Returns error if configuration update fails or if values are invalid.
 func (*UtilsStruct) SetConfig(flagSet *pflag.FlagSet) error {
 	log.Debug("Checking to assign log file...")
 	protoUtils.AssignLogFile(flagSet)
@@ -113,6 +117,18 @@ func (*UtilsStruct) SetConfig(flagSet *pflag.FlagSet) error {
 	return nil
 }
 
+// Configuration parameters for the Lumino node:
+// - provider: RPC endpoint URL for network connection
+// - gasmultiplier: Multiplier for gas price calculations
+// - buffer: Percentage buffer for various operations
+// - wait: Wait time for network operations
+// - gasprice: Base gas price for transactions
+// - logLevel: Logging verbosity level
+// - gasLimit: Transaction gas limit multiplier
+// - rpcTimeout: Timeout for RPC calls
+// - exposeMetrics: Port for metrics exposure
+// - certFile: SSL certificate path
+// - certKey: SSL certificate key path
 func init() {
 	rootCmd.AddCommand(setConfig)
 

@@ -1,5 +1,7 @@
 // nolint
-// Package cmd provides all functions related to command line
+// Package cmd provides the core interface definitions for the Lumino CLI.
+// This file defines all interface contracts that different components of the
+// system must implement, enabling clean separation of concerns and testability.
 package cmd
 
 import (
@@ -23,6 +25,9 @@ import (
 	"github.com/spf13/pflag"
 )
 
+// Core interfaces defining the contract between different components of the system.
+// These interfaces enable mock implementations for testing and allow for
+// flexible component replacement.
 var flagSetUtils FlagSetInterface
 var protoUtils UtilsInterface
 var cmdUtils UtilsCmdInterface
@@ -37,6 +42,9 @@ var viperUtils ViperInterface
 var timeUtils TimeInterface
 var osUtils OSInterface
 
+// Primary interface for utility functions used throughout the system.
+// Provides core functionality for blockchain interaction, transaction management,
+// and general utility operations.
 type UtilsInterface interface {
 	GetEpoch(client *ethclient.Client) (uint32, error)
 	GetOptions() bind.CallOpts
@@ -61,6 +69,8 @@ type UtilsInterface interface {
 	GetLock(client *ethclient.Client, address string) (types.Locks, error)
 }
 
+// Interface for command line flag handling and parameter management.
+// Provides methods to retrieve and validate various types of command line flags.
 type FlagSetInterface interface {
 	GetStringProvider(flagSet *pflag.FlagSet) (string, error)
 	GetStringLogLevel(flagSet *pflag.FlagSet) (string, error)
@@ -84,6 +94,8 @@ type FlagSetInterface interface {
 	GetUint16JobId(flagSet *pflag.FlagSet) (uint16, error)
 }
 
+// Interface for managing network state transitions and epoch management.
+// Handles state queries, transitions, and network information retrieval.
 type StateManagerInterface interface {
 	NetworkInfo(client *ethclient.Client, opts *bind.CallOpts) (types.NetworkInfo, error)
 	GetEpoch(client *ethclient.Client, opts *bind.CallOpts) (uint32, error)
@@ -91,6 +103,9 @@ type StateManagerInterface interface {
 	WaitForNextState(client *ethclient.Client, opts *bind.CallOpts, targetState types.EpochState) error
 }
 
+// Interface for managing staking operations including stake, unstake and reward calculations.
+// Provides methods for stake management and validation.
+// Place before type StateManagerInterface interface
 type StakeManagerInterface interface {
 	Stake(client *ethclient.Client, opts *bind.TransactOpts, epoch uint32, amount *big.Int, machineSpecs string) (*Types.Transaction, error)
 	Unstake(client *ethclient.Client, opts *bind.TransactOpts, stakerId uint32, amount *big.Int) (*Types.Transaction, error)
@@ -99,6 +114,8 @@ type StakeManagerInterface interface {
 	GetStakerStructFromId(client *ethclient.Client, opts *bind.CallOpts, stakerId uint32) (types.StakerContract, error)
 }
 
+// Interface for managing job-related operations on the blockchain.
+// Handles job creation, assignment, status updates and retrieval of job information.
 type JobsManagerInterface interface {
 	CreateJob(client *ethclient.Client, opts *bind.TransactOpts, jobDetailsJSON string) (*Types.Transaction, error)
 	UpdateJobStatus(client *ethclient.Client, opts *bind.TransactOpts, jobId *big.Int, status uint8, buffer uint8) (*Types.Transaction, error)
@@ -199,6 +216,8 @@ type TimeUtils struct{}
 type AbiUtils struct{}
 type OSUtils struct{}
 
+// Initializes all interface implementations with their concrete types.
+// This is the central point for dependency injection and system setup.
 func InitializeInterfaces() {
 	protoUtils = Utils{}
 	flagSetUtils = FlagSetUtils{}

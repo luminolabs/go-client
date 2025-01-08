@@ -17,6 +17,13 @@ import (
 	"github.com/stretchr/testify/mock"
 )
 
+// Tests the account import functionality with various scenarios:
+// 1. Successful import with valid private key and password
+// 2. Handling of invalid private key
+// 3. Path creation failures
+// 4. Keystore import errors
+// 5. Directory handling edge cases
+// Verifies both successful imports and proper error handling.
 func TestImportAccount(t *testing.T) {
 
 	privateKey, _ := ecdsa.GenerateKey(elliptic.P256(), rand.Reader)
@@ -190,6 +197,10 @@ func TestImportAccount(t *testing.T) {
 	}
 }
 
+// Tests the import command execution flow with:
+// 1. Successful account import case
+// 2. Error handling for import failures
+// Validates proper error propagation and fatal error triggers.
 func TestExecuteImport(t *testing.T) {
 	var flagSet *pflag.FlagSet
 

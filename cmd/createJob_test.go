@@ -15,6 +15,13 @@ import (
 	"github.com/stretchr/testify/mock"
 )
 
+// Tests job creation command execution with comprehensive scenarios:
+// 1. Successful job creation with valid parameters
+// 2. Configuration retrieval failures
+// 3. Invalid job configuration file handling
+// 4. Job fee validation errors
+// 5. Transaction submission failures
+// Each test verifies proper error handling and state management.
 func TestExecuteCreateJob(t *testing.T) {
 	var flagSet *pflag.FlagSet
 	var client *ethclient.Client
@@ -212,6 +219,12 @@ func TestExecuteCreateJob(t *testing.T) {
 	}
 }
 
+// Tests the core job creation logic with scenarios:
+// 1. Valid job creation with proper parameters
+// 2. Nil client handling
+// 3. Transaction failure cases
+// 4. Block completion monitoring
+// Verifies transaction creation and confirmation process.
 func TestCreateJob(t *testing.T) {
 	client := &ethclient.Client{}
 	config := types.Configurations{

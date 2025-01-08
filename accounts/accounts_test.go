@@ -1,3 +1,5 @@
+// Package accounts_test provides comprehensive test coverage for account management
+// functionality including account creation, key management and signing operations
 package accounts
 
 import (
@@ -18,6 +20,11 @@ import (
 	"github.com/stretchr/testify/mock"
 )
 
+// TestCreateAccount verifies account creation functionality including:
+// - Successful account creation with valid parameters
+// - Error handling for invalid paths and permissions
+// - Directory creation when keystore path doesn't exist
+// - Proper error propagation from account creation failures
 func TestCreateAccount(t *testing.T) {
 	var keystorePath string
 	var password string
@@ -117,6 +124,10 @@ func TestCreateAccount(t *testing.T) {
 	}
 }
 
+// TestGetPrivateKeyFromKeystore validates private key extraction from keystores:
+// - Successful key extraction with valid password
+// - Error handling for invalid passwords
+// - Proper handling of corrupted keystore files
 func TestGetPrivateKeyFromKeystore(t *testing.T) {
 	var password string
 	var keystorePath string
@@ -192,6 +203,10 @@ func TestGetPrivateKeyFromKeystore(t *testing.T) {
 	}
 }
 
+// TestGetPrivateKey tests private key retrieval functionality:
+// - Successful key retrieval for existing accounts
+// - Error handling for non-existent accounts
+// - Proper validation of account addresses
 func TestGetPrivateKey(t *testing.T) {
 	var password string
 	var keystorePath string
@@ -259,6 +274,10 @@ func TestGetPrivateKey(t *testing.T) {
 	}
 }
 
+// TestSignData verifies cryptographic signing operations:
+// - Successful signature generation with valid keys
+// - Error handling for invalid private keys
+// - Proper validation of input parameters
 func TestSignData(t *testing.T) {
 	var hash []byte
 	var account types.Account

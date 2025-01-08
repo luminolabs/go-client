@@ -14,6 +14,10 @@ import (
 	"github.com/stretchr/testify/mock"
 )
 
+// Tests network information retrieval functionality:
+// 1. Successful network info fetch
+// 2. Network fetch failure handling
+// Validates proper information collection and error handling.
 func TestGetNetworkInfo(t *testing.T) {
 	var client *ethclient.Client
 
@@ -85,6 +89,11 @@ func TestGetNetworkInfo(t *testing.T) {
 	}
 }
 
+// Tests network info command execution covering:
+// 1. Successful execution with valid config
+// 2. Configuration retrieval failures
+// 3. Network info fetch errors
+// Verifies proper command flow and error propagation.
 func TestExecuteNetworkInfo(t *testing.T) {
 	var config types.Configurations
 	var client *ethclient.Client

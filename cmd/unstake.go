@@ -34,7 +34,13 @@ func initialiseUnstake(cmd *cobra.Command, args []string) {
 	cmdUtils.ExecuteUnstake(cmd.Flags())
 }
 
-// This function sets the flag appropriately and executes the Unstake function
+// ExecuteUnstake is the entry point for token unstaking process. This function:
+// 1. Loads and validates network configuration
+// 2. Verifies account and token amount
+// 3. Checks for existing unstake locks
+// 4. Executes the unstaking transaction
+// 5. Monitors transaction confirmation
+// Returns early if any validation step fails.
 func (*UtilsStruct) ExecuteUnstake(flagSet *pflag.FlagSet) {
 	config, err := cmdUtils.GetConfigData()
 	utils.CheckError("Error in getting config: ", err)
@@ -78,7 +84,13 @@ func (*UtilsStruct) ExecuteUnstake(flagSet *pflag.FlagSet) {
 	}
 }
 
-// This function allows user to unstake their tokens in the lumino network
+// Unstake initiates the unstaking process for staked tokens in the Lumino network.
+// This critical function:
+// 1. Verifies staker existence and status
+// 2. Checks for existing unstake locks
+// 3. Constructs and submits unstaking transaction
+// 4. Returns transaction hash upon successful submission
+// Returns error if unstaking conditions are not met.
 func (*UtilsStruct) Unstake(config types.Configurations, client *ethclient.Client, input types.UnstakeInput) (common.Hash, error) {
 	txnArgs := types.TransactionOptions{
 		Client:         client,
@@ -126,6 +138,8 @@ func (*UtilsStruct) Unstake(config types.Configurations, client *ethclient.Clien
 	return transactionUtils.Hash(txn), nil
 }
 
+// Sets up the unstake command with required flags for address and value,
+// plus optional flags for password and wei denomination specification.
 func init() {
 	rootCmd.AddCommand(unstakeCmd)
 

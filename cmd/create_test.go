@@ -16,6 +16,10 @@ import (
 	"testing"
 )
 
+// Tests account creation functionality across different scenarios:
+// 1. Successful account creation with valid parameters
+// 2. Failure handling for invalid path
+// Each test verifies account address and appropriate error responses.
 func TestCreate(t *testing.T) {
 	var password string
 
@@ -94,6 +98,10 @@ func TestCreate(t *testing.T) {
 	}
 }
 
+// Tests the create command execution workflow including:
+// 1. Successful execution with valid parameters
+// 2. Error handling for account creation failures
+// Verifies proper error propagation and fatal error handling.
 func TestExecuteCreate(t *testing.T) {
 	var flagSet *pflag.FlagSet
 

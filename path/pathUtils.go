@@ -1,4 +1,4 @@
-// Package path provides all path related functions
+// Package path interfaces and utilities for filesystem operations
 package path
 
 import (
@@ -9,14 +9,18 @@ import (
 var PathUtilsInterface PathInterface
 var OSUtilsInterface OSInterface
 
-// PathInterface defines the interface for path-related operations
+// PathInterface defines the contract for path-related operations.
+// Implementations must provide methods for retrieving various
+// application paths and handling filesystem operations.
 type PathInterface interface {
 	GetDefaultPath() (string, error)
 	GetLogFilePath(fileName string) (string, error)
 	GetConfigFilePath() (string, error)
 }
 
-// OSInterface defines the interface for OS-related operations
+// OSInterface defines the contract for OS-level filesystem operations.
+// Provides a mockable interface for testing filesystem interactions
+// and ensures consistent behavior across different platforms.
 type OSInterface interface {
 	UserHomeDir() (string, error)
 	Stat(name string) (fs.FileInfo, error)
@@ -55,6 +59,7 @@ func (o OSUtils) Mkdir(name string, perm fs.FileMode) error {
 	return os.Mkdir(name, perm)
 }
 
+// MkdirAll creates a directory and any necessary parent directories with specified permissions.
 func (o OSUtils) MkdirAll(name string, perm fs.FileMode) error {
 	return os.MkdirAll(name, perm)
 }
@@ -69,10 +74,12 @@ func (o OSUtils) Open(name string) (*os.File, error) {
 	return os.Open(name)
 }
 
+// ReadFile reads the entire contents of a file into a byte slice.
 func (o OSUtils) ReadFile(path string) ([]byte, error) {
 	return os.ReadFile(path)
 }
 
+// WriteFile writes data to a file, creating it if necessary, with specified permissions.
 func (o OSUtils) WriteFile(name string, content []byte, perm fs.FileMode) error {
 	return os.WriteFile(name, content, perm)
 }

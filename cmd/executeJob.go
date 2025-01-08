@@ -48,7 +48,13 @@ func initialiseExecuteJob(cmd *cobra.Command, args []string) {
 	cmdUtils.RunExecuteJob(cmd.Flags())
 }
 
-// This function sets the flag appropriately and executes the UpdateJob function
+// RunExecuteJob is the entry point for job execution that sets up the execution environment
+// and initiates job processing. This function:
+// 1. Validates all input parameters and configuration
+// 2. Sets up graceful shutdown handlers
+// 3. Initializes execution state tracking
+// 4. Launches the main execution loop
+// Returns early if validation fails or if admin checks fail.
 func (*UtilsStruct) RunExecuteJob(flagSet *pflag.FlagSet) {
 	config, err := cmdUtils.GetConfigData()
 	utils.CheckError("Error in getting config: ", err)
@@ -105,6 +111,8 @@ func (*UtilsStruct) RunExecuteJob(flagSet *pflag.FlagSet) {
 	}
 }
 
+// Sets up signal handling for graceful shutdown of job execution. Ensures proper cleanup
+// of resources and updates job status appropriately when shutdown is triggered.
 func handleGracefulShutdown(ctx context.Context, cancel context.CancelFunc) {
 	signalChan := make(chan os.Signal, 1)
 	signal.Notify(signalChan, os.Interrupt)
@@ -128,6 +136,9 @@ func handleGracefulShutdown(ctx context.Context, cancel context.CancelFunc) {
 	}()
 }
 
+// UpdateJobStatus updates the on-chain status of a job by submitting a transaction with the new status.
+// Handles transaction construction, submission and monitoring for all job state transitions.
+// Takes care of gas estimation and transaction confirmation.
 func (*UtilsStruct) UpdateJobStatus(client *ethclient.Client, config types.Configurations, account types.Account, jobId *big.Int, status types.JobStatus, buffer uint8) (common.Hash, error) {
 	if client == nil {
 		log.Error("Client is nil")
@@ -202,7 +213,12 @@ func (*UtilsStruct) UpdateJobStatus(client *ethclient.Client, config types.Confi
 	return txnHash, nil
 }
 
-// This function allows the admin to update an existing job
+// ExecuteJob is the core job execution function that manages the job lifecycle through various network states.
+// Continuously monitors the network state and responds to changes by:
+// 1. Managing state transitions
+// 2. Handling job execution updates
+// 3. Coordinating with the blockchain for job progression
+// Uses a ticker to periodically check and update job status.
 func (*UtilsStruct) ExecuteJob(ctx context.Context, client *ethclient.Client, config types.Configurations, account types.Account, isAdmin bool, isRandom bool, pipelinePath string) error {
 	ticker := time.NewTicker(time.Duration(core.StateCheckInterval) * time.Second)
 	defer ticker.Stop()

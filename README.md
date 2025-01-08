@@ -1,82 +1,140 @@
 # Go-client: Developer Documentation
 
+## Overview
+
+The Go Client is a command-line interface (CLI) tool for interacting with the Lumino network, a decentralized compute platform that enables seamless execution of machine learning workflows. This client facilitates staking, job management, and ML pipeline execution in a decentralized environment.
+
 ## Table of Contents
 
-1. [Project Overview](#1-project-overview)
-2. [Getting Started](#2-getting-started)
-3. [Running with Docker](#3-running-with-docker)
-4. [Project Structure](#4-project-structure)
-5. [Core Components](#5-core-components)
-6. [Command Line Interface](#6-command-line-interface)
-7. [Development Workflow](#7-development-workflow)
-8. [Testing](#8-testing)
-9. [Common Patterns and Best Practices](#9-common-patterns-and-best-practices)
-10. [Troubleshooting](#10-troubleshooting)
+1.  [Features](#features)
+2.  [Requirements](#requirements)
+3.  [Installation](#installation)
+4.  [Configuration](#configuration)
+5.  [Usage](#usage)
+6.  [Machine Learning Pipeline Integration](#machine-learning-pipeline-integration)
+7.  [Development](#development)
+8.  [Testing](#testing)
+9.  [Contributing](#contributing)
+10. [Troubleshooting](#troubleshooting)
 
-## 1. Project Overview
+## Features
 
-The Lumino Go Client is a command-line interface (CLI) application for interacting with the Lumino network. It provides functionalities for staking, job management, block operations, and network status queries.
+- **Account Management**
 
-### Key Features
+  - Create and import Ethereum accounts
+  - Secure keystore management
+  - Private key and password handling
 
-- Staking and unstaking operations
-- Job creation, listing, and execution
-- Block proposal and confirmation
-- Network and account status queries
+- **Staking Operations**
 
-## 2. Getting Started
+  - Stake LUMINO tokens
+  - Unstake tokens with lock period
+  - Withdraw unlocked stakes
+  - View staking status and rewards
 
-### Prerequisites
+- **Job Management**
+
+  - Create ML training jobs
+  - Assign jobs to compute providers
+  - Track job status and execution
+  - View job results and metrics
+
+- **ML Pipeline Integration**
+
+  - Seamless integration with pipeline-zen
+  - Support for PyTorch training workflows
+  - Multi-GPU training capabilities
+  - Dataset management and versioning
+
+- **Network Operations**
+  - Monitor network status
+  - Track epochs and states
+  - View network metrics
+
+## Requirements
 
 - Go 1.22 or later
+- Python 3.10 (for ML pipeline integration)
+- Docker (recommended for deployment)
 - Git
+- Ethereum client (geth)
 
-### Setting Up the Development Environment
+## Installation
+
+### Local Installation
 
 1. Clone the repository:
-   ```
-   git clone https://github.com/your-org/lumino-go-client.git
-   cd lumino-go-client
-   ```
+
+```bash
+git clone https://github.com/luminolabs/go-client.git
+cd go-client
+```
 
 2. Install dependencies:
-   ```
-   go mod download
-   ```
 
-3. Build the project:
-   ```
-   go build -o luminocli
-   ```
-
-4. Run the CLI:
-   ```
-   ./luminocli --help
-   ```
-   
-## 3. Running with Docker
-First, create a `~/.lumino` directory with the following structure:
-```
-- ~/.lumino
-- ├── .env
-- ├── config.json (temporary, till we can read from the chain)
-- └── pipeline-zen-jobs-gcp-key.json (get this from 1password: pipeline-zen-jobs-gcp-key.json)
+```bash
+go mod download
 ```
 
-Example of a `.env` file:
+3. Generate contract bindings:
+
+```bash
+./scripts/generate-bindings.sh
+```
+
+4. Build the client:
+
+```bash
+go build -o lumino
+```
+
+### Docker Installation
+
+1. Build the Docker image:
+
+```bash
+./scripts/docker-build.sh
+```
+
+2. Run the client using Docker:
+
+```bash
+./scripts/docker-run.sh ./lumino [command]
+```
+
+## Configuration
+
+### Directory Structure
+
+Create a `.lumino` directory in your home folder with the following structure:
+
+```
+~/.lumino/
+├── .env                               # Environment variables
+├── config.json                        # Configuration file
+└── pipeline-zen-jobs-gcp-key.json    # GCP credentials (if using GCP)
+```
+
+### Environment Variables
+
+Create a `.env` file with the following settings:
+
 ```dotenv
-PZ_ENV=cpnode
-PZ_RESULTS_BUCKET_SUFFIX=us
-PZ_HUGGINGFACE_TOKEN=<get this from 1password: PZ_HUGGINGFACE_TOKEN>
-PZ_DEVICE=<`cpu` if running local, `cuda` if on GCP>
+PZ_ENV=cpnode                          # Environment (cpnode/local)
+PZ_RESULTS_BUCKET_SUFFIX=us            # Results bucket location
+PZ_HUGGINGFACE_TOKEN=your_token_here   # HuggingFace API token
+PZ_DEVICE=cuda                         # Device type (cuda/cpu)
 ```
 
-Example of a `config.json` file (change parameters as needed):
+### Configuration File (Optional)
+
+Create a `config.json` file with job settings:
+
 ```json
 {
   "job_config_name": "llm_dummy",
-  "job_id": "21",
-  "dataset_id": "gs://lum-pipeline-zen-jobs-us/datasets/6a8d8e6e-7160-4866-914d-6304eb736cfd/2024-09-22_04-02-48_text2sqljsonl",
+  "job_id": "13",
+  "dataset_id": "gs://lum-pipeline-zen-jobs-us/datasets/your-dataset-id",
   "batch_size": "20",
   "shuffle": "true",
   "num_epochs": "1",
@@ -90,118 +148,140 @@ Example of a `config.json` file (change parameters as needed):
 }
 ```
 
-Build the Docker image:
-```bash
-./scripts/docker-build.sh
-```
-
-Import the CP Node's wallet (only needed once):
-```bash
-./scripts/docker-run.sh ./lumino import
-```
-
 Then, run the Lumino Client with Docker; for example, to stake 1 token:
+
 ```bash
-./scripts/docker-run.sh ./lumino stake --address 0xC4481aa21AeAcAD3cCFe6252c6fe2f161A47A771 --value 1  --logLevel debug 
+./scripts/docker-run.sh ./lumino stake --address 0xC4481aa21AeAcAD3cCFe6252c6fe2f161A47A771 --value 1  --logLevel debug
 ```
 
 Finally, run the pipeline-zen workflow with Docker:
+
 ```bash
 ./scripts/docker-run.sh ./lumino executeJob -a 0xC4481aa21AeAcAD3cCFe6252c6fe2f161A47A771 --config /root/.lumino/config.json --jobId 21 --zen-path /pipeline-zen-jobs --logLevel debug
 ```
 
-## 4. Project Structure
+## Usage
 
-```
-luminoclient/
-├── cmd/                 # Command implementations
-│   ├── root.go          # Root command and entry point
-│   ├── stake.go         # Staking commands
-│   ├── unstake.go       # Unstaking commands
-│   ├── job.go           # Job-related commands
-│   ├── block.go         # Block operations commands
-│   ├── status.go        # Status query commands
-│   ├── config.go        # Configuration management
-│   ├── utils.go         # Command utilities
-│   └── interface.go     # Interfaces for components
-├── core/                # Core types and constants
-│   ├── constants.go     # System-wide constants
-│   ├── contracts.go     # Contract addresses
-│   ├── version.go       # Version information
-│   └── types/           # Data structures
-│       ├── block.go
-│       ├── epoch.go
-│       ├── job.go
-│       └── staker.go
-├── logger/              # Logging functionality
-│   ├── logger.go
-│   └── errors.go
-├── utils/               # Utility functions
-│   ├── api.go
-│   ├── signature.go
-│   ├── transaction.go
-│   └── utils.go
-├── go.mod
-├── go.sum
-└── main.go              # Application entry point
+### Account Management
+
+Create a new account:
+
+```bash
+./lumino create
 ```
 
-## 5. Core Components
+Import an existing account:
 
-### 5.1 Command (cmd) Package
-
-The `cmd` package is the heart of the CLI, implementing various commands using the Cobra library.
-
-Key concepts:
-- Each command is defined as a Cobra command struct
-- Commands are organized hierarchically (root command -> subcommands)
-- Command execution logic is defined in the `Run` field of each command
-
-Example of adding a new command:
-
-```go
-var newCmd = &cobra.Command{
-    Use:   "new",
-    Short: "A new command",
-    Run: func(cmd *cobra.Command, args []string) {
-        // Command logic here
-    },
-}
-
-func init() {
-    rootCmd.AddCommand(newCmd)
-}
+```bash
+./lumino import
 ```
 
-### 5.2 Core Types
+### Staking Operations
 
-The `core/types` package defines the main data structures used throughout the application. When working with these types, ensure you understand their relationships and how they map to the Lumino network concepts.
+Stake tokens:
 
-### 5.3 Utility Functions
+```bash
+./lumino stake --address <your-address> --value <amount> --logLevel debug
+```
 
-The `utils` package contains helper functions for common operations. When adding new functionality, consider if it can be generalized and added to this package for reuse.
+Unstake tokens:
 
-## 6. Command Line Interface
+```bash
+./lumino unstake --address <your-address> --value <amount>
+```
 
-The CLI is built using the Cobra library. Key points to remember:
+Withdraw unlocked stakes:
 
-- The root command is defined in `cmd/root.go`
-- Each major feature has its own command file (e.g., `stake.go`, `job.go`)
-- Use flags for command options (defined using `cmd.Flags().StringP()` or similar methods)
-- Implement `Run` functions for each command to define its behavior
+```bash
+./lumino withdraw --address <your-address>
+```
 
-## 7. Development Workflow
+### Job Management
 
-1. **Feature Planning**: Discuss new features in the issue tracker before implementation.
-2. **Branch Creation**: Create a new branch for each feature or bug fix.
-3. **Implementation**: Write code and tests for the new feature.
-4. **Testing**: Run tests and ensure all existing tests pass.
-5. **Documentation**: Update relevant documentation, including this developer guide if necessary.
-6. **Pull Request**: Create a pull request for code review.
-7. **Code Review**: Address any feedback from the code review.
-8. **Merge**: Once approved, merge the pull request into the main branch.
+Create a new job:
 
-## 8. Testing
+```bash
+./lumino createJob -a <your-address> --config /path/to/config.json --jobFee <amount>
+```
+
+Execute a job:
+
+```bash
+./lumino executeJob -a <your-address> --jobId <id> --zen-path /pipeline-zen-jobs --logLevel debug
+```
+
+### Network Information
+
+View network status:
+
+```bash
+./lumino networkInfo
+```
+
+## Machine Learning Pipeline Integration
+
+### Supported ML Tasks
+
+- Model fine-tuning
+- Distributed training
+- Multi-GPU training
+- Custom dataset processing
+
+### Pipeline Configuration
+
+The pipeline configuration supports various ML parameters:
+
+- Batch size and learning rate
+- Training epochs
+- Model architecture settings
+- LoRA and QLoRA support
+- Dataset configurations
+- GPU utilization settings
+
+### Running ML Jobs
+
+1. Prepare your job configuration
+2. Create the job using `createJob`
+3. Execute the job using `executeJob`
+4. Monitor progress through logs
+
+## Development
+
+### Project Structure
+
+```
+lumino/
+├── cmd/                # Command implementations
+├── core/               # Core types and constants
+├── logger/             # Logging functionality
+├── utils/              # Utility functions
+├── accounts/           # Account management
+├── path/               # Path handling
+└── pipeline-zen/       # ML pipeline integration
+```
+
+### Building from Source
+
+1. Clone the repository
+2. Install dependencies:
+
+```bash
+go mod download
+```
+
+3. Generate contract bindings:
+
+```bash
+./scripts/generate-bindings.sh
+```
+
+4. Build:
+
+```bash
+go build -o lumino
+```
+
+## Testing
 
 - Write unit tests for all new functionality
 - Use table-driven tests for testing multiple scenarios
@@ -232,7 +312,37 @@ func TestSomeFunction(t *testing.T) {
 }
 ```
 
-## 9. Common Patterns and Best Practices
+Run all tests:
+
+```bash
+go test ./... -v
+```
+
+Run tests with race condition detection:
+
+```bash
+go test -race ./...
+```
+
+Generate test coverage:
+
+```bash
+go test ./... -coverprofile=coverage.out
+go tool cover -html=coverage.out
+```
+
+## Contributing
+
+1. **Feature Planning**: Discuss new features in the issue tracker before implementation.
+2. **Branch Creation**: Create a new branch for each feature or bug fix.
+3. **Implementation**: Write code and tests for the new feature.
+4. **Testing**: Run tests and ensure all existing tests pass.
+5. **Documentation**: Update relevant documentation, including this developer guide if necessary.
+6. **Pull Request**: Create a pull request for code review.
+7. **Code Review**: Address any feedback from the code review.
+8. **Merge**: Once approved, merge the pull request into the main branch.
+
+### Common Patterns and Best Practices
 
 - Use interfaces for better testability and modularity (see `cmd/interface.go`)
 - Follow Go naming conventions (e.g., use MixedCaps or mixedCaps)
@@ -240,22 +350,20 @@ func TestSomeFunction(t *testing.T) {
 - Use context for managing timeouts and cancellations in long-running operations
 - Prefer composition over inheritance
 
-## 10. Troubleshooting
+## Troubleshooting
 
 Common issues and their solutions:
 
-1. **Build Errors**: 
+1. **Build Errors**:
+
    - Ensure all dependencies are installed (`go mod tidy`)
    - Check for conflicting versions in `go.mod`
 
 2. **Runtime Errors**:
+
    - Check log files for detailed error messages
    - Ensure configuration files are correctly set up
 
 3. **Test Failures**:
    - Run tests with verbose output (`go test -v ./...`)
    - Check for race conditions with (`go test -race ./...`)
-
-For any other issues, consult the project's issue tracker or reach out to the core development team.
-
-This documentation is a living document. As we work on the project and gain new insights, feel free to update and expand this guide to help future developers.
