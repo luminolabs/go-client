@@ -22,8 +22,11 @@ type OSInterface interface {
 	Stat(name string) (fs.FileInfo, error)
 	IsNotExist(err error) bool
 	Mkdir(name string, perm fs.FileMode) error
+	MkdirAll(name string, perm fs.FileMode) error
 	OpenFile(name string, flag int, perm fs.FileMode) (*os.File, error)
 	Open(name string) (*os.File, error)
+	ReadFile(path string) ([]byte, error)
+	WriteFile(name string, content []byte, perm fs.FileMode) error
 }
 
 // PathUtils implements the PathInterface
@@ -52,6 +55,10 @@ func (o OSUtils) Mkdir(name string, perm fs.FileMode) error {
 	return os.Mkdir(name, perm)
 }
 
+func (o OSUtils) MkdirAll(name string, perm fs.FileMode) error {
+	return os.MkdirAll(name, perm)
+}
+
 // OpenFile is the generalized open call; most users will use Open or Create instead
 func (o OSUtils) OpenFile(name string, flag int, perm fs.FileMode) (*os.File, error) {
 	return os.OpenFile(name, flag, perm)
@@ -60,4 +67,12 @@ func (o OSUtils) OpenFile(name string, flag int, perm fs.FileMode) (*os.File, er
 // Open opens the named file for reading
 func (o OSUtils) Open(name string) (*os.File, error) {
 	return os.Open(name)
+}
+
+func (o OSUtils) ReadFile(path string) ([]byte, error) {
+	return os.ReadFile(path)
+}
+
+func (o OSUtils) WriteFile(name string, content []byte, perm fs.FileMode) error {
+	return os.WriteFile(name, content, perm)
 }

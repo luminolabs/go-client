@@ -9,7 +9,6 @@ import (
 	"lumino/pkg/bindings"
 	"lumino/utils"
 	"math/big"
-	"os"
 
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/ethclient"
@@ -64,7 +63,7 @@ func (*UtilsStruct) ExecuteCreateJob(flagSet *pflag.FlagSet) {
 	}
 
 	// Read and parse the job configuration file
-	jobDetailsJSON, err := os.ReadFile(configPath)
+	jobDetailsJSON, err := osUtils.ReadFile(configPath)
 	utils.CheckError("Error reading job configuration file: ", err)
 
 	// Create the job

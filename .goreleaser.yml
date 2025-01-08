@@ -1,0 +1,32 @@
+builds:
+  - binary: lumino
+    goos:
+      - darwin
+      - linux
+    goarch:
+      - amd64
+      - arm64
+    env:
+      - CGO_ENABLED=0
+    flags:
+      - -mod=vendor
+
+release:
+  prerelease: auto
+
+universal_binaries:
+  - replace: true
+
+# brews:
+#   -
+#     name: lumino
+#     homepage: https://github.com/luminolabs/go-client
+#     tap:
+#       owner: luminolabs
+#       name: homebrew-go-client
+#     commit_author:
+#       name: kira
+#       email: shyampkira@gmail.com
+
+checksum:
+  name_template: 'checksums.txt'

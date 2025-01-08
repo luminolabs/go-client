@@ -3,6 +3,7 @@ package cmd
 import (
 	"context"
 	"crypto/ecdsa"
+	"io/fs"
 	"math/big"
 	"os"
 	"time"
@@ -35,7 +36,6 @@ func InitializeUtils() {
 	utils.EthClient = &utils.EthClientStruct{}
 	utils.ClientInterface = &utils.ClientStruct{}
 	utils.Time = &utils.TimeStruct{}
-	utils.OS = &utils.OSStruct{}
 	utils.PathInterface = &utils.PathStruct{}
 	utils.AccountsInterface = &utils.AccountsStruct{}
 	utils.ABIInterface = &utils.ABIStruct{}
@@ -366,7 +366,7 @@ func (stateManagerUtils *StateManagerUtils) WaitForNextState(client *ethclient.C
 			"targetState":  utils.UtilsInterface.GetStateName(int64(targetState)),
 		}).Debug("Waiting for state transition")
 
-		time.Sleep(2)
+		time.Sleep(2 * time.Second)
 	}
 }
 
@@ -420,4 +420,45 @@ func (stateManagerUtils StateManagerUtils) NetworkInfo(client *ethclient.Client,
 // This function is used for exiting the code
 func (o OSUtils) Exit(code int) {
 	os.Exit(code)
+}
+
+func (o OSUtils) UserHomeDir() (string, error) {
+	return path.OSUtilsInterface.UserHomeDir()
+}
+
+// Stat returns the FileInfo structure describing file
+func (o OSUtils) Stat(name string) (fs.FileInfo, error) {
+	return path.OSUtilsInterface.Stat(name)
+}
+
+// IsNotExist returns a boolean indicating whether the error is known to report that a file or directory does not exist
+func (o OSUtils) IsNotExist(err error) bool {
+	return path.OSUtilsInterface.IsNotExist(err)
+}
+
+// Mkdir creates a new directory with the specified name and permission bits
+func (o OSUtils) Mkdir(name string, perm fs.FileMode) error {
+	return path.OSUtilsInterface.Mkdir(name, perm)
+}
+
+func (o OSUtils) MkdirAll(name string, perm fs.FileMode) error {
+	return path.OSUtilsInterface.MkdirAll(name, perm)
+}
+
+// OpenFile is the generalized open call; most users will use Open or Create instead
+func (o OSUtils) OpenFile(name string, flag int, perm fs.FileMode) (*os.File, error) {
+	return path.OSUtilsInterface.OpenFile(name, flag, perm)
+}
+
+// Open opens the named file for reading
+func (o OSUtils) Open(name string) (*os.File, error) {
+	return path.OSUtilsInterface.Open(name)
+}
+
+func (o OSUtils) ReadFile(pathName string) ([]byte, error) {
+	return path.OSUtilsInterface.ReadFile(pathName)
+}
+
+func (o OSUtils) WriteFile(name string, content []byte, perm fs.FileMode) error {
+	return path.OSUtilsInterface.WriteFile(name, content, perm)
 }

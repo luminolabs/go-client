@@ -5,9 +5,9 @@ import (
 	"encoding/json"
 	"fmt"
 	"lumino/core/types"
+	"lumino/path"
 	pipeline_zen "lumino/pipeline-zen"
 	"math/big"
-	"os"
 	"path/filepath"
 	"strings"
 	"time"
@@ -45,13 +45,9 @@ func (*UtilsStruct) HandleAssignState(ctx context.Context, client *ethclient.Cli
 		"Current State": "Assign",
 	}).Info("Admin Node: Executing Assign State Transition")
 	opts := protoUtils.GetOptions()
-	config, err := cmdUtils.GetConfigData()
 	// TODO: to be replaced by activeStaker or a better mechanism
 	// numStakers, err := stakeManagerUtils.GetNumStakers(client, &opts)
-	// if err != nil {
-	// 	log.Error("Error in getting Num stakers: ", err)
-	// 	return fmt.Errorf("failed to get Number of stakers jobs: %w", err)
-	// }
+
 	log.Debug("Num stakers : ", 3)
 
 	var activeStakers [3]string
@@ -176,12 +172,7 @@ func (*UtilsStruct) HandleUpdateState(ctx context.Context, client *ethclient.Cli
 
 	// Create job directory in .lumino
 	jobDir := filepath.Join("./.jobs", jobId.String())
-	if err := os.MkdirAll(jobDir, 0755); err != nil {
-		return fmt.Errorf("failed to create job directory: %w", err)
-	}
-
-	// Create job directory if it doesn't exist
-	if err := os.MkdirAll(jobDir, 0755); err != nil {
+	if err := path.OSUtilsInterface.MkdirAll(jobDir, 0755); err != nil {
 		return fmt.Errorf("failed to create job directory: %w", err)
 	}
 
@@ -195,7 +186,7 @@ func (*UtilsStruct) HandleUpdateState(ctx context.Context, client *ethclient.Cli
 
 	// Write to file
 	configPath := filepath.Join(jobDir, "config.json")
-	if err := os.WriteFile(configPath, configJson, 0644); err != nil {
+	if err := path.OSUtilsInterface.WriteFile(configPath, configJson, 0644); err != nil {
 		return fmt.Errorf("failed to write job config: %w", err)
 	}
 
@@ -235,24 +226,43 @@ func (*UtilsStruct) HandleUpdateState(ctx context.Context, client *ethclient.Cli
 	// start the waitgroup and wait for it in the main thread
 	// read the files for the status of the job
 	// Execute job with the config from .lumino directory
-	output, err := pipeline_zen.RunTorchTuneWrapper(pipelinePath, configPath)
-	if err != nil {
-		log.WithError(err).Error("Job execution failed")
+	// Start job execution in background
+	go func() {
+		// Update job status to Running
+		txnHash, err := cmdUtils.UpdateJobStatus(client, config, account, jobId, types.JobStatusRunning, 0)
+		if err != nil {
+			log.WithError(err).Error("Failed to update job status to running")
+			return
+		}
+		log.WithField("txHash", txnHash.Hex()).Info("Job status updated to Running")
+
+		// Execute job
+		output, err := pipeline_zen.RunTorchTuneWrapper(pipelinePath, configPath)
+		if err != nil {
+			log.WithError(err).Error("Job execution failed")
+			// Update status to Failed
+			if _, err := cmdUtils.UpdateJobStatus(client, config, account, jobId, types.JobStatusFailed, 0); err != nil {
+				log.WithError(err).Error("Failed to update job status to failed")
+			}
+			return
+		}
+
+		log.WithFields(logrus.Fields{
+			"jobId":  jobId.String(),
+			"output": output,
+		}).Info("Job started successfully")
+
+		// Update state
 		stateMutex.Lock()
 		executionState.CurrentJob = &types.JobExecution{
-			JobID:    jobId,
-			Status:   types.JobStatusFailed,
-			Executor: account.Address,
+			JobID:     jobId,
+			Status:    types.JobStatusRunning,
+			StartTime: time.Now(),
+			Executor:  account.Address,
 		}
+		executionState.IsJobRunning = true
 		stateMutex.Unlock()
-		// cmdUtils.UpdateJobStatus(client, config, account, jobId, types.JobStatusFailed, 0)
-		return nil
-	}
-
-	log.WithFields(logrus.Fields{
-		"jobId":  jobId.String(),
-		"output": output,
-	}).Info("Job is running successfully")
+	}()
 
 	return nil
 }
@@ -358,13 +368,13 @@ func (*UtilsStruct) HandleConfirmState(ctx context.Context, client *ethclient.Cl
 
 	// Check if .started file exists
 	startedExists := false
-	if _, err := os.Stat(startedFile); err == nil {
+	if _, err := path.OSUtilsInterface.Stat(startedFile); err == nil {
 		startedExists = true
 	}
 
 	// Check if .finished file exists
 	finishedExists := false
-	if _, err := os.Stat(finishedFile); err == nil {
+	if _, err := path.OSUtilsInterface.Stat(finishedFile); err == nil {
 		finishedExists = true
 	}
 

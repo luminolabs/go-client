@@ -1,14 +1,17 @@
+// nolint
 // Package cmd provides all functions related to command line
 package cmd
 
 import (
 	"context"
 	"crypto/ecdsa"
+	"io/fs"
 	Accounts "lumino/accounts"
 	"lumino/core/types"
 	"lumino/path"
 	"lumino/pkg/bindings"
 	"math/big"
+	"os"
 	"time"
 
 	"github.com/ethereum/go-ethereum/accounts"
@@ -171,6 +174,15 @@ type TimeInterface interface {
 
 type OSInterface interface {
 	Exit(code int)
+	UserHomeDir() (string, error)
+	Stat(name string) (fs.FileInfo, error)
+	IsNotExist(err error) bool
+	Mkdir(name string, perm fs.FileMode) error
+	MkdirAll(name string, perm fs.FileMode) error
+	OpenFile(name string, flag int, perm fs.FileMode) (*os.File, error)
+	Open(name string) (*os.File, error)
+	ReadFile(path string) ([]byte, error)
+	WriteFile(name string, content []byte, perm fs.FileMode) error
 }
 
 type Utils struct{}

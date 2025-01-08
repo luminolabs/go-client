@@ -38,4 +38,5 @@ pipeline-zen-src
 Thumbs.db
 
 repopack-output.txt
+repomix-output.txt
 repopack.config.js
