@@ -133,6 +133,36 @@ func (_m *OSInterface) OpenFile(name string, flag int, perm fs.FileMode) (*os.Fi
 	return r0, r1
 }
 
+// ReadFile provides a mock function with given fields: path
+func (_m *OSInterface) ReadFile(path string) ([]byte, error) {
+	ret := _m.Called(path)
+
+	if len(ret) == 0 {
+		panic("no return value specified for ReadFile")
+	}
+
+	var r0 []byte
+	var r1 error
+	if rf, ok := ret.Get(0).(func(string) ([]byte, error)); ok {
+		return rf(path)
+	}
+	if rf, ok := ret.Get(0).(func(string) []byte); ok {
+		r0 = rf(path)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).([]byte)
+		}
+	}
+
+	if rf, ok := ret.Get(1).(func(string) error); ok {
+		r1 = rf(path)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
 // Stat provides a mock function with given fields: name
 func (_m *OSInterface) Stat(name string) (fs.FileInfo, error) {
 	ret := _m.Called(name)

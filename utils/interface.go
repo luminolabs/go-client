@@ -4,11 +4,9 @@ import (
 	"context"
 	"crypto/ecdsa"
 	"io"
-	"io/fs"
 	"lumino/core/types"
 	"lumino/pkg/bindings"
 	"math/big"
-	"os"
 	"time"
 
 	"github.com/avast/retry-go"
@@ -25,7 +23,6 @@ import (
 var UtilsInterface Utils
 var EthClient EthClientUtils
 var ClientInterface ClientUtils
-var OS OSUtils
 var PathInterface PathUtils
 var BindInterface BindUtils
 var Time TimeUtils
@@ -126,13 +123,6 @@ type BindUtils interface {
 	NewKeyedTransactorWithChainID(key *ecdsa.PrivateKey, chainID *big.Int) (*bind.TransactOpts, error)
 }
 
-type OSUtils interface {
-	OpenFile(name string, flag int, perm fs.FileMode) (*os.File, error)
-	Open(name string) (*os.File, error)
-	WriteFile(name string, data []byte, perm fs.FileMode) error
-	ReadFile(filename string) ([]byte, error)
-}
-
 type RetryUtils interface {
 	RetryAttempts(numberOfAttempts uint) retry.Option
 }
@@ -147,7 +137,6 @@ type UtilsStruct struct{}
 type EthClientStruct struct{}
 type ClientStruct struct{}
 type TimeStruct struct{}
-type OSStruct struct{}
 type PathStruct struct{}
 type BindStruct struct{}
 type BlockManagerStruct struct{}
@@ -164,7 +153,6 @@ type OptionsPackageStruct struct {
 	EthClient             EthClientUtils
 	ClientInterface       ClientUtils
 	Time                  TimeUtils
-	OS                    OSUtils
 	PathInterface         PathUtils
 	BindInterface         BindUtils
 	BlockManagerInterface BlockManagerUtils

@@ -25,6 +25,7 @@ type OSInterface interface {
 	MkdirAll(name string, perm fs.FileMode) error
 	OpenFile(name string, flag int, perm fs.FileMode) (*os.File, error)
 	Open(name string) (*os.File, error)
+	ReadFile(path string) ([]byte, error)
 	WriteFile(name string, content []byte, perm fs.FileMode) error
 }
 
@@ -66,6 +67,10 @@ func (o OSUtils) OpenFile(name string, flag int, perm fs.FileMode) (*os.File, er
 // Open opens the named file for reading
 func (o OSUtils) Open(name string) (*os.File, error) {
 	return os.Open(name)
+}
+
+func (o OSUtils) ReadFile(path string) ([]byte, error) {
+	return os.ReadFile(path)
 }
 
 func (o OSUtils) WriteFile(name string, content []byte, perm fs.FileMode) error {

@@ -45,7 +45,6 @@ func (*UtilsStruct) HandleAssignState(ctx context.Context, client *ethclient.Cli
 		"Current State": "Assign",
 	}).Info("Admin Node: Executing Assign State Transition")
 	opts := protoUtils.GetOptions()
-	config, err := cmdUtils.GetConfigData()
 	// TODO: to be replaced by activeStaker or a better mechanism
 	// numStakers, err := stakeManagerUtils.GetNumStakers(client, &opts)
 

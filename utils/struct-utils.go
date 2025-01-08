@@ -5,9 +5,7 @@ import (
 	"crypto/ecdsa"
 	"errors"
 	"io"
-	"io/fs"
 	"math/big"
-	"os"
 	"reflect"
 	"time"
 
@@ -49,7 +47,6 @@ func IntialiseLuminoUtils(optionsPackageStruct OptionsPackageStruct) Utils {
 	UtilsInterface = optionsPackageStruct.UtilsInterface
 	ClientInterface = optionsPackageStruct.ClientInterface
 	Time = optionsPackageStruct.Time
-	OS = optionsPackageStruct.OS
 	PathInterface = optionsPackageStruct.PathInterface
 	ABIInterface = optionsPackageStruct.ABIInterface
 	BindInterface = optionsPackageStruct.BindInterface
@@ -134,22 +131,6 @@ func (e EthClientStruct) Dial(rawurl string) (*ethclient.Client, error) {
 
 func (t TimeStruct) Sleep(duration time.Duration) {
 	time.Sleep(duration)
-}
-
-func (o OSStruct) OpenFile(name string, flag int, perm fs.FileMode) (*os.File, error) {
-	return os.OpenFile(name, flag, perm)
-}
-
-func (o OSStruct) Open(name string) (*os.File, error) {
-	return os.Open(name)
-}
-
-func (o OSStruct) WriteFile(name string, data []byte, perm fs.FileMode) error {
-	return os.WriteFile(name, data, perm)
-}
-
-func (o OSStruct) ReadFile(filename string) ([]byte, error) {
-	return os.ReadFile(filename)
 }
 
 func (c ClientStruct) TransactionReceipt(client *ethclient.Client, ctx context.Context, txHash common.Hash) (*types.Receipt, error) {
